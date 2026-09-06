@@ -6,152 +6,311 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import org.json.JSONObject
 
 class MainActivity : Activity() {
 
     private lateinit var webView: WebView
+    private val handler = Handler(Looper.getMainLooper())
 
     companion object {
-        private const val LOCATION_PERMISSION_REQUEST = 1001
-        private const val NOTIFICATION_PERMISSION_REQUEST = 1002
+        private const val LOCATION_REQUEST = 1001
+        private const val NOTIFICATION_REQUEST = 1002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Mantém a tela ligada durante a viagem
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        // Cria o WebView
         webView = WebView(this)
 
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
+        webView.settings.allowContentAccess = true
+        webView.settings.mediaPlaybackRequiresUserGesture = false
 
         webView.webViewClient = WebViewClient()
 
-        webView.addJavascriptInterface(object {
-
-            @JavascriptInterface
-            fun startGPS() {
-                runOnUiThread {
-                    iniciarGPS()
-                }
-            }
-
-            @JavascriptInterface
-            fun stopGPS() {
-                runOnUiThread {
-                    pararGPS()
-                }
-            }
-
-        }, "AndroidGPS")
+        // Conecta o JavaScript do HTML ao Android
+        webView.addJavascriptInterface(AndroidBridge(), "AndroidGPS")
 
         setContentView(webView)
 
+        // Abre o index.html
         webView.loadUrl("file:///android_asset/index.html")
 
+        // Solicita permissões
         solicitarPermissoes()
+
+        // Envia os dados do GPS para o HTML a cada 1 segundo
+        handler.post(object : Runnable {
+            override fun run() {
+                enviarGpsParaPagina()
+                handler.postDelayed(this, 1000)
+            }
+        })
     }
 
     private fun solicitarPermissoes() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissoes = mutableListOf<String>()
 
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (
+                checkSelfPermission(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
-                requestPermissions(
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    NOTIFICATION_PERMISSION_REQUEST
+                permissoes.add(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            }
+
+            if (
+                checkSelfPermission(
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissoes.add(
+                    Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             }
         }
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
+        // Permissão de notificações no Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            if (
+                checkSelfPermission(
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissoes.add(
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+            }
+        }
+
+        if (permissoes.isNotEmpty()) {
 
             requestPermissions(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                LOCATION_PERMISSION_REQUEST
+                permissoes.toTypedArray(),
+                LOCATION_REQUEST
             )
         }
     }
 
-    private fun iniciarGPS() {
+    private fun temLocalizacao(): Boolean {
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            checkSelfPermission(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED ||
+
+            checkSelfPermission(
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        } else {
+            true
+        }
+    }
+
+    // =========================================================
+    // INICIAR GPS
+    // =========================================================
+
+    private fun iniciarServicoGps() {
+
+        if (!temLocalizacao()) {
+
             Toast.makeText(
                 this,
-                "Permissão de localização necessária.",
+                "Permita a localização do aparelho e toque em Iniciar novamente.",
                 Toast.LENGTH_LONG
             ).show()
 
             solicitarPermissoes()
+
             return
         }
 
-        val intent = Intent(this, LocationService::class.java)
+        // Mantém a tela ligada
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        val intent = Intent(
+            this,
+            LocationService::class.java
+        )
+
+        try {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+                startForegroundService(intent)
+
+            } else {
+
+                startService(intent)
+            }
+
+        } catch (e: Exception) {
+
+            Toast.makeText(
+                this,
+                "Não foi possível iniciar o GPS: ${
+                    e.message ?: "erro"
+                }",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    // =========================================================
+    // PARAR GPS
+    // =========================================================
+
+    private fun pararServicoGps() {
+
+        try {
+
+            stopService(
+                Intent(
+                    this,
+                    LocationService::class.java
+                )
+            )
+
+        } catch (_: Exception) {
+        }
+    }
+
+    // =========================================================
+    // ENVIA GPS PARA O HTML
+    // =========================================================
+
+    private fun enviarGpsParaPagina() {
+
+        if (!::webView.isInitialized) {
+            return
         }
 
-        Toast.makeText(
-            this,
-            "GPS iniciado",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
+        val prefs = getSharedPreferences(
+            "trip",
+            MODE_PRIVATE
+        )
 
-    private fun pararGPS() {
+        val dados = JSONObject()
 
-        val intent = Intent(this, LocationService::class.java)
-        stopService(intent)
+        dados.put(
+            "lat",
+            prefs.getString("lat", "") ?: ""
+        )
 
-        Toast.makeText(
-            this,
-            "GPS parado",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
+        dados.put(
+            "lon",
+            prefs.getString("lon", "") ?: ""
+        )
 
-    fun enviarGPSParaPagina(
-        latitude: Double,
-        longitude: Double,
-        velocidade: Double,
-        precisao: Float,
-        distancia: Double
-    ) {
+        dados.put(
+            "speed",
+            prefs.getFloat(
+                "speed",
+                -1f
+            )
+        )
 
-        val javascript = """
-            window.nativeGpsUpdate(
-                $latitude,
-                $longitude,
-                $velocidade,
-                $precisao,
-                $distancia
-            );
-        """.trimIndent()
+        dados.put(
+            "accuracy",
+            prefs.getFloat(
+                "accuracy",
+                -1f
+            )
+        )
+
+        dados.put(
+            "distance",
+            prefs.getFloat(
+                "distance_km",
+                0f
+            )
+        )
+
+        dados.put(
+            "running",
+            prefs.getBoolean(
+                "running",
+                false
+            )
+        )
+
+        val texto = JSONObject.quote(
+            dados.toString()
+        )
 
         runOnUiThread {
-            webView.evaluateJavascript(javascript, null)
+
+            webView.evaluateJavascript(
+                "window.nativeGpsUpdate && window.nativeGpsUpdate($texto);",
+                null
+            )
         }
     }
 
+    // =========================================================
+    // PONTE ANDROID ↔ JAVASCRIPT
+    // =========================================================
+
+    inner class AndroidBridge {
+
+        @JavascriptInterface
+        fun startTrip() {
+
+            runOnUiThread {
+
+                iniciarServicoGps()
+            }
+        }
+
+        @JavascriptInterface
+        fun stopTrip() {
+
+            runOnUiThread {
+
+                pararServicoGps()
+            }
+        }
+
+        @JavascriptInterface
+        fun isNative(): Boolean {
+
+            return true
+        }
+    }
+
+    // =========================================================
+    // ENCERRAMENTO
+    // =========================================================
+
     override fun onDestroy() {
+
+        handler.removeCallbacksAndMessages(null)
+
         super.onDestroy()
     }
 }
