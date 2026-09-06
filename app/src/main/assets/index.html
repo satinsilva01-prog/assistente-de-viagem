@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b6b4f">
+<title>Assistente de Viagem</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f2f5f4;
+    color:#17352c
+}
+
+header{
+    background:#0b6b4f;
+    color:#fff;
+    padding:15px;
+    text-align:center
+}
+
+header h1{
+    margin:0;
+    font-size:22px
+}
+
+main{
+    max-width:720px;
+    margin:auto;
+    padding:12px
+}
+
+.card{
+    background:#fff;
+    border-radius:16px;
+    padding:15px;
+    margin:10px 0;
+    box-shadow:0 2px 8px #0001
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px
+}
+
+.metric{
+    background:#f7faf9;
+    border-radius:16px;
+    padding:18px 10px;
+    text-align:center;
+    border:2px solid #d7e6e1;
+    box-shadow:0 3px 10px #0002;
+    min-height:105px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center
+}
+
+.metric span{
+    font-size:12px;
+    color:#55736a
+}
+
+.metric b{
+    display:block;
+    font-size:28px;
+    margin-top:8px;
+    font-weight:800
+}
+
+.big{
+    font-size:38px!important
+}
+
+label{
+    font-size:13px;
+    color:#55736a;
+    display:block;
+    margin:7px 0 5px
+}
+
+input,select{
+    width:100%;
+    padding:11px;
+    border:1px solid #ccd8d4;
+    border-radius:9px;
+    font-size:16px;
+    background:white
+}
+
+button{
+    border:0;
+    border-radius:10px;
+    padding:12px;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer
+}
+
+.primary{
+    background:#0b6b4f;
+    color:white
+}
+
+.secondary{
+    background:#e6efec;
+    color:#174d3e
+}
+
+.danger{
+    background:#c0392b;
+    color:white
+}
+
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px
+}
+
+.status{
+    text-align:center;
+    font-weight:bold;
+    padding:7px
+}
+
+.note{
+    font-size:12px;
+    color:#657d75;
+    line-height:1.4
+}
+
+.hidden{
+    display:none
+}
+
+.saveStatus{
+    text-align:center;
+    font-size:12px;
+    color:#55736a;
+    margin-top:8px
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚗 Assistente de Viagem</h1>
+    <div>GPS • consumo • distância • viagem</div>
+</header>
+
+<main>
+
+<div class="card">
+
+    <div class="actions">
+
+        <button class="primary" id="iniciar">
+            ▶ Iniciar
+        </button>
+
+        <button class="secondary" id="pausar">
+            ⏸ Pausar
+        </button>
+
+        <button class="danger" id="finalizar">
+            ■ Finalizar
+        </button>
+
+        <button class="secondary" id="zerar">
+            ↺ Nova viagem
+        </button>
+
+    </div>
+
+    <div class="saveStatus" id="saveStatus">
+        💾 Dados salvos automaticamente
+    </div>
+
+</div>
+
+
+<div class="card" style="padding:12px">
+
+    <h3 style="margin:0 0 10px;text-align:center">
+        📊 Dados da viagem
+    </h3>
+
+    <div class="grid">
+
+        <div class="metric">
+            <span>Velocidade atual</span>
+            <b id="velocidade">0 km/h</b>
+        </div>
+
+        <div class="metric">
+            <span>Velocidade média</span>
+            <b id="velMedia">0 km/h</b>
+        </div>
+
+        <div class="metric">
+            <span>Distância</span>
+            <b id="distancia">0,00 km</b>
+        </div>
+
+        <div class="metric">
+            <span>Tempo</span>
+            <b id="tempo">00:00:00</b>
+        </div>
+
+        <div class="metric">
+            <span>Combustível gasto</span>
+            <b id="litros">0,00 L</b>
+        </div>
+
+        <div class="metric">
+            <span>Autonomia estimada</span>
+            <b id="autonomia">-- km</b>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <h3>🚗 Meu veículo</h3>
+
+    <label>Selecionar veículo</label>
+
+    <select id="veiculo">
+
+        <option value="">
+            Selecione...
+        </option>
+
+        <option value="etios2012">
+            Toyota Etios Sedan 2012
+        </option>
+
+        <option value="outro">
+            Outro / cadastrar manualmente
+        </option>
+
+    </select>
+
+
+    <div id="dadosVeiculo" class="hidden">
+
+        <div class="grid">
+
+            <div class="metric">
+                <span>Tanque</span>
+                <b id="tanque">-- L</b>
+            </div>
+
+            <div class="metric">
+                <span>Combustível</span>
+                <b id="comb">--</b>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div id="manual" class="hidden">
+
+        <label>Marca / modelo / ano</label>
+
+        <input
+            id="nomeManual"
+            placeholder="Ex.: Honda Civic 2015"
+        >
+
+        <label>Capacidade do tanque (L)</label>
+
+        <input
+            id="tanqueManual"
+            type="number"
+            step="0.1"
+            placeholder="Ex.: 50"
+        >
+
+        <label>Combustível</label>
+
+        <select id="combManual">
+
+            <option>Etanol</option>
+            <option>Gasolina</option>
+            <option>Flex</option>
+            <option>Diesel</option>
+
+        </select>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="status" id="status">
+        Viagem parada
+    </div>
+
+    <div class="metric">
+
+        <span>
+            Consumo médio estimado
+        </span>
+
+        <b class="big" id="consumo">
+            -- km/L
+        </b>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <h3>⛽ Combustível</h3>
+
+    <label>
+        Preço por litro (R$/L)
+    </label>
+
+    <input
+        id="preco"
+        type="number"
+        step="0.01"
+        value="3.29"
+    >
+
+    <label>
+        Consumo de referência (km/L)
+    </label>
+
+    <input
+        id="ref"
+        type="number"
+        step="0.1"
+        value="10"
+    >
+
+    <div
+        class="grid"
+        style="margin-top:10px"
+    >
+
+        <div class="metric">
+            <span>Custo da viagem</span>
+            <b id="custo">
+                R$ 0,00
+            </b>
+        </div>
+
+        <div class="metric">
+            <span>Custo por km</span>
+            <b id="custokm">
+                R$ 0,00
+            </b>
+        </div>
+
+    </div>
+
+    <p class="note">
+        A estimativa usa o consumo de referência.
+        O consumo real será calculado quando houver
+        abastecimentos completos com odômetro.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h3>⛽ Registrar abastecimento</h3>
+
+    <label>
+        Litros abastecidos
+    </label>
+
+    <input
+        id="abLitros"
+        type="number"
+        step="0.01"
+        placeholder="Ex.: 36,47"
+    >
+
+    <label>
+        Preço por litro (R$/L)
+    </label>
+
+    <input
+        id="abPreco"
+        type="number"
+        step="0.01"
+        value="3.29"
+    >
+
+    <label>
+        Odômetro (km)
+    </label>
+
+    <input
+        id="odometro"
+        type="number"
+        step="0.1"
+        placeholder="Ex.: 125430"
+    >
+
+    <label>
+
+        <input
+            id="tanqueCheio"
+            type="checkbox"
+            style="width:auto"
+        >
+
+        Tanque cheio
+
+    </label>
+
+    <button
+        class="primary"
+        style="width:100%;margin-top:8px"
+        id="salvarAb"
+    >
+        Salvar abastecimento
+    </button>
+
+    <div
+        id="abResultado"
+        class="note"
+        style="margin-top:10px"
+    ></div>
+
+</div>
+
+
+<div class="card">
+
+    <h3>📊 Consumo real</h3>
+
+    <div class="grid">
+
+        <div class="metric">
+            <span>Último consumo real</span>
+            <b id="real">
+                -- km/L
+            </b>
+        </div>
+
+        <div class="metric">
+            <span>Média histórica</span>
+            <b id="mediaReal">
+                -- km/L
+            </b>
+        </div>
+
+    </div>
+
+    <p
+        id="historicoInfo"
+        class="note"
+    >
+        Ainda não há dados suficientes.
+        Para consumo real, registre abastecimentos
+        consecutivos com o odômetro e, de preferência,
+        marque tanque cheio.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h3>☀️ Tela durante a viagem</h3>
+
+    <label>
+
+        <input
+            id="telaLigada"
+            type="checkbox"
+            style="width:auto"
+            checked
+        >
+
+        Manter a tela ligada durante a viagem
+
+    </label>
+
+    <p class="note">
+        No aplicativo Android, a tela permanecerá ativa
+        durante a viagem.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h3>📍 GPS</h3>
+
+    <div
+        class="status"
+        id="gps"
+    >
+        Aguardando localização...
+    </div>
+
+    <p class="note">
+        O GPS do aplicativo é fornecido pelo Android.
+        A localização continua sendo atualizada durante
+        a viagem.
+    </p>
+
+</div>
+
+</main>
+
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const fmt = n =>
+    Number(n).toLocaleString(
+        'pt-BR',
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+
+let db = JSON.parse(
+    localStorage.getItem('cv2_db') ||
+    '{"abastecimentos":[],"viagens":[]}'
+);
+
+
+let running = false;
+let paused = false;
+
+let startTime = 0;
+let elapsed = 0;
+let timer = null;
+
+let distance = 0;
+let currentSpeed = 0;
+
+let wakeLock = null;
+
+
+/* =========================
+   VEÍCULOS
+========================= */
+
+const vehicles = {
+
+    etios2012:{
+        nome:"Toyota Etios Sedan 2012",
+        tanque:45,
+        comb:"Flex"
+    }
+
+};
+
+
+/* =========================
+   SALVAMENTO
+========================= */
+
+function save(){
+
+    localStorage.setItem(
+        'cv2_db',
+        JSON.stringify(db)
+    );
+
+}
+
+
+function saveActiveTrip(){
+
+    if(
+        !running &&
+        distance === 0 &&
+        elapsed === 0
+    ){
+        return;
+    }
+
+
+    localStorage.setItem(
+        'cv2_active_trip',
+
+        JSON.stringify({
+
+            running,
+            paused,
+            distance,
+            elapsed,
+            currentSpeed,
+            vehicle:vehicleData(),
+            savedAt:Date.now()
+
+        })
+
+    );
+
+
+    const el =
+        document.getElementById('saveStatus');
+
+    if(el){
+
+        el.textContent =
+            '💾 Dados salvos automaticamente • ' +
+            new Date().toLocaleTimeString('pt-BR');
+
+    }
+
+}
+
+
+function clearActiveTrip(){
+
+    localStorage.removeItem(
+        'cv2_active_trip'
+    );
+
+}
+
+
+setInterval(
+    saveActiveTrip,
+    5000
+);
+
+
+document.addEventListener(
+    'visibilitychange',
+    saveActiveTrip
+);
+
+
+window.addEventListener(
+    'beforeunload',
+    saveActiveTrip
+);
+
+
+/* =========================
+   TELA LIGADA
+========================= */
+
+async function manterTelaLigada(){
+
+    if(
+        !document.getElementById('telaLigada')?.checked
+    ){
+        return;
+    }
+
+    try{
+
+        if(
+            'wakeLock' in navigator
+        ){
+
+            wakeLock =
+                await navigator.wakeLock.request(
+                    'screen'
+                );
+
+        }
+
+    }catch(e){}
+
+}
+
+
+async function liberarTela(){
+
+    try{
+
+        if(wakeLock){
+
+            await wakeLock.release();
+
+            wakeLock = null;
+
+        }
+
+    }catch(e){}
+
+}
+
+
+document.addEventListener(
+    'visibilitychange',
+
+    ()=>{
+
+        if(
+            document.visibilityState === 'visible' &&
+            running &&
+            !paused
+        ){
+
+            manterTelaLigada();
+
+        }
+
+    }
+
+);
+
+
+/* =========================
+   VEÍCULO
+========================= */
+
+function vehicleData(){
+
+    const v =
+        $('veiculo').value;
+
+
+    if(
+        v === "etios2012"
+    ){
+
+        return vehicles[v];
+
+    }
+
+
+    if(
+        v === "outro"
+    ){
+
+        return {
+
+            nome:
+                $('nomeManual').value ||
+                "Veículo manual",
+
+            tanque:
+                parseFloat(
+                    $('tanqueManual').value
+                ) || 0,
+
+            comb:
+                $('combManual').value
+
+        };
+
+    }
+
+
+    return {
+
+        nome:"",
+        tanque:0,
+        comb:""
+
+    };
+
+}
+
+
+function updateVehicle(){
+
+    const v =
+        $('veiculo').value;
+
+
+    $('dadosVeiculo')
+        .classList
+        .toggle(
+            'hidden',
+            !v
+        );
+
+
+    $('manual')
+        .classList
+        .toggle(
+            'hidden',
+            v !== "outro"
+        );
+
+
+    const d =
+        vehicleData();
+
+
+    $('tanque').textContent =
+        d.tanque
+        ? fmt(d.tanque) + " L"
+        : "-- L";
+
+
+    $('comb').textContent =
+        d.comb || "--";
+
+
+    update();
+
+}
+
+
+/* =========================
+   ATUALIZAÇÃO DOS DADOS
+========================= */
+
+function update(){
+
+    const ref =
+        Math.max(
+            parseFloat(
+                $('ref').value
+            ) || 0.01,
+            0.01
+        );
+
+
+    const preco =
+        Math.max(
+            parseFloat(
+                $('preco').value
+            ) || 0,
+            0
+        );
+
+
+    const litros =
+        distance / ref;
+
+
+    const custo =
+        litros * preco;
+
+
+    let sec =
+        elapsed;
+
+
+    if(
+        running &&
+        !paused
+    ){
+
+        sec += Math.floor(
+            (Date.now() - startTime) / 1000
+        );
+
+    }
+
+
+    $('consumo').textContent =
+        fmt(ref) + " km/L";
+
+
+    $('distancia').textContent =
+        fmt(distance) + " km";
+
+
+    $('litros').textContent =
+        fmt(litros) + " L";
+
+
+    $('custo').textContent =
+        "R$ " + fmt(custo);
+
+
+    $('custokm').textContent =
+        "R$ " +
+        fmt(
+            distance
+            ? custo / distance
+            : 0
+        );
+
+
+    $('velMedia').textContent =
+        fmt(
+            sec > 0
+            ? distance / (sec / 3600)
+            : 0
+        ) +
+        " km/h";
+
+
+    const d =
+        vehicleData();
+
+
+    $('autonomia').textContent =
+        d.tanque > 0
+        ? fmt(
+            Math.max(
+                d.tanque - litros,
+                0
+            ) * ref
+          ) + " km"
+        : "-- km";
+
+}
+
+
+/* =========================
+   TEMPO
+========================= */
+
+function tick(){
+
+    update();
+
+
+    let sec =
+        elapsed;
+
+
+    if(
+        running &&
+        !paused
+    ){
+
+        sec += Math.floor(
+            (Date.now() - startTime) / 1000
+        );
+
+    }
+
+
+    const h =
+        Math.floor(sec / 3600);
+
+
+    const m =
+        Math.floor(
+            (sec % 3600) / 60
+        );
+
+
+    const s =
+        sec % 60;
+
+
+    $('tempo').textContent =
+        [h,m,s]
+        .map(
+            x =>
+            String(x)
+            .padStart(2,'0')
+        )
+        .join(':');
+
+}
+
+
+/* =========================
+   GPS NATIVO ANDROID
+========================= */
+
+window.nativeGpsUpdate =
+function(
+    latitude,
+    longitude,
+    speed,
+    accuracy,
+    nativeDistance
+){
+
+    try{
+
+        currentSpeed =
+            Number(speed) || 0;
+
+
+        $('velocidade').textContent =
+            fmt(currentSpeed) +
+            " km/h";
+
+
+        $('gps').textContent =
+            "GPS nativo ativo • precisão ~" +
+            Math.round(
+                Number(accuracy) || 0
+            ) +
+            " m";
+
+
+        if(
+            Number(nativeDistance) >= 0
+        ){
+
+            distance =
+                Number(nativeDistance);
+
+
+            $('distancia').textContent =
+                fmt(distance) +
+                " km";
+
+
+            update();
+
+            saveActiveTrip();
+
+        }
+
+    }catch(e){
+
+        console.log(
+            "Erro GPS nativo:",
+            e
+        );
+
+    }
+
+};
+
+
+/* =========================
+   COMANDOS PARA ANDROID
+========================= */
+
+function nativeStart(){
+
+    if(
+        window.AndroidGPS &&
+        typeof AndroidGPS.start === 'function'
+    ){
+
+        AndroidGPS.start();
+
+    }
+
+}
+
+
+function nativeStop(){
+
+    if(
+        window.AndroidGPS &&
+        typeof AndroidGPS.stop === 'function'
+    ){
+
+        AndroidGPS.stop();
+
+    }
+
+}
+
+
+/* =========================
+   INICIAR
+========================= */
+
+$('iniciar').onclick =
+function(){
+
+    nativeStart();
+
+
+    if(!running){
+
+        running = true;
+        paused = false;
+
+        startTime =
+            Date.now();
+
+
+        $('status').textContent =
+            "🟢 Viagem em andamento";
+
+
+        manterTelaLigada();
+
+
+        saveActiveTrip();
+
+
+        if(!timer){
+
+            timer =
+                setInterval(
+                    tick,
+                    500
+                );
+
+        }
+
+    }
+    else if(paused){
+
+        paused = false;
+
+        startTime =
+            Date.now();
+
+
+        $('status').textContent =
+            "🟢 Viagem em andamento";
+
+    }
+
+};
+
+
+/* =========================
+   PAUSAR
+========================= */
+
+$('pausar').onclick =
+function(){
+
+    if(
+        running &&
+        !paused
+    ){
+
+        elapsed +=
+            Math.floor(
+                (Date.now() - startTime) /
+                1000
+            );
+
+
+        paused = true;
+
+
+        $('status').textContent =
+            "🟡 Viagem pausada";
+
+
+        tick();
+
+
+        saveActiveTrip();
+
+    }
+
+};
+
+
+/* =========================
+   FINALIZAR
+========================= */
+
+$('finalizar').onclick =
+function(){
+
+    nativeStop();
+
+
+    if(running){
+
+        if(!paused){
+
+            elapsed +=
+                Math.floor(
+                    (Date.now() - startTime) /
+                    1000
+                );
+
+        }
+
+
+        running = false;
+        paused = false;
+
+
+        clearInterval(timer);
+
+        timer = null;
+
+
+        $('status').textContent =
+            "🏁 Viagem finalizada";
+
+
+        liberarTela();
+
+
+        db.viagens.push({
+
+            veiculo:
+                vehicleData().nome,
+
+            distancia:
+                distance,
+
+            segundos:
+                elapsed,
+
+            data:
+                new Date().toISOString()
+
+        });
+
+
+        save();
+
+        clearActiveTrip();
+
+        tick();
+
+    }
+
+};
+
+
+/* =========================
+   NOVA VIAGEM
+========================= */
+
+$('zerar').onclick =
+function(){
+
+    nativeStop();
+
+    clearActiveTrip();
+
+
+    running = false;
+    paused = false;
+
+
+    clearInterval(timer);
+
+    timer = null;
+
+
+    startTime = 0;
+    elapsed = 0;
+
+    distance = 0;
+
+    currentSpeed = 0;
+
+
+    $('status').textContent =
+        "Viagem parada";
+
+
+    $('tempo').textContent =
+        "00:00:00";
+
+
+    $('velocidade').textContent =
+        "0 km/h";
+
+
+    $('gps').textContent =
+        "Aguardando localização...";
+
+
+    update();
+
+};
+
+
+/* =========================
+   ABASTECIMENTO
+========================= */
+
+$('salvarAb').onclick =
+function(){
+
+    const l =
+        parseFloat(
+            $('abLitros').value
+        );
+
+
+    const p =
+        parseFloat(
+            $('abPreco').value
+        );
+
+
+    const o =
+        parseFloat(
+            $('odometro').value
+        );
+
+
+    const full =
+        $('tanqueCheio').checked;
+
+
+    if(
+        !(l > 0) ||
+        !(p > 0) ||
+        !(o >= 0)
+    ){
+
+        alert(
+            "Preencha litros, preço e odômetro."
+        );
+
+        return;
+
+    }
+
+
+    const prev =
+        db.abastecimentos.length
+        ? db.abastecimentos[
+            db.abastecimentos.length - 1
+          ]
+        : null;
+
+
+    let real = null;
+
+
+    if(
+        prev &&
+        o > prev.odometro &&
+        prev.tanqueCheio &&
+        full
+    ){
+
+        real =
+            (o - prev.odometro) / l;
+
+    }
+
+
+    db.abastecimentos.push({
+
+        litros:l,
+        preco:p,
+        odometro:o,
+        tanqueCheio:full,
+        data:
+            new Date().toISOString()
+
+    });
+
+
+    save();
+
+
+    $('abResultado').textContent =
+        real
+        ? `Consumo real deste intervalo: ${fmt(real)} km/L`
+        : "Abastecimento salvo. Mais um abastecimento completo permitirá calcular o consumo real.";
+
+
+    $('abLitros').value = "";
+    $('odometro').value = "";
+
+
+    renderReal();
+
+};
+
+
+/* =========================
+   CONSUMO REAL
+========================= */
+
+function renderReal(){
+
+    const vals = [];
+
+
+    for(
+        let i = 1;
+        i < db.abastecimentos.length;
+        i++
+    ){
+
+        const a =
+            db.abastecimentos[i - 1];
+
+
+        const b =
+            db.abastecimentos[i];
+
+
+        if(
+            a.tanqueCheio &&
+            b.tanqueCheio &&
+            b.odometro > a.odometro &&
+            b.litros > 0
+        ){
+
+            vals.push(
+                (b.odometro - a.odometro) /
+                b.litros
+            );
+
+        }
+
+    }
+
+
+    if(vals.length){
+
+        $('real').textContent =
+            fmt(
+                vals[vals.length - 1]
+            ) +
+            " km/L";
+
+
+        $('mediaReal').textContent =
+            fmt(
+                vals.reduce(
+                    (a,b) => a + b,
+                    0
+                ) /
+                vals.length
+            ) +
+            " km/L";
+
+
+        $('historicoInfo').textContent =
+            vals.length +
+            " intervalo(s) calculado(s) por abastecimentos completos.";
+
+    }
+
+}
+
+
+/* =========================
+   RECUPERAR VIAGEM
+========================= */
+
+function restoreActiveTrip(){
+
+    const raw =
+        localStorage.getItem(
+            'cv2_active_trip'
+        );
+
+
+    if(!raw){
+
+        update();
+
+        return;
+
+    }
+
+
+    try{
+
+        const t =
+            JSON.parse(raw);
+
+
+        if(
+            t.distance > 0 ||
+            t.elapsed > 0
+        ){
+
+            distance =
+                t.distance || 0;
+
+
+            elapsed =
+                t.elapsed || 0;
+
+
+            currentSpeed =
+                t.currentSpeed || 0;
+
+
+            if(t.running){
+
+                running = true;
+
+                paused =
+                    !!t.paused;
+
+
+                if(!paused){
+
+                    startTime =
+                        Date.now();
+
+                }
+
+
+                $('status').textContent =
+                    paused
+                    ? "🟡 Viagem recuperada e pausada"
+                    : "🟢 Viagem recuperada";
+
+
+                if(!timer){
+
+                    timer =
+                        setInterval(
+                            tick,
+                            500
+                        );
+
+                }
+
+
+                nativeStart();
+
+            }
+
+
+            tick();
+
+            update();
+
+        }
+
+    }catch(e){
+
+        console.log(
+            "Erro ao recuperar viagem:",
+            e
+        );
+
+    }
+
+}
+
+
+/* =========================
+   EVENTOS
+========================= */
+
+$('veiculo').onchange =
+    updateVehicle;
+
+
+$('nomeManual').oninput =
+    updateVehicle;
+
+
+$('tanqueManual').oninput =
+    updateVehicle;
+
+
+$('combManual').onchange =
+    updateVehicle;
+
+
+$('ref').oninput =
+    update;
+
+
+$('preco').oninput =
+    update;
+
+
+/* =========================
+   INICIALIZAÇÃO
+========================= */
+
+updateVehicle();
+
+renderReal();
+
+tick();
+
+restoreActiveTrip();
+
+</script>
+
+</body>
+</html>
