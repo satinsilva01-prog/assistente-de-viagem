@@ -1039,7 +1039,12 @@ function(
 /* =========================
    COMANDOS PARA ANDROID
 ========================= */
-
+function stopGPS(){
+  if(watchId !== null){
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+    }
 function nativeStart(){
 
     if(
@@ -1168,6 +1173,7 @@ $('finalizar').onclick =
 function(){
 
     nativeStop();
+    stopGPS();
 
 
     if(running){
