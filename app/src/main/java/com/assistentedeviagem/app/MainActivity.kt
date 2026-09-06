@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -29,9 +30,26 @@ class MainActivity : Activity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
+
         webView.webViewClient = WebViewClient()
 
-        webView.addJavascriptInterface(AndroidGPS(), "AndroidGPS")
+        webView.addJavascriptInterface(object {
+
+            @JavascriptInterface
+            fun startGPS() {
+                runOnUiThread {
+                    iniciarGPS()
+                }
+            }
+
+            @JavascriptInterface
+            fun stopGPS() {
+                runOnUiThread {
+                    pararGPS()
+                }
+            }
+
+        }, "AndroidGPS")
 
         setContentView(webView)
 
@@ -43,6 +61,7 @@ class MainActivity : Activity() {
     private fun solicitarPermissoes() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
             if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED
             ) {
@@ -53,12 +72,10 @@ class MainActivity : Activity() {
             }
         }
 
-        if (
-            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED ||
-            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
+
             requestPermissions(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -71,6 +88,19 @@ class MainActivity : Activity() {
 
     private fun iniciarGPS() {
 
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(
+                this,
+                "Permissão de localização necessária.",
+                Toast.LENGTH_LONG
+            ).show()
+
+            solicitarPermissoes()
+            return
+        }
+
         val intent = Intent(this, LocationService::class.java)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -78,44 +108,24 @@ class MainActivity : Activity() {
         } else {
             startService(intent)
         }
+
+        Toast.makeText(
+            this,
+            "GPS iniciado",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun pararGPS() {
 
         val intent = Intent(this, LocationService::class.java)
         stopService(intent)
-    }
 
-    inner class AndroidGPS {
-
-        @android.webkit.JavascriptInterface
-        fun start() {
-
-            runOnUiThread {
-                if (
-                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
-                ) {
-                    iniciarGPS()
-                } else {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Permissão de localização necessária.",
-                        Toast.LENGTH_LONG
-                    ).show()
-
-                    solicitarPermissoes()
-                }
-            }
-        }
-
-        @android.webkit.JavascriptInterface
-        fun stop() {
-
-            runOnUiThread {
-                pararGPS()
-            }
-        }
+        Toast.makeText(
+            this,
+            "GPS parado",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     fun enviarGPSParaPagina(
@@ -126,21 +136,22 @@ class MainActivity : Activity() {
         distancia: Double
     ) {
 
-        val json = """
-            {
-                "latitude": $latitude,
-                "longitude": $longitude,
-                "velocidade": $velocidade,
-                "precisao": $precisao,
-                "distancia": $distancia
-            }
+        val javascript = """
+            window.nativeGpsUpdate(
+                $latitude,
+                $longitude,
+                $velocidade,
+                $precisao,
+                $distancia
+            );
         """.trimIndent()
 
         runOnUiThread {
-            webView.evaluateJavascript(
-                "window.nativeGpsUpdate($json);",
-                null
-            )
+            webView.evaluateJavascript(javascript, null)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }
