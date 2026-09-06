@@ -1049,10 +1049,10 @@ function nativeStart(){
 
     if(
         window.AndroidGPS &&
-        typeof AndroidGPS.start === 'function'
+        typeof AndroidGPS.startTrip === "function"
     ){
 
-        AndroidGPS.start();
+        AndroidGPS.startTrip();
 
     }
 
@@ -1063,10 +1063,10 @@ function nativeStop(){
 
     if(
         window.AndroidGPS &&
-        typeof AndroidGPS.stop === 'function'
+        typeof AndroidGPS.stopTrip === "function"
     ){
 
-        AndroidGPS.stop();
+        AndroidGPS.stopTrip();
 
     }
 
