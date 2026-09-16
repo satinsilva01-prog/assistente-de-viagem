@@ -28,6 +28,12 @@ button{border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:bold;
 .note{font-size:12px;color:#657d75;line-height:1.4}
 .hidden{display:none}
 .saveStatus{text-align:center;font-size:12px;color:#55736a;margin-top:8px}
+.maintenance-card{border-left:4px solid #0b6b4f}
+.maintenance-meta{font-size:13px;color:#55736a;line-height:1.5;margin:7px 0}
+.alert-item{padding:10px;border-radius:10px;margin:7px 0;font-weight:bold}
+.alert-soon{background:#fff4d8;color:#815d00}.alert-overdue{background:#fde8e7;color:#9b2520}
+.inline-check{display:flex;align-items:center;gap:7px;margin-top:12px}.inline-check input{width:auto}
+.card-actions{display:flex;gap:8px;margin-top:10px}.card-actions button{padding:9px 12px;font-size:13px}
 </style>
 </head>
 <body>
@@ -141,6 +147,38 @@ button{border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:bold;
 <p class="note">No APK, a tela permanece ativa durante a viagem.</p>
 </div>
 
+<section id="manutencao" aria-labelledby="manutencaoTitulo">
+<div class="card">
+<h3 id="manutencaoTitulo">🔧 Manutenção</h3>
+<p class="note">Registre serviços e acompanhe os próximos vencimentos do veículo selecionado.</p>
+<div id="maintenanceAlerts"></div>
+<label>Tipo de manutenção</label>
+<input id="maintenanceType" list="maintenanceTypeSuggestions" placeholder="Ex.: Troca de óleo">
+<datalist id="maintenanceTypeSuggestions"></datalist>
+<label>Data</label>
+<input id="maintenanceDate" type="date">
+<label>Odômetro (km)</label>
+<input id="maintenanceOdometer" type="number" min="0" step="0.1" placeholder="Ex.: 125430">
+<label>Descrição / observação <span class="note">(opcional)</span></label>
+<input id="maintenanceDescription" placeholder="Ex.: óleo e filtro substituídos">
+<label>Custo (R$)</label>
+<input id="maintenanceCost" type="number" min="0" step="0.01" placeholder="Ex.: 250,00">
+<div class="grid">
+<div><label>Próxima manutenção (km)</label><input id="maintenanceNextKm" type="number" min="0" step="0.1" placeholder="Opcional"></div>
+<div><label>Próxima manutenção (data)</label><input id="maintenanceNextDate" type="date"></div>
+</div>
+<label class="inline-check"><input id="maintenanceAlertEnabled" type="checkbox"> Criar alerta</label>
+<div class="actions" style="margin-top:10px">
+<button class="primary" id="saveMaintenance">Salvar manutenção</button>
+<button class="secondary hidden" id="cancelMaintenanceEdit">Cancelar edição</button>
+</div>
+</div>
+<div class="card">
+<h3>📋 Histórico de manutenção</h3>
+<div id="maintenanceHistory" class="note">Nenhuma manutenção registrada.</div>
+</div>
+</section>
+
 <div class="card">
 <h3>📍 GPS</h3>
 <div class="status" id="gps">Aguardando localização...</div>
@@ -154,6 +192,11 @@ const $=id=>document.getElementById(id);
 const fmt=n=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
 let db=JSON.parse(localStorage.getItem('cv2_db')||'{"abastecimentos":[],"viagens":[]}');
+// Mantém os dados existentes e amplia o banco de forma compatível para manutenção.
+db.abastecimentos=Array.isArray(db.abastecimentos)?db.abastecimentos:[];
+db.viagens=Array.isArray(db.viagens)?db.viagens:[];
+db.manutencoes=Array.isArray(db.manutencoes)?db.manutencoes:[];
+db.maintenanceTypes=Array.isArray(db.maintenanceTypes)?db.maintenanceTypes:[];
 let running=false;
 let paused=false;
 let startTime=0;
@@ -590,6 +633,131 @@ function renderReal(){
   }
 }
 
+function localDate(value=new Date()){
+  const d=new Date(value);
+  const offset=d.getTimezoneOffset()*60000;
+  return new Date(d-offset).toISOString().slice(0,10);
+}
+
+function stableId(prefix){
+  return prefix+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+}
+
+function vehicleId(){
+  const selected=$('veiculo').value;
+  if(selected && selected!=="outro") return selected;
+  const name=vehicleData().nome.trim().toLocaleLowerCase('pt-BR');
+  return name ? 'manual-'+name.replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : 'unassigned';
+}
+
+function rememberMaintenanceType(type){
+  const normalized=type.trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR');
+  if(!normalized) return;
+  const exists=db.maintenanceTypes.some(item=>String(item).trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR')===normalized);
+  if(!exists) db.maintenanceTypes.push(type.trim().replace(/\s+/g,' '));
+}
+
+function renderMaintenanceTypeSuggestions(){
+  $('maintenanceTypeSuggestions').innerHTML='';
+  db.maintenanceTypes.forEach(type=>{
+    const option=document.createElement('option');
+    option.value=type;
+    $('maintenanceTypeSuggestions').appendChild(option);
+  });
+}
+
+function currentOdometer(){
+  const values=db.abastecimentos.map(item=>Number(item.odometro)).concat(db.manutencoes.map(item=>Number(item.odometerKm)));
+  return Math.max(0,...values.filter(Number.isFinite));
+}
+
+function maintenanceAlert(record){
+  if(!record.alertEnabled || record.alertDismissed || record.completed) return null;
+  const today=localDate();
+  const odometer=currentOdometer();
+  const dueKm=Number(record.nextKm);
+  const dueDate=record.nextDate;
+  const overdue=(Number.isFinite(dueKm)&&dueKm>0&&odometer>dueKm) || (dueDate&&today>dueDate);
+  const soonKm=Number.isFinite(dueKm)&&dueKm>0&&odometer<=dueKm&&(dueKm-odometer)<=500;
+  const dateTime=dueDate?new Date(dueDate+'T00:00:00').getTime():0;
+  const soonDate=dateTime && dateTime>=new Date(today+'T00:00:00').getTime() && dateTime-new Date(today+'T00:00:00').getTime()<=30*86400000;
+  if(overdue) return {kind:'overdue',text:'⚠️ MANUTENÇÃO VENCIDA'};
+  if(soonKm||soonDate) return {kind:'soon',text:'🔔 MANUTENÇÃO PRÓXIMA'};
+  return null;
+}
+
+function maintenanceNextText(record){
+  const parts=[];
+  if(record.nextKm!==null && record.nextKm!==undefined && record.nextKm!=='') parts.push(fmt(record.nextKm)+' km');
+  if(record.nextDate) parts.push(new Date(record.nextDate+'T00:00:00').toLocaleDateString('pt-BR'));
+  return parts.length ? parts.join(' • ') : 'Não definida';
+}
+
+function renderMaintenance(){
+  renderMaintenanceTypeSuggestions();
+  const alerts=db.manutencoes.map(record=>({record,alert:maintenanceAlert(record)})).filter(item=>item.alert);
+  $('maintenanceAlerts').innerHTML=alerts.map(({record,alert})=>`<div class="alert-item alert-${alert.kind}">${alert.text}: ${escapeHtml(record.type)} (${escapeHtml(record.vehicleName||'Veículo não informado')})</div>`).join('');
+  const records=[...db.manutencoes].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  $('maintenanceHistory').innerHTML=records.length ? records.map(record=>{
+    const alert=maintenanceAlert(record);
+    return `<article class="maintenance-card card"><strong>${escapeHtml(record.type||'Manutenção')}</strong>${alert?` <span>${alert.text}</span>`:''}
+      <div class="maintenance-meta">${new Date((record.date||localDate())+'T00:00:00').toLocaleDateString('pt-BR')} • ${escapeHtml(record.vehicleName||'Veículo não informado')}<br>Odômetro: ${fmt(record.odometerKm)} km • Custo: R$ ${fmt(record.cost)}<br>Próxima manutenção: ${escapeHtml(maintenanceNextText(record))}</div>
+      ${record.description?`<div class="note">${escapeHtml(record.description)}</div>`:''}
+      <div class="card-actions"><button class="secondary" onclick="editMaintenance('${record.id}')">Editar</button><button class="danger" onclick="deleteMaintenance('${record.id}')">Excluir</button></div>
+    </article>`;
+  }).join('') : 'Nenhuma manutenção registrada.';
+}
+
+function escapeHtml(value){
+  const div=document.createElement('div'); div.textContent=String(value??''); return div.innerHTML;
+}
+
+let editingMaintenanceId=null;
+function resetMaintenanceForm(){
+  editingMaintenanceId=null;
+  ['maintenanceType','maintenanceOdometer','maintenanceDescription','maintenanceCost','maintenanceNextKm','maintenanceNextDate'].forEach(id=>$(id).value='');
+  $('maintenanceDate').value=localDate();
+  $('maintenanceAlertEnabled').checked=false;
+  $('saveMaintenance').textContent='Salvar manutenção';
+  $('cancelMaintenanceEdit').classList.add('hidden');
+}
+
+function editMaintenance(id){
+  const record=db.manutencoes.find(item=>item.id===id); if(!record) return;
+  editingMaintenanceId=id;
+  $('maintenanceType').value=record.type||''; $('maintenanceDate').value=record.date||localDate();
+  $('maintenanceOdometer').value=record.odometerKm??''; $('maintenanceDescription').value=record.description||'';
+  $('maintenanceCost').value=record.cost??''; $('maintenanceNextKm').value=record.nextKm??'';
+  $('maintenanceNextDate').value=record.nextDate||''; $('maintenanceAlertEnabled').checked=!!record.alertEnabled;
+  $('saveMaintenance').textContent='Atualizar manutenção'; $('cancelMaintenanceEdit').classList.remove('hidden');
+  $('manutencao').scrollIntoView({behavior:'smooth'});
+}
+
+function deleteMaintenance(id){
+  if(!confirm('Excluir este registro de manutenção?')) return;
+  db.manutencoes=db.manutencoes.filter(item=>item.id!==id); save(); renderMaintenance();
+}
+
+$('saveMaintenance').onclick=function(){
+  const type=$('maintenanceType').value.trim().replace(/\s+/g,' ');
+  const odometerKm=parseFloat($('maintenanceOdometer').value);
+  const cost=parseFloat($('maintenanceCost').value);
+  if(!type || !(odometerKm>=0) || !(cost>=0)){ alert('Preencha tipo, odômetro e custo.'); return; }
+  const existing=editingMaintenanceId?db.manutencoes.find(item=>item.id===editingMaintenanceId):null;
+  const now=new Date().toISOString();
+  const record={
+    ...(existing||{}), id:existing?.id||stableId('maintenance'), schemaVersion:2,
+    createdAt:existing?.createdAt||now, updatedAt:now, vehicleId:vehicleId(), vehicleName:vehicleData().nome||'Veículo não informado',
+    type, description:$('maintenanceDescription').value.trim(), date:$('maintenanceDate').value||localDate(), odometerKm,
+    cost, nextKm:$('maintenanceNextKm').value===''?null:parseFloat($('maintenanceNextKm').value),
+    nextDate:$('maintenanceNextDate').value||null, alertEnabled:$('maintenanceAlertEnabled').checked,
+    alertDismissed:existing?.alertDismissed||false, completed:existing?.completed||false, extra:existing?.extra||{}
+  };
+  if(existing) Object.assign(existing,record); else db.manutencoes.push(record);
+  rememberMaintenanceType(type); save(); resetMaintenanceForm(); renderMaintenance();
+};
+$('cancelMaintenanceEdit').onclick=resetMaintenanceForm;
+
 window.nativeGpsUpdate=function(raw){
 
   try{
@@ -637,6 +805,8 @@ window.nativeGpsUpdate=function(raw){
 
 updateVehicle();
 renderReal();
+resetMaintenanceForm();
+renderMaintenance();
 tick();
 restoreActiveTrip();
 
