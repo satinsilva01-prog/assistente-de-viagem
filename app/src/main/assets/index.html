@@ -34,6 +34,7 @@ button{border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:bold;
 .alert-soon{background:#fff4d8;color:#815d00}.alert-overdue{background:#fde8e7;color:#9b2520}
 .inline-check{display:flex;align-items:center;gap:7px;margin-top:12px}.inline-check input{width:auto}
 .card-actions{display:flex;gap:8px;margin-top:10px}.card-actions button{padding:9px 12px;font-size:13px}
+.app-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.app-nav button{background:#e6efec;color:#174d3e}.app-nav button.active{background:#0b6b4f;color:#fff}.app-section.hidden{display:none}
 </style>
 </head>
 <body>
@@ -44,6 +45,11 @@ button{border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:bold;
 </header>
 
 <main>
+<nav class="app-nav" aria-label="Seções do aplicativo">
+<button class="active" id="showTrip" type="button" aria-controls="viagem" aria-selected="true">🚗 Viagem</button>
+<button id="showMaintenance" type="button" aria-controls="manutencao" aria-selected="false">🔧 Manutenção</button>
+</nav>
+<section id="viagem" class="app-section" aria-label="Viagem">
 
 <div class="card">
 <div class="actions">
@@ -147,6 +153,16 @@ button{border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:bold;
 <p class="note">No APK, a tela permanece ativa durante a viagem.</p>
 </div>
 
+
+
+<div class="card">
+<h3>📍 GPS</h3>
+<div class="status" id="gps">Aguardando localização...</div>
+<p class="note">Permita a localização do aparelho. No APK, o GPS usa o serviço nativo do Android.</p>
+</div>
+
+</section>
+
 <section id="manutencao" aria-labelledby="manutencaoTitulo">
 <div class="card">
 <h3 id="manutencaoTitulo">🔧 Manutenção</h3>
@@ -178,13 +194,6 @@ button{border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:bold;
 <div id="maintenanceHistory" class="note">Nenhuma manutenção registrada.</div>
 </div>
 </section>
-
-<div class="card">
-<h3>📍 GPS</h3>
-<div class="status" id="gps">Aguardando localização...</div>
-<p class="note">Permita a localização do aparelho. No APK, o GPS usa o serviço nativo do Android.</p>
-</div>
-
 </main>
 
 <script>
@@ -197,6 +206,8 @@ db.abastecimentos=Array.isArray(db.abastecimentos)?db.abastecimentos:[];
 db.viagens=Array.isArray(db.viagens)?db.viagens:[];
 db.manutencoes=Array.isArray(db.manutencoes)?db.manutencoes:[];
 db.maintenanceTypes=Array.isArray(db.maintenanceTypes)?db.maintenanceTypes:[];
+// Persiste somente as novas coleções, preservando integralmente as chaves existentes.
+localStorage.setItem('cv2_db',JSON.stringify(db));
 let running=false;
 let paused=false;
 let startTime=0;
@@ -701,7 +712,7 @@ function renderMaintenance(){
   $('maintenanceHistory').innerHTML=records.length ? records.map(record=>{
     const alert=maintenanceAlert(record);
     return `<article class="maintenance-card card"><strong>${escapeHtml(record.type||'Manutenção')}</strong>${alert?` <span>${alert.text}</span>`:''}
-      <div class="maintenance-meta">${new Date((record.date||localDate())+'T00:00:00').toLocaleDateString('pt-BR')} • ${escapeHtml(record.vehicleName||'Veículo não informado')}<br>Odômetro: ${fmt(record.odometerKm)} km • Custo: R$ ${fmt(record.cost)}<br>Próxima manutenção: ${escapeHtml(maintenanceNextText(record))}</div>
+      <div class="maintenance-meta">${new Date((record.date||localDate())+'T00:00:00').toLocaleDateString('pt-BR')} • ${escapeHtml(record.vehicleName||'Veículo não informado')}<br>Odômetro: ${fmt(record.odometerKm)} km • Custo: R$ ${fmt(record.cost)}<br>Próxima manutenção: ${escapeHtml(maintenanceNextText(record))}${record.alertEnabled?`<br>Situação do alerta: ${alert?alert.text:'🔔 Alerta ativo'}`:''}</div>
       ${record.description?`<div class="note">${escapeHtml(record.description)}</div>`:''}
       <div class="card-actions"><button class="secondary" onclick="editMaintenance('${record.id}')">Editar</button><button class="danger" onclick="deleteMaintenance('${record.id}')">Excluir</button></div>
     </article>`;
@@ -757,6 +768,18 @@ $('saveMaintenance').onclick=function(){
   rememberMaintenanceType(type); save(); resetMaintenanceForm(); renderMaintenance();
 };
 $('cancelMaintenanceEdit').onclick=resetMaintenanceForm;
+
+function showAppSection(section){
+  const maintenance=section==='maintenance';
+  $('viagem').classList.toggle('hidden',maintenance);
+  $('manutencao').classList.toggle('hidden',!maintenance);
+  $('showTrip').classList.toggle('active',!maintenance);
+  $('showMaintenance').classList.toggle('active',maintenance);
+  $('showTrip').setAttribute('aria-selected',String(!maintenance));
+  $('showMaintenance').setAttribute('aria-selected',String(maintenance));
+}
+$('showTrip').onclick=()=>showAppSection('trip');
+$('showMaintenance').onclick=()=>showAppSection('maintenance');
 
 window.nativeGpsUpdate=function(raw){
 
