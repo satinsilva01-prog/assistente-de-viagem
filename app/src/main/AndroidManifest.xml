@@ -12,6 +12,7 @@
 
     <application
         android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
         android:label="Assistente de Viagem"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
