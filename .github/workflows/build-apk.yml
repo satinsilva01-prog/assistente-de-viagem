@@ -14,6 +14,15 @@ jobs:
       - name: Baixar código
         uses: actions/checkout@v4
 
+      - name: Sincronizar fonte do APK
+        run: |
+          set -e
+          test -f index.html
+          mkdir -p app/src/main/assets
+          cp index.html app/src/main/assets/index.html
+          echo "Fonte do APK sincronizada com index.html da raiz"
+          grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html || { echo 'ERRO: fonte V35 não encontrada'; exit 1; }
+
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
@@ -25,7 +34,7 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Corrigir reset no APK
+      - name: Reforçar reset no APK
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -34,32 +43,43 @@ jobs:
           s = p.read_text(encoding='utf-8')
           new = r'''function resetApp(){
             if(!confirm('⚠️ Isso apagará todos os dados locais do aplicativo, incluindo viagens, abastecimentos, veículos, histórico, manutenção, ajustes, alertas e configurações. Deseja realmente resetar?'))return;
-            try{stopGps()}catch(e){}
-            try{stopTimer()}catch(e){}
-            try{localStorage.clear()}catch(e){console.warn('localStorage.clear falhou',e)}
-            try{sessionStorage.clear()}catch(e){console.warn('sessionStorage.clear falhou',e)}
+            try{if(typeof stopGps==='function')stopGps()}catch(e){}
+            try{if(typeof stopTimer==='function')stopTimer()}catch(e){}
+            try{localStorage.clear()}catch(e){}
+            try{sessionStorage.clear()}catch(e){}
             try{
               if(window.indexedDB&&indexedDB.databases){
                 indexedDB.databases().then(dbs=>(dbs||[]).forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});
               }
             }catch(e){}
-            state=clone(DEFAULT);
+            try{state=clone(DEFAULT)}catch(e){console.error('Falha ao restaurar DEFAULT',e)}
+            if(!state||typeof state!=='object')state={};
             if(!Array.isArray(state.manutencoes))state.manutencoes=[];
             if(!Array.isArray(state.maintenanceTypes))state.maintenanceTypes=[];
             lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=null;speedingSince=null;viagemTelaTravada=false;
-            document.body.classList.remove('dark');
-            if($('avThemeBtn'))$('avThemeBtn').textContent='🌙';
-            try{setViagemTelaTravada(false)}catch(e){}
-            try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll();}catch(e){}
+            try{document.body.classList.remove('dark')}catch(e){}
+            try{if($('avThemeBtn'))$('avThemeBtn').textContent='🌙'}catch(e){}
+            try{if(typeof setViagemTelaTravada==='function')setViagemTelaTravada(false)}catch(e){}
+            try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll()}catch(e){}
+            try{if(typeof save==='function')save()}catch(e){}
+            try{if(typeof render==='function')render()}catch(e){}
             try{location.replace(location.href.split('#')[0].split('?')[0]+'?reset='+Date.now())}catch(e){try{location.reload()}catch(e2){}}
           }
           '''
-          s2, n = re.subn(r'function resetApp\(\)\{.*?\n\}\n(?=function openMenu\(\))', new, s, count=1, flags=re.S)
+          pattern = r'function resetApp\(\)\{.*?\n\}\n(?=function openMenu\(\))'
+          s2,n = re.subn(pattern,new,s,count=1,flags=re.S)
           if n != 1:
-              raise SystemExit('Não foi possível localizar a rotina resetApp no index.html')
-          p.write_text(s2, encoding='utf-8')
-          print('Reset corrigido no arquivo do APK')
+              raise SystemExit('Não foi possível localizar resetApp no index.html da V35')
+          p.write_text(s2,encoding='utf-8')
+          print('Reset reforçado com limpeza, restauração, persistência e renderização')
           PY
+
+      - name: Validar fonte antes da compilação
+        run: |
+          grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
+          grep -q 'Histórico do veículo' app/src/main/assets/index.html
+          grep -q 'function resetApp' app/src/main/assets/index.html
+          echo "Validação da fonte concluída"
 
       - name: Compilar APK
         run: gradle :app:assembleDebug
