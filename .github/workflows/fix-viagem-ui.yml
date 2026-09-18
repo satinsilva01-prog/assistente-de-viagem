@@ -12,82 +12,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Corrigir INDEX oficial — cadeado e reset
+      - name: Aplicar correção oficial no INDEX
+        run: python3 tools/fix_index.py
+      - name: Copiar INDEX para o APK
         run: |
           set -e
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          marker='/* V35 FIX CADEADO RESET 2026-09-18 */'
-
-          if marker not in s:
-              # Cadeado: fica fixo e acessível, sem bloquear o restante do aplicativo.
-              s,n=re.subn(
-                  r'\.viagem-lock-tag\{[^}]*\}',
-                  marker+'\n.viagem-lock-tag{position:fixed;right:12px;top:72px;z-index:2005;width:42px;height:42px;border:1px solid #b8c0c8;border-radius:50%;padding:0;background:#fff;color:#111;font-size:20px;font-weight:800;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px #0003;cursor:pointer;user-select:none;pointer-events:auto}\n.viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}\nbody.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}\nbody.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}\n.av-trip-panel.viagem-panel-locked{pointer-events:none}\n.av-trip-panel.viagem-panel-locked #viagemLockTag{pointer-events:auto}',
-                  s,count=1,flags=re.S)
-              if n!=1: raise SystemExit('Não foi possível localizar o CSS do cadeado')
-
-              # Remove o bloqueio global do body.
-              s=s.replace("  document.body.classList.toggle('viagem-scroll-locked',viagemTelaTravada);\n", "")
-
-              # Cadeado: bloqueia somente os controles da tela de viagem.
-              lock_new='''let viagemTelaTravada=false;
-function setViagemTelaTravada(travar){
-  viagemTelaTravada=!!travar;
-  const tag=$('viagemLockTag');
-  const panel=$('av-trip-panel');
-  if(panel)panel.classList.toggle('viagem-panel-locked',viagemTelaTravada);
-  if(tag){tag.textContent=viagemTelaTravada?'🔒':'🔓';tag.title=viagemTelaTravada?'Destravar tela da viagem':'Travar tela da viagem';tag.setAttribute('aria-label',tag.title);tag.style.display='flex';}
-  try{sessionStorage.setItem('assistente_viagem_tela_travada',viagemTelaTravada?'1':'0')}catch(e){}
-}
-function toggleViagemTela(){setViagemTelaTravada(!viagemTelaTravada)}
-function initViagemTelaLock(){
-  const tag=$('viagemLockTag'); if(!tag)return;
-  tag.onclick=toggleViagemTela;
-  tag.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleViagemTela()}};
-  try{setViagemTelaTravada(sessionStorage.getItem('assistente_viagem_tela_travada')==='1')}catch(e){setViagemTelaTravada(false)}
-}
-
-'''
-              start=s.find('let viagemTelaTravada=false;')
-              end=s.find('function showTab(tab){',start)
-              if start<0 or end<0: raise SystemExit('Não foi possível localizar a rotina do cadeado')
-              s=s[:start]+lock_new+s[end:]
-
-              # Reset robusto para WebView/APK.
-              reset_new='''function resetApp(){
-  if(!confirm('⚠️ Isso apagará TODOS os dados deste aplicativo neste aparelho, incluindo viagens, abastecimentos, veículos, manutenção, históricos, ajustes e configurações. Deseja realmente resetar?'))return;
-  try{if(typeof stopGps==='function')stopGps();}catch(e){}
-  try{if(typeof stopTimer==='function')stopTimer();}catch(e){}
-  try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll();}catch(e){}
-  try{localStorage.clear();}catch(e){}
-  try{sessionStorage.clear();}catch(e){}
-  try{if(indexedDB&&indexedDB.databases){indexedDB.databases().then(dbs=>dbs.forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});}}catch(e){}
-  try{viagemTelaTravada=false;}catch(e){}
-  try{const panel=$('av-trip-panel');if(panel)panel.classList.remove('viagem-panel-locked');}catch(e){}
-  try{document.body.classList.remove('dark','viagem-scroll-locked');document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';}catch(e){}
-  try{state=clone(DEFAULT);}catch(e){}
-  try{if(typeof render==='function')render();}catch(e){}
-  alert('✅ Aplicativo resetado. Todos os dados locais foram apagados.');
-  setTimeout(()=>{try{location.reload();}catch(e){location.href=location.href;}},150);
-}
-'''
-              s,n=re.subn(r'function resetApp\(\)\{.*?\n\}\n\nfunction openMenu',reset_new+'\nfunction openMenu',s,count=1,flags=re.S)
-              if n!=1: raise SystemExit('Não foi possível localizar resetApp')
-
-              p.write_text(s,encoding='utf-8')
-
-              # Mantém a mesma correção no INDEX oficial e no asset usado pelo APK.
-              Path('app/src/main/assets').mkdir(parents=True,exist_ok=True)
-              Path('app/src/main/assets/index.html').write_text(s,encoding='utf-8')
-          else:
-              print('Correção V35 já aplicada')
-          PY
-
+          mkdir -p app/src/main/assets
+          cp index.html app/src/main/assets/index.html
+          grep -q 'V35 FIX CADEADO RESET 2026-09-18' index.html
+          grep -q 'function resetApp' index.html
+          grep -q 'viagem-panel-locked' index.html
       - name: Commit correção oficial
         run: |
           git config user.name 'github-actions[bot]'
@@ -95,31 +29,19 @@ function initViagemTelaLock(){
           git add index.html app/src/main/assets/index.html
           git commit -m 'Fix viagem UI' || exit 0
           git push
-
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-
-      - name: Validar fonte corrigida
-        run: |
-          set -e
-          grep -q 'V35 FIX CADEADO RESET 2026-09-18' index.html
-          grep -q 'function resetApp' index.html
-          grep -q 'viagem-panel-locked' index.html
-
       - name: Compilar APK corrigido
         run: gradle :app:assembleDebug
-
       - name: Validar APK
         run: test -f app/build/outputs/apk/debug/app-debug.apk
-
       - name: Disponibilizar APK corrigido
         uses: actions/upload-artifact@v4
         with:
