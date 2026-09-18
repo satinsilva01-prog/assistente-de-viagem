@@ -1,13 +1,8 @@
 name: Gerar APK
-
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   build:
@@ -15,108 +10,29 @@ jobs:
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
-
-      - name: Corrigir INDEX oficial — cadeado e reset
-        run: |
-          set -e
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          marker='/* V35 FIX CADEADO RESET 2026-09-18 */'
-
-          if marker not in s:
-              # 1) O cadeado fica fixo e sempre acessível durante a tela de viagem.
-              s,n=re.subn(
-                  r'\.viagem-lock-tag\{[^}]*\}',
-                  marker+'\n.viagem-lock-tag{position:fixed;right:12px;top:72px;z-index:2005;border:1px solid #b8c0c8;border-radius:999px;width:42px;height:42px;padding:0;background:#fff;color:#111;font-size:20px;font-weight:800;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px #0003;gap:6px;cursor:pointer;user-select:none;pointer-events:auto}',
-                  s,count=1,flags=re.S)
-              if n!=1: raise SystemExit('Não foi possível localizar o CSS do cadeado')
-
-              # 2) O bloqueio de rolagem fica somente na tela Viagem.
-              s=s.replace("  document.body.classList.toggle('viagem-scroll-locked',viagemTelaTravada);\n", "")
-
-              # 3) Reset robusto para WebView/APK: para GPS/timer, limpa
-              # localStorage/sessionStorage, tenta apagar IndexedDB e usa o
-              # bridge nativo quando existir; depois recarrega o app.
-              reset_new='''function resetApp(){
-  if(!confirm('⚠️ Isso apagará TODOS os dados deste aplicativo neste aparelho, incluindo viagens, abastecimentos, veículos, manutenção, históricos, ajustes e configurações. Deseja realmente resetar?'))return;
-  try{stopGps();stopTimer();}catch(e){}
-  try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll();}catch(e){}
-  try{localStorage.clear();}catch(e){}
-  try{sessionStorage.clear();}catch(e){}
-  try{if(indexedDB&&indexedDB.databases){indexedDB.databases().then(dbs=>dbs.forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});}}catch(e){}
-  try{document.body.classList.remove('dark','viagem-scroll-locked');}catch(e){}
-  try{viagemTelaTravada=false;}catch(e){}
-  try{const tag=$('viagemLockTag');if(tag){tag.classList.remove('active');tag.innerHTML='🔓';tag.style.display='flex';}}catch(e){}
-  try{state=clone(DEFAULT);}catch(e){}
-  try{if(typeof closeMenu==='function')closeMenu();}catch(e){}
-  try{if(typeof render==='function')render();}catch(e){}
-  alert('✅ Aplicativo resetado. Todos os dados locais foram apagados.');
-  setTimeout(()=>{try{location.reload();}catch(e){location.href=location.href;}},150);
-}
-'''
-              s,n=re.subn(r'function resetApp\(\)\{.*?\n\}\n\nfunction openMenu',reset_new+'\nfunction openMenu',s,count=1,flags=re.S)
-              if n!=1: raise SystemExit('Não foi possível localizar resetApp')
-
-              p.write_text(s,encoding='utf-8')
-
-              # Mantém a correção no INDEX oficial da raiz, para que site e APK
-              # usem exatamente a mesma rotina.
-              import subprocess
-              subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
-              subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
-              subprocess.run(['git','add','index.html'],check=True)
-              subprocess.run(['git','commit','-m','Corrigir cadeado e reset do Assistente V35 [skip ci]'],check=True)
-              subprocess.run(['git','push','origin','HEAD:main'],check=True)
-          else:
-              print('Correção V35 já está aplicada no INDEX oficial')
-          PY
-
-      - name: Sincronizar fonte oficial do APK
+      - name: Sincronizar INDEX oficial
         run: |
           set -e
           test -f index.html
           mkdir -p app/src/main/assets
           cp index.html app/src/main/assets/index.html
-          echo "Fonte oficial V35 copiada para o APK"
           grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
           grep -q 'Histórico do veículo' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
           grep -q 'V35 FIX CADEADO RESET 2026-09-18' app/src/main/assets/index.html
-          echo "Validação da fonte oficial concluída"
-
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-
-      - name: Verificar fonte imediatamente antes da compilação
-        run: |
-          set -e
-          grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
-          grep -q 'Histórico do veículo' app/src/main/assets/index.html
-          grep -q 'function resetApp' app/src/main/assets/index.html
-          grep -q 'V35 FIX CADEADO RESET 2026-09-18' app/src/main/assets/index.html
-          echo "OK: APK será compilado usando a fonte oficial corrigida"
-
       - name: Compilar APK
         run: gradle :app:assembleDebug
-
       - name: Validar APK gerado
-        run: |
-          set -e
-          test -f app/build/outputs/apk/debug/app-debug.apk
-          echo "APK gerado com sucesso"
-
+        run: test -f app/build/outputs/apk/debug/app-debug.apk
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
