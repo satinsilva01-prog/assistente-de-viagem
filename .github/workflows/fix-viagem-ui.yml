@@ -1,0 +1,46 @@
+name: Fix viagem UI
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.event.head_commit.message != 'Fix viagem UI'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore and patch index
+        run: |
+          git cat-file -p 8158bce17744c2a7beeaab6b7c60f27fd6cec8d3 > app/src/main/assets/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main/assets/index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('#av-trip-panel{position:sticky;top:64px;z-index:50;background:var(--bg);padding:2px 0 7px}', '#av-trip-panel{position:relative;z-index:50;background:var(--bg);padding:2px 0 5px}')
+          s=s.replace('.av-trip-panel-inner{padding:9px 10px}', '.av-trip-panel-inner{padding:8px 9px}')
+          s=s.replace('.av-trip-panel-title{margin-bottom:7px}', '.av-trip-panel-title{margin-bottom:6px}')
+          s=s.replace('.av-trip-panel-inner{background:#fff;border-radius:16px;padding:12px;', '.av-trip-panel-inner{background:#fff;border-radius:15px;padding:9px;')
+          s=s.replace('.av-trip-panel-title{font-weight:800;text-align:center;margin-bottom:9px}', '.av-trip-panel-title{font-weight:800;text-align:center;margin-bottom:6px;position:relative;padding-right:42px}')
+          s=s.replace('.av-dashboard{display:grid;grid-template-columns:1fr 1fr;gap:9px}', '.av-dashboard{display:grid;grid-template-columns:1fr 1fr;gap:7px}')
+          s=s.replace('.av-box{background:#fff;border:1px solid #dfe4e8;border-radius:13px;padding:10px;', '.av-box{background:#fff;border:1px solid #dfe4e8;border-radius:12px;padding:8px;')
+          s=s.replace('.av-box-value{font-size:24px;', '.av-box-value{font-size:21px;')
+          old='.viagem-lock-tag{position:fixed;right:12px;top:78px;z-index:1050;border:1px solid #b8c0c8;border-radius:999px;padding:7px 10px;background:#fff;color:#111;font-size:12px;font-weight:800;box-shadow:0 3px 12px #0002;display:none;align-items:center;gap:6px;cursor:pointer;user-select:none}\n.viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}\nbody.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}\nbody.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}\n.viagem-scroll-locked{overflow:hidden!important;touch-action:none!important}'
+          new='.viagem-lock-tag{position:absolute;right:8px;top:50%;transform:translateY(-50%);z-index:60;width:36px;height:36px;border:1px solid #b8c0c8;border-radius:50%;padding:0;background:#fff;color:#111;font-size:20px;line-height:34px;text-align:center;box-shadow:0 2px 8px #0002;display:none;align-items:center;justify-content:center;cursor:pointer;user-select:none}\n.viagem-lock-tag span{display:none!important}\n.viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}\nbody.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}\nbody.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}\nbody.av-scroll-freeze{overflow:hidden!important}\nbody.av-scroll-freeze #av-fixed-header,body.av-scroll-freeze #av-trip-footer{position:fixed}'
+          s=s.replace(old,new)
+          s=s.replace('<div id="viagemLockTag" class="viagem-lock-tag" role="button" tabindex="0" aria-label="Travar tela da viagem">🔓 <span>TRAVAR</span></div>\n<section id="av-trip-panel"><div class="av-trip-panel-inner"><div class="av-trip-panel-title">🚗 Painel do veículo</div>', '<section id="av-trip-panel"><div class="av-trip-panel-inner"><div class="av-trip-panel-title">🚗 Painel do veículo<div id="viagemLockTag" class="viagem-lock-tag" role="button" tabindex="0" aria-label="Travar tela da viagem">🔓<span>TRAVAR</span></div></div>')
+          start=s.index('let viagemTelaTravada=false;')
+          end=s.index('function showTab(tab){', start)
+          js="""let viagemTelaTravada=false;\nlet viagemScrollY=0;\nfunction setViagemTelaTravada(travar){\n  const next=!!travar;\n  const tag=$('viagemLockTag');\n  if(next===viagemTelaTravada){if(tag){tag.textContent=next?'🔒':'🔓';tag.title=next?'Destravar tela':'Travar tela'}return;}\n  if(next){\n    viagemScrollY=window.scrollY||window.pageYOffset||0; viagemTelaTravada=true;\n    document.body.classList.add('av-scroll-freeze'); document.body.style.position='fixed'; document.body.style.top=(-viagemScrollY)+'px'; document.body.style.left='0'; document.body.style.right='0'; document.body.style.width='100%';\n    if(tag){tag.textContent='🔒';tag.title='Destravar tela'}\n  }else{\n    document.body.classList.remove('av-scroll-freeze'); document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';\n    viagemTelaTravada=false; window.scrollTo(0,viagemScrollY||0); if(tag){tag.textContent='🔓';tag.title='Travar tela'}\n  }\n  try{sessionStorage.setItem('assistente_viagem_tela_travada',viagemTelaTravada?'1':'0')}catch(e){}\n}\nfunction toggleViagemTela(){setViagemTelaTravada(!viagemTelaTravada)}\nfunction initViagemTelaLock(){\n  const tag=$('viagemLockTag'); if(!tag)return; tag.onclick=toggleViagemTela;\n  tag.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleViagemTela()}};\n  try{setViagemTelaTravada(sessionStorage.getItem('assistente_viagem_tela_travada')==='1')}catch(e){setViagemTelaTravada(false)}\n}\n\n"""
+          s=s[:start]+js+s[end:]
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/src/main/assets/index.html
+          git commit -m 'Fix viagem UI' || exit 0
+          git push
