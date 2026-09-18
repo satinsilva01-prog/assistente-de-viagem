@@ -62,7 +62,13 @@ body.dark .maintenance-badge.over{background:#3b1818;color:#fca5a5!important}
 #av-trip-panel.vehicle-collapsed .av-dashboard,#av-trip-panel.vehicle-collapsed .av-trip-extra{display:none}
 #av-trip-panel.vehicle-collapsed .av-expand-icon{transform:rotate(180deg)}
 /* TAG DE TRAVA DA TELA DA VIAGEM */
-.viagem-lock-tag{position:absolute;right:9px;top:8px;z-index:1050;border:1px solid #b8c0c8;border-radius:999px;width:36px;height:36px;padding:0;background:#fff;color:#111;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px #0002;display:none;align-items:center;gap:6px;cursor:pointer;user-select:none}
+/* V35 FIX CADEADO RESET 2026-09-18 */
+.viagem-lock-tag{position:fixed;right:12px;top:72px;z-index:2005;width:42px;height:42px;border:1px solid #b8c0c8;border-radius:50%;padding:0;background:#fff;color:#111;font-size:20px;font-weight:800;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px #0003;cursor:pointer;user-select:none;pointer-events:auto}
+.viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
+body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
+body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
+.av-trip-panel.viagem-panel-locked{pointer-events:none}
+.av-trip-panel.viagem-panel-locked #viagemLockTag{pointer-events:auto}
 .viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
 body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
 body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
@@ -856,26 +862,13 @@ function initVehiclePanelExpandable(){
 let viagemTelaTravada=false;
 function setViagemTelaTravada(travar){
   viagemTelaTravada=!!travar;
-  const tag=$('viagemLockTag');
-  const page=$('tabViagem');
-  if(tag){
-    tag.classList.toggle('active',viagemTelaTravada);
-    tag.innerHTML=viagemTelaTravada?'🔒':'🔓';
-  }
-  if(page)page.classList.toggle('viagem-scroll-locked',viagemTelaTravada);
-  document.body.classList.toggle('viagem-scroll-locked',viagemTelaTravada);
+  const tag=$('viagemLockTag'),panel=$('av-trip-panel');
+  if(panel)panel.classList.toggle('viagem-panel-locked',viagemTelaTravada);
+  if(tag){tag.classList.toggle('active',viagemTelaTravada);tag.innerHTML=viagemTelaTravada?'🔒':'🔓';tag.title=viagemTelaTravada?'Destravar tela da viagem':'Travar tela da viagem';tag.setAttribute('aria-label',tag.title);tag.style.display='flex';}
   try{sessionStorage.setItem('assistente_viagem_tela_travada',viagemTelaTravada?'1':'0')}catch(e){}
 }
-function toggleViagemTela(){
-  setViagemTelaTravada(!viagemTelaTravada);
-}
-function initViagemTelaLock(){
-  const tag=$('viagemLockTag');
-  if(!tag)return;
-  tag.onclick=toggleViagemTela;
-  tag.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleViagemTela()}};
-  try{setViagemTelaTravada(sessionStorage.getItem('assistente_viagem_tela_travada')==='1')}catch(e){setViagemTelaTravada(false)}
-}
+function toggleViagemTela(){setViagemTelaTravada(!viagemTelaTravada)}
+function initViagemTelaLock(){const tag=$('viagemLockTag');if(!tag)return;tag.onclick=toggleViagemTela;tag.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleViagemTela()}};try{setViagemTelaTravada(sessionStorage.getItem('assistente_viagem_tela_travada')==='1')}catch(e){setViagemTelaTravada(false)}}
 
 function maintenanceToday(){const d=new Date(),o=d.getTimezoneOffset()*60000;return new Date(d-o).toISOString().slice(0,10)}
 let maintenanceEditId=null;
@@ -982,29 +975,20 @@ function showTab(tab){
 }
 function resetApp(){
   if(!confirm('⚠️ Isso apagará TODOS os dados deste aplicativo neste aparelho, incluindo viagens, abastecimentos, veículos, manutenção, históricos, ajustes e configurações. Deseja realmente resetar?'))return;
-  try{stopGps();stopTimer();}catch(e){}
+  try{if(typeof stopGps==='function')stopGps();}catch(e){}
+  try{if(typeof stopTimer==='function')stopTimer();}catch(e){}
   try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll();}catch(e){}
-  // Remove todas as chaves conhecidas, inclusive integrações antigas que
-  // poderiam repopular o painel depois do reset.
-  const knownKeys=[NS,'assistente_viagem_historico_v1','assistente_viagem_eventos_v1','av_abastecimentos_v2','assistente_viagem_manutencao_v1','av_theme','assistente_viagem_veiculo_v1','assistente_viagem_vehicle_v1','cv2_veiculo_atual','veiculo_atual','assistente_viagem_abastecimentos_v1','abastecimentos_v1','cv2_abastecimentos','assistente_viagem_tela_travada'];
-  knownKeys.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  try{localStorage.clear()}catch(e){}
-  try{sessionStorage.clear()}catch(e){}
-  state=clone(DEFAULT);
-  lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=null;speedingSince=null;viagemTelaTravada=false;
-  document.body.classList.remove('dark');
-  if($('avThemeBtn'))$('avThemeBtn').textContent='🌙';
-  ['destinoModalInput','abVeiculo','abTanque','abValor','abPreco','abLitros','abOdo','mntTipo','mntData','mntDescricao','mntOdom','mntCusto','mntProximoKm','mntProximaData'].forEach(id=>{if($(id))$(id).value=''});
-  if($('abComb'))$('abComb').value='Flex';
-  if($('abSituacao'))$('abSituacao').selectedIndex=0;
-  if($('ajusteOdoInput'))$('ajusteOdoInput').value='';
-  if($('ajusteCombNivel'))$('ajusteCombNivel').value='0';
-  if($('destinoModal'))$('destinoModal').style.display='none';
-  if($('ajusteOdoModal'))$('ajusteOdoModal').style.display='none';
-  try{setViagemTelaTravada(false)}catch(e){}
-  renderAb();renderHistorico();if(typeof renderManutencao==='function')renderManutencao();renderTripVehicleSelect();render();
-  closeMenu();
+  try{localStorage.clear();}catch(e){}
+  try{sessionStorage.clear();}catch(e){}
+  try{if(indexedDB&&indexedDB.databases){indexedDB.databases().then(dbs=>dbs.forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});}}catch(e){}
+  try{state=clone(DEFAULT);}catch(e){}
+  try{viagemTelaTravada=false;}catch(e){}
+  try{const panel=$('av-trip-panel');if(panel)panel.classList.remove('viagem-panel-locked');}catch(e){}
+  try{document.body.classList.remove('dark','viagem-scroll-locked');document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';}catch(e){}
+  try{if(typeof render==='function')render();}catch(e){}
+  try{if(typeof closeMenu==='function')closeMenu();}catch(e){}
   alert('✅ Aplicativo resetado. Todos os dados locais foram apagados.');
+  setTimeout(()=>{try{location.reload();}catch(e){location.href=location.href;}},150);
 }
 
 function openMenu(){$('avMenuPanel').classList.add('open');$('avMenuBackdrop').classList.add('open')}function closeMenu(){$('avMenuPanel').classList.remove('open');$('avMenuBackdrop').classList.remove('open')}
