@@ -9,19 +9,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
 
-      - name: Sincronizar fonte do APK
+      - name: Sincronizar fonte oficial do APK
         run: |
           set -e
           test -f index.html
           mkdir -p app/src/main/assets
           cp index.html app/src/main/assets/index.html
-          echo "Fonte do APK sincronizada com index.html da raiz"
-          grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html || { echo 'ERRO: fonte V35 não encontrada'; exit 1; }
+          echo "Fonte oficial V35 copiada para o APK"
+          grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
+          grep -q 'Histórico do veículo' app/src/main/assets/index.html
+          grep -q 'function resetApp' app/src/main/assets/index.html
+          echo "Validação da fonte oficial concluída"
 
       - name: Configurar Java
         uses: actions/setup-java@v4
@@ -34,55 +36,22 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Reforçar reset no APK
+      - name: Verificar fonte imediatamente antes da compilação
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p = Path('app/src/main/assets/index.html')
-          s = p.read_text(encoding='utf-8')
-          new = r'''function resetApp(){
-            if(!confirm('⚠️ Isso apagará todos os dados locais do aplicativo, incluindo viagens, abastecimentos, veículos, histórico, manutenção, ajustes, alertas e configurações. Deseja realmente resetar?'))return;
-            try{if(typeof stopGps==='function')stopGps()}catch(e){}
-            try{if(typeof stopTimer==='function')stopTimer()}catch(e){}
-            try{localStorage.clear()}catch(e){}
-            try{sessionStorage.clear()}catch(e){}
-            try{
-              if(window.indexedDB&&indexedDB.databases){
-                indexedDB.databases().then(dbs=>(dbs||[]).forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});
-              }
-            }catch(e){}
-            try{state=clone(DEFAULT)}catch(e){console.error('Falha ao restaurar DEFAULT',e)}
-            if(!state||typeof state!=='object')state=clone(DEFAULT);
-            if(!Array.isArray(state.manutencoes))state.manutencoes=[];
-            if(!Array.isArray(state.maintenanceTypes))state.maintenanceTypes=[];
-            lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=null;speedingSince=null;viagemTelaTravada=false;
-            try{document.body.classList.remove('dark')}catch(e){}
-            try{if($('avThemeBtn'))$('avThemeBtn').textContent='🌙'}catch(e){}
-            try{if(typeof setViagemTelaTravada==='function')setViagemTelaTravada(false)}catch(e){}
-            try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll()}catch(e){}
-            try{if(typeof save==='function')save()}catch(e){}
-            try{if(typeof render==='function')render()}catch(e){}
-            try{location.replace(location.href.split('#')[0].split('?')[0]+'?reset='+Date.now())}catch(e){try{location.reload()}catch(e2){}}
-          }
-          '''
-          pattern = r'function resetApp\(\)\{.*?\n\}\n(?=function\s+)'
-          s2,n = re.subn(pattern,new,s,count=1,flags=re.S)
-          if n != 1:
-              raise SystemExit('Não foi possível localizar resetApp na fonte V35')
-          p.write_text(s2,encoding='utf-8')
-          print('Reset reforçado com limpeza, restauração, persistência e renderização')
-          PY
-
-      - name: Validar fonte antes da compilação
-        run: |
+          set -e
           grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
           grep -q 'Histórico do veículo' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
-          echo "Validação da fonte concluída"
+          echo "OK: APK será compilado usando a fonte oficial da raiz"
 
       - name: Compilar APK
         run: gradle :app:assembleDebug
+
+      - name: Validar APK gerado
+        run: |
+          set -e
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          echo "APK gerado com sucesso"
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
