@@ -53,7 +53,7 @@ jobs:
               }
             }catch(e){}
             try{state=clone(DEFAULT)}catch(e){console.error('Falha ao restaurar DEFAULT',e)}
-            if(!state||typeof state!=='object')state={};
+            if(!state||typeof state!=='object')state=clone(DEFAULT);
             if(!Array.isArray(state.manutencoes))state.manutencoes=[];
             if(!Array.isArray(state.maintenanceTypes))state.maintenanceTypes=[];
             lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=null;speedingSince=null;viagemTelaTravada=false;
@@ -66,10 +66,10 @@ jobs:
             try{location.replace(location.href.split('#')[0].split('?')[0]+'?reset='+Date.now())}catch(e){try{location.reload()}catch(e2){}}
           }
           '''
-          pattern = r'function resetApp\(\)\{.*?\n\}\n(?=function openMenu\(\))'
+          pattern = r'function resetApp\(\)\{.*?\n\}\n(?=function\s+)'
           s2,n = re.subn(pattern,new,s,count=1,flags=re.S)
           if n != 1:
-              raise SystemExit('Não foi possível localizar resetApp no index.html da V35')
+              raise SystemExit('Não foi possível localizar resetApp na fonte V35')
           p.write_text(s2,encoding='utf-8')
           print('Reset reforçado com limpeza, restauração, persistência e renderização')
           PY
