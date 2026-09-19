@@ -10,17 +10,21 @@ jobs:
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
-      - name: Sincronizar INDEX oficial
+        with:
+          fetch-depth: 0
+      - name: Preparar INDEX oficial antes do APK
         run: |
           set -e
           test -f index.html
+          python3 tools/fix_index.py
           mkdir -p app/src/main/assets
           cp index.html app/src/main/assets/index.html
           test -s app/src/main/assets/index.html
           grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
           grep -q 'Histórico do veículo' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
-          echo "INDEX da raiz copiado integralmente para o APK"
+          grep -q 'PAINEL DO VEÍCULO RECOLHÍVEL' app/src/main/assets/index.html
+          echo "INDEX oficial preparado e copiado integralmente para o APK"
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
