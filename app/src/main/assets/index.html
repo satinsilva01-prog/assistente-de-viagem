@@ -60,8 +60,15 @@ body.dark .maintenance-badge.over{background:#3b1818;color:#fca5a5!important}
 /* PAINEL DO VEÍCULO RECOLHÍVEL — COMPACTO */
 .av-trip-panel-title{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding-right:0!important;white-space:nowrap}
 .av-expand-icon{font-size:15px;line-height:1;transition:transform .15s ease}
-#av-trip-panel.vehicle-collapsed .av-dashboard,#av-trip-panel.vehicle-collapsed .av-trip-extra{display:none}
+#av-trip-panel.vehicle-collapsed .av-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin:0}
+#av-trip-panel.vehicle-collapsed .av-box{padding:7px 8px;display:flex;align-items:center;min-height:43px}
+#av-trip-panel.vehicle-collapsed .av-box-label,#av-trip-panel.vehicle-collapsed .av-fuel-legend,#av-trip-panel.vehicle-collapsed .av-box .note,#av-trip-panel.vehicle-collapsed .future-space{display:none}
+#av-trip-panel.vehicle-collapsed .av-fuel-bars{flex:1;margin:0;align-self:center}
+#av-trip-panel.vehicle-collapsed .av-fuel-bars span{height:7px}
+#av-trip-panel.vehicle-collapsed #avOdoCard{justify-content:center;cursor:pointer}
+#av-trip-panel.vehicle-collapsed #avOdoCard .av-box-value{margin:0;font-size:18px;line-height:1.1}
 #av-trip-panel.vehicle-collapsed .av-expand-icon{transform:rotate(180deg)}
+@media(max-width:520px){#av-trip-panel.vehicle-collapsed .av-box{min-height:40px;padding:6px}#av-trip-panel.vehicle-collapsed #avOdoCard .av-box-value{font-size:17px}}
 /* TAG DE TRAVA DA TELA DA VIAGEM */
 /* V35 FIX CADEADO RESET 2026-09-18 */
 .viagem-lock-tag{position:fixed;right:12px;top:72px;z-index:2005;width:42px;height:42px;border:1px solid #b8c0c8;border-radius:50%;padding:0;background:#fff;color:#111;font-size:20px;font-weight:800;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px #0003;cursor:pointer;user-select:none;pointer-events:auto}
@@ -73,7 +80,7 @@ body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
 .viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
 body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
 body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
-.viagem-scroll-locked{overflow:hidden!important;touch-action:none!important}
+.viagem-scroll-locked{overflow:hidden!important;touch-action:none!important;overscroll-behavior:none!important}.viagem-lock-shield{position:absolute;inset:0;z-index:1049;background:transparent;display:none;touch-action:none;pointer-events:none}.viagem-lock-shield.active{display:block;pointer-events:auto}.viagem-lock-tag{z-index:1051!important} .tab-page#tabViagem{position:relative}.tab-page#tabViagem .av-action{position:relative;z-index:1052}.tab-page#tabViagem #viagemLockTag{position:relative;z-index:1053}
 
 
 .fuel-alert-card{border:1px solid #d7e2de}
@@ -110,7 +117,7 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <div id="avMenuPanel" class="av-menu-panel"><button data-tab="viagem">🚗 Viagem</button><button data-tab="abastecimento">⛽ Abastecimento</button><button data-tab="historico">📋 Histórico de viagem</button><button data-tab="manutencao">🔧 Manutenção</button><button data-tab="notificacoes">🔔 Notificações</button><button id="btnResetApp" type="button">♻️ Resetar aplicativo</button></div><div id="avMenuBackdrop" class="av-menu-backdrop"></div>
 <main>
 <section id="tabViagem" class="tab-page active">
-<section id="av-trip-panel"><div class="av-trip-panel-inner"><div id="viagemLockTag" class="viagem-lock-tag" role="button" tabindex="0" aria-label="Travar tela da viagem">🔓</div><div class="av-trip-panel-title" id="avVehiclePanelToggle" role="button" tabindex="0" aria-expanded="true">🚗 Painel do veículo <span class="av-expand-icon">⌃</span></div><div class="av-dashboard">
+<section id="av-trip-panel"><div class="av-trip-panel-inner"><div id="viagemLockTag" class="viagem-lock-tag" role="button" tabindex="0" aria-label="Travar tela da viagem">🔓</div><div id="viagemLockShield" class="viagem-lock-shield" aria-hidden="true"></div><div class="av-trip-panel-title" id="avVehiclePanelToggle" role="button" tabindex="0" aria-expanded="true">🚗 Painel do veículo <span class="av-expand-icon">⌃</span></div><div class="av-dashboard">
 <div class="av-box"><div class="av-box-label">COMBUSTÍVEL</div><div class="av-box-value" id="avFuelValue">-- / 8 <small>tanque</small></div><div class="av-fuel-bars" id="avFuelBars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="av-fuel-legend"><span>E</span><span>F</span></div><div class="future-space" id="fuelFuture"></div></div>
 <div class="av-box" id="avOdoCard" role="button" tabindex="0" aria-label="Ajustar odômetro"><div class="av-box-label">ODÔMETRO • REFERÊNCIA</div><div class="av-box-value" id="avOdoDemo">-- km</div><div class="note">Referência atual do veículo</div><div class="future-space" id="odoFuture"></div></div>
 </div></div></section>
@@ -335,7 +342,36 @@ function onGps(pos){
   }
   lossStarted=null;lastGps=c;state.trip.lastPosition={lat:c.lat,lon:c.lon,at:now};updateSpeed();save();render();
 }
-function addDistance(a,b){const d=hav(a,b);if(!Number.isFinite(d)||d<=0||d>5)return;state.trip.distanceKm=Number((state.trip.distanceKm+d).toFixed(3));state.trip.drivingMs+=Math.max(0,b.at-a.at);const ref=realConsumptionKml(state.vehicle.fuelType);state.trip.liters=ref>0?Number((state.trip.distanceKm/ref).toFixed(3)):0;const price=Number(state.vehicle.priceL)||lastFuelPrice()||0;state.trip.cost=Number((state.trip.liters*price).toFixed(2));state.trip.avgSpeed=state.trip.drivingMs>0?state.trip.distanceKm/(state.trip.drivingMs/3600000):0;if(Number(state.vehicle.fuelL)>0)state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)))}
+function addDistance(a,b){
+  const d=hav(a,b);if(!Number.isFinite(d)||d<=0||d>5)return;
+  state.trip.distanceKm=Number((state.trip.distanceKm+d).toFixed(3));
+  state.trip.drivingMs+=Math.max(0,b.at-a.at);
+  const ref=realConsumptionKml(state.vehicle.fuelType);
+  state.trip.liters=ref>0?Number((state.trip.distanceKm/ref).toFixed(3)):0;
+  const price=Number(state.vehicle.priceL)||lastFuelPrice()||0;
+  state.trip.cost=Number((state.trip.liters*price).toFixed(2));
+  state.trip.avgSpeed=state.trip.drivingMs>0?state.trip.distanceKm/(state.trip.drivingMs/3600000):0;
+
+  // O odômetro do veículo acompanha a distância real registrada pelo GPS.
+  const beforeOdo=Number(state.vehicle.odometerRef)||0;
+  if(beforeOdo>0){
+    const nextOdo=Number((beforeOdo+d).toFixed(3));
+    state.vehicle.odometerRef=nextOdo;
+    const vid=state.selectedVehicleId||state.vehicle.id;
+    const v=state.vehicles.find(x=>String(x.id)===String(vid));
+    if(v){v.odometerRef=nextOdo;v.updatedAt=new Date().toISOString();}
+    if(state.trip.vehicle)state.trip.vehicle.odometerRef=nextOdo;
+  }
+
+  // O combustível diminui somente quando existe uma referência de consumo válida.
+  if(ref>0 && Number(state.vehicle.fuelL)>0){
+    state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)));
+    const vid=state.selectedVehicleId||state.vehicle.id;
+    const v=state.vehicles.find(x=>String(x.id)===String(vid));
+    if(v){v.fuelL=state.vehicle.fuelL;v.updatedAt=new Date().toISOString();}
+    if(state.trip.vehicle)state.trip.vehicle.fuelL=state.vehicle.fuelL;
+  }
+}
 function updateSpeed(){$('velocidade').textContent=fmt(currentSpeed,0)+' km/h';if(currentLimit){const over=currentSpeed>currentLimit;$('statusLimiteVelocidade').textContent=over?'⚠️ Acima do limite':'Dentro do limite';$('statusLimiteVelocidade').className=over?'danger':'';if(over&&!speedingSince)speedingSince=Date.now();if(!over&&speedingSince){recordSpeedEvent(Date.now()-speedingSince);speedingSince=null}}}
 function recordSpeedEvent(duration){if(!state.trip||!currentLimit)return;state.events.push({id:uid('speed'),schemaVersion:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),tipo:'excesso_velocidade',tripId:state.trip.id,velocidadeMax:Number(currentSpeed.toFixed(1)),limite:Number(currentLimit),duracaoMs:Math.max(0,duration),location:state.trip.lastPosition||null,extra:{}});save();}
 function clearTripForNext(){
@@ -865,14 +901,20 @@ function initVehiclePanelExpandable(){
   const panel=document.getElementById('av-trip-panel');
   const title=document.getElementById('avVehiclePanelToggle');
   if(!panel||!title)return;
-  const toggle=()=>{
-    const collapsed=panel.classList.toggle('vehicle-collapsed');
+  const apply=(collapsed)=>{
+    panel.classList.toggle('vehicle-collapsed',!!collapsed);
     title.setAttribute('aria-expanded', collapsed?'false':'true');
     const icon=title.querySelector('.av-expand-icon');
     if(icon)icon.textContent=collapsed?'⌄':'⌃';
   };
+  const toggle=()=>{
+    const collapsed=!panel.classList.contains('vehicle-collapsed');
+    apply(collapsed);
+    try{localStorage.setItem('assistente_viagem_painel_veiculo_recolhido',collapsed?'1':'0')}catch(e){}
+  };
   title.onclick=toggle;
   title.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}};
+  try{apply(localStorage.getItem('assistente_viagem_painel_veiculo_recolhido')==='1')}catch(e){apply(false)}
 }
 
 let viagemTelaTravada=false;
@@ -984,6 +1026,7 @@ function showTab(tab){
   $('tab'+tab[0].toUpperCase()+tab.slice(1)).classList.add('active');
   const lock=$('viagemLockTag');
   if(lock)lock.style.display=tab==='viagem'?'flex':'none';
+  if(tab!=='viagem' && viagemTelaTravada)setViagemTelaTravada(false);
   if(tab==='abastecimento')renderAb();
   if(tab==='historico')renderHistorico();
   if(tab==='manutencao')renderManutencao(); if(tab==='notificacoes')renderFuelAlertSettings();
