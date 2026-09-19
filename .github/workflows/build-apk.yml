@@ -1,7 +1,7 @@
-name: Gerar APK
+name: Teste isolado do RESET
 on:
   push:
-    branches: [main]
+    branches: [teste-reset]
   workflow_dispatch:
 
 jobs:
@@ -10,25 +10,14 @@ jobs:
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Copiar INDEX oficial para o APK
+      - name: Copiar INDEX de teste
         run: |
           set -e
           test -f index.html
           mkdir -p app/src/main/assets
           cp index.html app/src/main/assets/index.html
-          test -s app/src/main/assets/index.html
-          grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
-          grep -q 'av-menu-btn' app/src/main/assets/index.html
+          grep -q 'TESTE ISOLADO DO RESET' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
-          grep -q 'id="btnIniciar"' app/src/main/assets/index.html
-          if grep -q 'viagemLockTag\|viagemTelaTravada\|installViagemLockTouchGuard' app/src/main/assets/index.html; then
-            echo "ERRO: código antigo do cadeado encontrado"
-            exit 1
-          fi
-          grep -q '#av-trip-panel{position:static;top:auto;' app/src/main/assets/index.html
-          echo "INDEX oficial copiado integralmente para o APK"
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
@@ -38,17 +27,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Compilar APK
+      - name: Compilar APK de teste
         run: gradle :app:assembleDebug
-      - name: Validar APK gerado
-        run: |
-          set -e
-          test -s app/build/outputs/apk/debug/app-debug.apk
-          echo "APK V35 gerado com o INDEX oficial atual"
-      - name: Disponibilizar APK
+      - name: Validar APK
+        run: test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Disponibilizar APK de teste
         uses: actions/upload-artifact@v4
         with:
-          name: Assistente-de-Viagem-APK
+          name: Assistente-de-Viagem-TESTE-RESET
           path: app/build/outputs/apk/debug/app-debug.apk
-
-# Trigger: rebuild from the current main branch after final APK corrections.
