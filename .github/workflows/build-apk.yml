@@ -50,3 +50,5 @@ jobs:
         with:
           name: Assistente-de-Viagem-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+
+# Trigger: rebuild from the current main branch after final APK corrections.
