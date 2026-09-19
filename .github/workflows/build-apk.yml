@@ -23,8 +23,8 @@ jobs:
           grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
           grep -q 'Histórico do veículo' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
-          grep -q 'PAINEL DO VEÍCULO RECOLHÍVEL' app/src/main/assets/index.html
-          echo "INDEX oficial preparado e copiado integralmente para o APK"
+          grep -q 'viagem-simplificacao-2026-09-19' app/src/main/assets/index.html
+          echo "INDEX oficial preparado: reset preservado, cadeado removido e painel não fixo"
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
