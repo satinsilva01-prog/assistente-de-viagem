@@ -12,21 +12,23 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Preparar INDEX oficial antes do APK
+      - name: Copiar INDEX oficial para o APK
         run: |
           set -e
           test -f index.html
-          python3 tools/fix_index.py
           mkdir -p app/src/main/assets
           cp index.html app/src/main/assets/index.html
           test -s app/src/main/assets/index.html
           grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
-          grep -q 'Histórico do veículo' app/src/main/assets/index.html
           grep -q 'av-menu-btn' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
-          grep -q 'viagem-simplificacao-2026-09-19' app/src/main/assets/index.html
-          grep -q 'position:static!important' app/src/main/assets/index.html
-          echo "INDEX V35 verificado: menu, reset, cadeado removido e painel não fixo"
+          grep -q 'id="btnIniciar"' app/src/main/assets/index.html
+          if grep -q 'viagemLockTag\|viagemTelaTravada\|installViagemLockTouchGuard' app/src/main/assets/index.html; then
+            echo "ERRO: código antigo do cadeado encontrado"
+            exit 1
+          fi
+          grep -q '#av-trip-panel{position:static;top:auto;' app/src/main/assets/index.html
+          echo "INDEX oficial copiado integralmente para o APK"
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
