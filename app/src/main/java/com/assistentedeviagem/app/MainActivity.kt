@@ -47,7 +47,24 @@ class MainActivity : Activity() {
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                // Ajustes do APK, sem alterar o HTML oficial: remove o cadeado
+                // e deixa o painel do veículo acompanhar a rolagem.
+                webView.evaluateJavascript("""
+                    (function(){
+                      try{
+                        var lock=document.getElementById('viagemLockTag'); if(lock) lock.remove();
+                        var shield=document.getElementById('viagemLockShield'); if(shield) shield.remove();
+                        var panel=document.getElementById('av-trip-panel');
+                        if(panel){panel.style.position='static';panel.style.top='auto';panel.style.zIndex='50';}
+                        document.querySelectorAll('.viagem-scroll-locked').forEach(function(e){e.classList.remove('viagem-scroll-locked');});
+                      }catch(e){}
+                    })();
+                """.trimIndent(), null)
+            }
+        }
         webView.addJavascriptInterface(AndroidBridge(), "AndroidGPS")
         setContentView(webView)
         webView.loadUrl("file:///android_asset/index.html")
