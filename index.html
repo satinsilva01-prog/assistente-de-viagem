@@ -57,6 +57,7 @@ body.dark .maintenance-badge.over{background:#3b1818;color:#fca5a5!important}
 @media(max-width:520px){.maintenance-grid{grid-template-columns:1fr}}
 
 /* PAINEL DO VEÍCULO EXPANSÍVEL */
+/* PAINEL DO VEÍCULO RECOLHÍVEL — COMPACTO */
 .av-trip-panel-title{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding-right:0!important;white-space:nowrap}
 .av-expand-icon{font-size:15px;line-height:1;transition:transform .15s ease}
 #av-trip-panel.vehicle-collapsed .av-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin:0}
@@ -69,7 +70,13 @@ body.dark .maintenance-badge.over{background:#3b1818;color:#fca5a5!important}
 #av-trip-panel.vehicle-collapsed .av-expand-icon{transform:rotate(180deg)}
 @media(max-width:520px){#av-trip-panel.vehicle-collapsed .av-box{min-height:40px;padding:6px}#av-trip-panel.vehicle-collapsed #avOdoCard .av-box-value{font-size:17px}}
 /* TAG DE TRAVA DA TELA DA VIAGEM */
-.viagem-lock-tag{position:absolute;right:9px;top:8px;z-index:1050;border:1px solid #b8c0c8;border-radius:999px;width:36px;height:36px;padding:0;background:#fff;color:#111;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px #0002;display:none;align-items:center;gap:6px;cursor:pointer;user-select:none}
+/* V35 FIX CADEADO RESET 2026-09-18 */
+.viagem-lock-tag{position:fixed;right:12px;top:72px;z-index:2005;width:42px;height:42px;border:1px solid #b8c0c8;border-radius:50%;padding:0;background:#fff;color:#111;font-size:20px;font-weight:800;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px #0003;cursor:pointer;user-select:none;pointer-events:auto}
+.viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
+body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
+body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
+.av-trip-panel.viagem-panel-locked{pointer-events:none}
+.av-trip-panel.viagem-panel-locked #viagemLockTag{pointer-events:auto}
 .viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
 body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
 body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
@@ -87,6 +94,20 @@ body.dark .fuel-alert-card{border-color:#46534f}
 body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 
 .history-km-summary{margin-top:10px;background:var(--card);border:1px solid #d8dde3;border-radius:12px;padding:11px}.history-km-summary .km-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.history-km-summary .km-item{background:#f5f7f9;border-radius:9px;padding:8px}.history-km-summary .km-item span{display:block;font-size:11px;color:var(--muted)}.history-km-summary .km-item b{display:block;margin-top:3px;font-size:15px;color:var(--text)}body.dark .history-km-summary .km-item b{color:#f4f6f8}body.dark .history-km-summary{border-color:#343b44}body.dark .history-km-summary .km-item{background:#20262d}@media(max-width:520px){.history-km-summary .km-grid{grid-template-columns:1fr 1fr}.history-km-summary .km-item:last-child{grid-column:1/-1}}
+
+/* PAINEL DO VEÍCULO RECOLHÍVEL — COMPACTO */
+#av-trip-panel.vehicle-collapsed .av-dashboard{display:grid;grid-template-columns:1.25fr .75fr;gap:7px;align-items:center}
+#av-trip-panel.vehicle-collapsed .av-box{padding:5px 7px;min-height:36px;display:flex;align-items:center;justify-content:center}
+#av-trip-panel.vehicle-collapsed .av-box-label,
+#av-trip-panel.vehicle-collapsed .av-fuel-legend,
+#av-trip-panel.vehicle-collapsed .av-box .note,
+#av-trip-panel.vehicle-collapsed .av-box .future-space{display:none}
+#av-trip-panel.vehicle-collapsed #avFuelValue{display:none}
+#av-trip-panel.vehicle-collapsed .av-fuel-bars{margin-top:0;width:100%;gap:2px}
+#av-trip-panel.vehicle-collapsed .av-fuel-bars span{height:7px}
+#av-trip-panel.vehicle-collapsed #avOdoCard{cursor:pointer}
+#av-trip-panel.vehicle-collapsed #avOdoDemo{font-size:18px;margin:0;white-space:nowrap}
+#av-trip-panel.vehicle-collapsed .av-trip-panel-title{margin-bottom:5px;font-size:15px}
 </style>
 </head>
 <body>
@@ -899,59 +920,13 @@ function initVehiclePanelExpandable(){
 let viagemTelaTravada=false;
 function setViagemTelaTravada(travar){
   viagemTelaTravada=!!travar;
-  const tag=$('viagemLockTag');
-  const page=$('tabViagem');
-  const shield=$('viagemLockShield');
-  if(tag){
-    tag.classList.toggle('active',viagemTelaTravada);
-    tag.innerHTML=viagemTelaTravada?'🔒':'🔓';
-    tag.setAttribute('aria-label',viagemTelaTravada?'Destravar tela da viagem':'Travar tela da viagem');
-  }
-  if(shield)shield.classList.toggle('active',viagemTelaTravada);
-  if(page)page.classList.toggle('viagem-scroll-locked',viagemTelaTravada);
-  // O cadeado protege somente a área da viagem. Menu e controles operacionais
-  // (Iniciar, Fim, Pausar e Nova viagem) permanecem utilizáveis.
-  document.body.classList.remove('viagem-scroll-locked');
-  document.documentElement.classList.remove('viagem-scroll-locked');
+  const tag=$('viagemLockTag'),panel=$('av-trip-panel');
+  if(panel)panel.classList.toggle('viagem-panel-locked',viagemTelaTravada);
+  if(tag){tag.classList.toggle('active',viagemTelaTravada);tag.innerHTML=viagemTelaTravada?'🔒':'🔓';tag.title=viagemTelaTravada?'Destravar tela da viagem':'Travar tela da viagem';tag.setAttribute('aria-label',tag.title);tag.style.display='flex';}
   try{sessionStorage.setItem('assistente_viagem_tela_travada',viagemTelaTravada?'1':'0')}catch(e){}
 }
-function toggleViagemTela(){
-  setViagemTelaTravada(!viagemTelaTravada);
-}
-let viagemLockTouchHandler=null;
-function viagemLockAllowedTarget(target){
-  if(!viagemTelaTravada)return true;
-  const el=target?.nodeType===1?target:target?.parentElement;
-  if(!el)return true;
-  if(el.closest?.('#viagemLockTag'))return true;
-  if(el.closest?.('#btnIniciar,#btnFim,#btnPausar,#btnNova'))return true;
-  return false;
-}
-function installViagemLockTouchGuard(){
-  if(viagemLockTouchHandler)return;
-  const guard=e=>{
-    if(!viagemTelaTravada)return;
-    const tab=$('tabViagem');
-    const el=e.target?.nodeType===1?e.target:e.target?.parentElement;
-    if(!tab || !el || !tab.contains(el))return;
-    if(viagemLockAllowedTarget(el))return;
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  viagemLockTouchHandler=guard;
-  document.addEventListener('touchstart',guard,{passive:false,capture:true});
-  document.addEventListener('touchmove',guard,{passive:false,capture:true});
-  document.addEventListener('pointerdown',guard,{passive:false,capture:true});
-  document.addEventListener('pointermove',guard,{passive:false,capture:true});
-  document.addEventListener('wheel',guard,{passive:false,capture:true});
-}
-function initViagemTelaLock(){
-  const tag=$('viagemLockTag');
-  if(!tag)return;
-  tag.onclick=toggleViagemTela;
-  tag.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleViagemTela()}};
-  try{setViagemTelaTravada(sessionStorage.getItem('assistente_viagem_tela_travada')==='1')}catch(e){setViagemTelaTravada(false)}
-}
+function toggleViagemTela(){setViagemTelaTravada(!viagemTelaTravada)}
+function initViagemTelaLock(){const tag=$('viagemLockTag');if(!tag)return;tag.onclick=toggleViagemTela;tag.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleViagemTela()}};try{setViagemTelaTravada(sessionStorage.getItem('assistente_viagem_tela_travada')==='1')}catch(e){setViagemTelaTravada(false)}}
 
 function maintenanceToday(){const d=new Date(),o=d.getTimezoneOffset()*60000;return new Date(d-o).toISOString().slice(0,10)}
 let maintenanceEditId=null;
@@ -1059,36 +1034,20 @@ function showTab(tab){
 }
 function resetApp(){
   if(!confirm('⚠️ Isso apagará TODOS os dados deste aplicativo neste aparelho, incluindo viagens, abastecimentos, veículos, manutenção, históricos, ajustes e configurações. Deseja realmente resetar?'))return;
-  try{stopGps();stopTimer();}catch(e){}
+  try{if(typeof stopGps==='function')stopGps();}catch(e){}
+  try{if(typeof stopTimer==='function')stopTimer();}catch(e){}
   try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll();}catch(e){}
-  // Remove todas as chaves conhecidas, inclusive integrações antigas que
-  // poderiam repopular o painel depois do reset.
-  const knownKeys=[NS,'assistente_viagem_historico_v1','assistente_viagem_eventos_v1','av_abastecimentos_v2','assistente_viagem_manutencao_v1','av_theme','assistente_viagem_veiculo_v1','assistente_viagem_vehicle_v1','cv2_veiculo_atual','veiculo_atual','assistente_viagem_abastecimentos_v1','abastecimentos_v1','cv2_abastecimentos','assistente_viagem_tela_travada','assistente_viagem_painel_veiculo_recolhido'];
-  knownKeys.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  try{localStorage.clear()}catch(e){}
-  try{sessionStorage.clear()}catch(e){}
-  try{indexedDB.databases?.().then(dbs=>dbs.forEach(db=>{try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{})}catch(e){}
-  state=clone(DEFAULT);
-  lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=null;speedingSince=null;viagemTelaTravada=false;
-  document.body.classList.remove('dark');
-  if($('avThemeBtn'))$('avThemeBtn').textContent='🌙';
-  ['destinoModalInput','abVeiculo','abTanque','abValor','abPreco','abLitros','abOdo','mntTipo','mntData','mntDescricao','mntOdom','mntCusto','mntProximoKm','mntProximaData'].forEach(id=>{if($(id))$(id).value=''});
-  if($('abComb'))$('abComb').value='Flex';
-  if($('abSituacao'))$('abSituacao').selectedIndex=0;
-  if($('ajusteOdoInput'))$('ajusteOdoInput').value='';
-  if($('ajusteCombNivel'))renderFuelAdjustmentOptions(getFuelBarCount(state.vehicle),0);
-  if($('destinoModal'))$('destinoModal').style.display='none';
-  if($('ajusteOdoModal'))$('ajusteOdoModal').style.display='none';
-  try{setViagemTelaTravada(false)}catch(e){}
-  renderAb();renderHistorico();if(typeof renderManutencao==='function')renderManutencao();renderTripVehicleSelect();render();
-  closeMenu();
+  try{localStorage.clear();}catch(e){}
+  try{sessionStorage.clear();}catch(e){}
+  try{if(indexedDB&&indexedDB.databases){indexedDB.databases().then(dbs=>dbs.forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});}}catch(e){}
+  try{state=clone(DEFAULT);}catch(e){}
+  try{viagemTelaTravada=false;}catch(e){}
+  try{const panel=$('av-trip-panel');if(panel)panel.classList.remove('viagem-panel-locked');}catch(e){}
+  try{document.body.classList.remove('dark','viagem-scroll-locked');document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';}catch(e){}
+  try{if(typeof render==='function')render();}catch(e){}
+  try{if(typeof closeMenu==='function')closeMenu();}catch(e){}
   alert('✅ Aplicativo resetado. Todos os dados locais foram apagados.');
-  setTimeout(()=>{
-    try{
-      const cleanUrl=location.href.split('#')[0].split('?')[0];
-      location.href=cleanUrl+'?reset='+Date.now();
-    }catch(e){try{location.reload()}catch(_){}}
-  },120);
+  setTimeout(()=>{try{location.reload();}catch(e){location.href=location.href;}},150);
 }
 
 function openMenu(){$('avMenuPanel').classList.add('open');$('avMenuBackdrop').classList.add('open')}function closeMenu(){$('avMenuPanel').classList.remove('open');$('avMenuBackdrop').classList.remove('open')}
