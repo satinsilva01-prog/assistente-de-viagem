@@ -51,20 +51,28 @@ class MainActivity : Activity() {
         try { val i=Intent(this,LocationService::class.java); if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) startForegroundService(i) else startService(i) } catch(e:Exception){ Toast.makeText(this,"Não foi possível iniciar o GPS: ${e.message ?: "erro"}",Toast.LENGTH_LONG).show() }
     }
     private fun pararServicoGps(){ try{stopService(Intent(this,LocationService::class.java))}catch(_:Exception){} }
-    private fun resetAplicativoNativo(){
+    private fun resetAplicativoNativo() {
         runOnUiThread {
             try {
                 pararServicoGps()
-                getSharedPreferences("trip",MODE_PRIVATE).edit().clear().apply()
-                getSharedPreferences("app",MODE_PRIVATE).edit().clear().apply()
-                getSharedPreferences("vehicle",MODE_PRIVATE).edit().clear().apply()
-                webView.stopLoading(); webView.clearHistory(); webView.clearFormData(); webView.clearCache(true)
+                getSharedPreferences("trip", MODE_PRIVATE).edit().clear().apply()
+                getSharedPreferences("app", MODE_PRIVATE).edit().clear().apply()
+                getSharedPreferences("vehicle", MODE_PRIVATE).edit().clear().apply()
+                webView.stopLoading()
+                webView.clearHistory()
+                webView.clearFormData()
+                webView.clearCache(true)
                 WebStorage.getInstance().deleteAllData()
-                webView.evaluateJavascript("try{localStorage.clear();sessionStorage.clear();}catch(e){}",null)
-                webView.loadUrl("file:///android_asset/index.html?nativeReset=1&ts="+System.currentTimeMillis())
-            } catch(e:Exception) { try{webView.loadUrl("file:///android_asset/index.html?nativeReset=1&ts="+System.currentTimeMillis())}catch(_:Exception){} }
+                webView.evaluateJavascript(
+                    "try{localStorage.clear();sessionStorage.clear();}catch(e){}",
+                    null
+                )
+            } catch (e: Exception) {
+                Toast.makeText(this, "Erro ao resetar dados nativos: " + (e.message ?: "erro"), Toast.LENGTH_LONG).show()
+            }
         }
     }
+
     private fun enviarGpsParaPagina(){
         if(!::webView.isInitialized)return
         val p=getSharedPreferences("trip",MODE_PRIVATE); val d=JSONObject()
