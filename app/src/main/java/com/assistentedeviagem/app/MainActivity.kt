@@ -35,6 +35,7 @@ class MainActivity : Activity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Ajustes do APK, sem alterar a lógica oficial do HTML.
+                // O bind do reset é repetido porque o menu pode ser reconstruído pelo HTML.
                 webView.evaluateJavascript("""
                     (function(){
                       try{
@@ -44,25 +45,29 @@ class MainActivity : Activity() {
                         if(panel){panel.style.position='static';panel.style.top='auto';panel.style.zIndex='50';}
                         document.querySelectorAll('.viagem-scroll-locked').forEach(function(e){e.classList.remove('viagem-scroll-locked');});
 
-                        // RESET NATIVO: intercepta diretamente o botão real do menu.
-                        // Isso evita depender do onclick do HTML ou de coordenadas de toque.
-                        var reset=document.getElementById('btnResetApp');
-                        if(reset){
-                          reset.addEventListener('click',function(ev){
-                            ev.preventDefault();
-                            ev.stopImmediatePropagation();
-                            if(window.AndroidGPS && typeof window.AndroidGPS.resetAll==='function'){
-                              window.AndroidGPS.resetAll();
-                            }
-                          },true);
-                          reset.addEventListener('touchend',function(ev){
-                            ev.preventDefault();
-                            ev.stopImmediatePropagation();
-                            if(window.AndroidGPS && typeof window.AndroidGPS.resetAll==='function'){
-                              window.AndroidGPS.resetAll();
-                            }
-                          },true);
+                        function bindNativeReset(){
+                          var reset=document.getElementById('btnResetApp');
+                          if(!reset || reset.dataset.nativeResetBound==='1') return;
+                          reset.dataset.nativeResetBound='1';
+                          var go=function(ev){
+                            if(ev){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();}
+                            try{
+                              if(window.AndroidGPS && typeof window.AndroidGPS.resetAll==='function'){
+                                window.AndroidGPS.resetAll();
+                              } else {
+                                alert('Função nativa de reset não disponível.');
+                              }
+                            }catch(e){ alert('Erro ao executar o reset: '+e); }
+                            return false;
+                          };
+                          reset.addEventListener('click',go,true);
+                          reset.addEventListener('touchend',go,true);
+                          reset.addEventListener('pointerup',go,true);
                         }
+                        bindNativeReset();
+                        setTimeout(bindNativeReset,300);
+                        setTimeout(bindNativeReset,800);
+                        setTimeout(bindNativeReset,1500);
                       }catch(e){}
                     })();
                 """.trimIndent(), null)
@@ -102,6 +107,7 @@ class MainActivity : Activity() {
     private fun resetAplicativoNativo() {
         runOnUiThread {
             try {
+                Toast.makeText(this, "Resetando aplicativo...", Toast.LENGTH_SHORT).show()
                 pararServicoGps()
                 getSharedPreferences("trip", MODE_PRIVATE).edit().clear().apply()
                 getSharedPreferences("app", MODE_PRIVATE).edit().clear().apply()
@@ -112,7 +118,7 @@ class MainActivity : Activity() {
                 webView.clearCache(true)
                 WebStorage.getInstance().deleteAllData()
                 webView.evaluateJavascript("try{localStorage.clear();sessionStorage.clear();}catch(e){}", null)
-                webView.reload()
+                webView.loadUrl("file:///android_asset/index.html")
             } catch (e: Exception) {
                 Toast.makeText(this, "Erro ao resetar dados nativos: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
             }
