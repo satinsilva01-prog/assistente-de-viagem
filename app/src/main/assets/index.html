@@ -109,6 +109,15 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 #av-trip-panel.vehicle-collapsed #avOdoDemo{font-size:18px;margin:0;white-space:nowrap}
 #av-trip-panel.vehicle-collapsed .av-trip-panel-title{margin-bottom:5px;font-size:15px}
 </style>
+
+<style id="viagem-simplificacao-2026-09-19">
+/* O cadeado foi eliminado nesta versão. */
+#viagemLockTag,.viagem-lock-tag{display:none!important;pointer-events:none!important;visibility:hidden!important}
+.av-trip-panel.viagem-panel-locked{pointer-events:auto!important}
+.av-trip-panel.viagem-panel-locked *{pointer-events:auto!important}
+/* O painel do veículo deixa de ficar fixo/sticky e passa a acompanhar a rolagem normal. */
+#av-trip-panel,.av-trip-panel{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important}
+</style>
 </head>
 <body>
 <header id="av-fixed-header">
@@ -1041,8 +1050,6 @@ function resetApp(){
   try{sessionStorage.clear();}catch(e){}
   try{if(indexedDB&&indexedDB.databases){indexedDB.databases().then(dbs=>dbs.forEach(db=>{if(db&&db.name)try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{});}}catch(e){}
   try{state=clone(DEFAULT);}catch(e){}
-  try{viagemTelaTravada=false;}catch(e){}
-  try{const panel=$('av-trip-panel');if(panel)panel.classList.remove('viagem-panel-locked');}catch(e){}
   try{document.body.classList.remove('dark','viagem-scroll-locked');document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';}catch(e){}
   try{if(typeof render==='function')render();}catch(e){}
   try{if(typeof closeMenu==='function')closeMenu();}catch(e){}
