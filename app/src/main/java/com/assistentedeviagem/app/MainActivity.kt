@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.MotionEvent
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebStorage
@@ -26,22 +25,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        webView = object : WebView(this) {
-            override fun onTouchEvent(event: MotionEvent): Boolean {
-                val handled = super.onTouchEvent(event)
-                if (event.action == MotionEvent.ACTION_UP) {
-                    val x = event.x
-                    val y = event.y
-                    postDelayed({
-                        evaluateJavascript("(function(){var e=document.elementFromPoint($x,$y);return !!(e&&e.closest&&e.closest('#btnResetApp'));})()") { result ->
-                            if (result == "true") resetAplicativoNativo()
-                        }
-                    }, 30)
-                }
-                return handled
-            }
-        }
-
+        webView = WebView(this)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
@@ -50,8 +34,7 @@ class MainActivity : Activity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                // Ajustes do APK, sem alterar o HTML oficial: remove o cadeado
-                // e deixa o painel do veículo acompanhar a rolagem.
+                // Ajustes do APK, sem alterar a lógica oficial do HTML.
                 webView.evaluateJavascript("""
                     (function(){
                       try{
@@ -60,6 +43,26 @@ class MainActivity : Activity() {
                         var panel=document.getElementById('av-trip-panel');
                         if(panel){panel.style.position='static';panel.style.top='auto';panel.style.zIndex='50';}
                         document.querySelectorAll('.viagem-scroll-locked').forEach(function(e){e.classList.remove('viagem-scroll-locked');});
+
+                        // RESET NATIVO: intercepta diretamente o botão real do menu.
+                        // Isso evita depender do onclick do HTML ou de coordenadas de toque.
+                        var reset=document.getElementById('btnResetApp');
+                        if(reset){
+                          reset.addEventListener('click',function(ev){
+                            ev.preventDefault();
+                            ev.stopImmediatePropagation();
+                            if(window.AndroidGPS && typeof window.AndroidGPS.resetAll==='function'){
+                              window.AndroidGPS.resetAll();
+                            }
+                          },true);
+                          reset.addEventListener('touchend',function(ev){
+                            ev.preventDefault();
+                            ev.stopImmediatePropagation();
+                            if(window.AndroidGPS && typeof window.AndroidGPS.resetAll==='function'){
+                              window.AndroidGPS.resetAll();
+                            }
+                          },true);
+                        }
                       }catch(e){}
                     })();
                 """.trimIndent(), null)
