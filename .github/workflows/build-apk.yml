@@ -22,9 +22,11 @@ jobs:
           test -s app/src/main/assets/index.html
           grep -q 'Assistente de Viagem V35' app/src/main/assets/index.html
           grep -q 'Histórico do veículo' app/src/main/assets/index.html
+          grep -q 'av-menu-btn' app/src/main/assets/index.html
           grep -q 'function resetApp' app/src/main/assets/index.html
           grep -q 'viagem-simplificacao-2026-09-19' app/src/main/assets/index.html
-          echo "INDEX oficial preparado: reset preservado, cadeado removido e painel não fixo"
+          grep -q 'position:static!important' app/src/main/assets/index.html
+          echo "INDEX V35 verificado: menu, reset, cadeado removido e painel não fixo"
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
@@ -40,7 +42,7 @@ jobs:
         run: |
           set -e
           test -s app/build/outputs/apk/debug/app-debug.apk
-          echo "APK gerado com sucesso"
+          echo "APK V35 gerado com o INDEX oficial atual"
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
