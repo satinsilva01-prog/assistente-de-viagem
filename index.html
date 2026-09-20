@@ -97,6 +97,18 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 }
 </style>
 
+
+<style id="tomtom-manutencao-integrado-css">
+.tomtom-box{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--card)}
+.tomtom-title{font-weight:800;margin-bottom:10px}
+.tomtom-label{display:block;font-size:12px;font-weight:700;margin:9px 0 5px}
+.tomtom-box input,.tomtom-box select{width:100%;box-sizing:border-box}
+.tomtom-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.history-report-actions{display:flex;gap:8px;margin:8px 0 12px}
+.history-report-actions button{width:100%}
+@media(max-width:520px){.tomtom-actions{grid-template-columns:1fr}.history-report-actions{display:block}}
+</style>
+
 </head>
 <body>
 <header id="av-fixed-header">
@@ -119,7 +131,33 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <div class="metric"><span>Custo da viagem</span><b id="custo">R$ 0,00</b><div class="future-space"></div></div><div class="metric"><span>Custo por km</span><b id="custokm">R$ 0,00</b><div class="future-space"></div></div>
 </div></div>
 <details class="card"><summary>⚙️ Status e referências</summary><div class="details-body"><div class="status" id="status">Viagem parada</div><div class="metric"><span>Consumo médio estimado</span><b id="consumo">-- km/L</b><div class="future-space"></div></div><div class="info-row"><span>Preço por litro</span><b id="precoInfo">--</b></div><div class="info-row"><span>Consumo de referência</span><b id="refInfo">-- km/L</b></div><div class="future-space"></div></div></details>
-<details class="card"><summary>ℹ️ Informações da viagem</summary><div class="details-body"><div class="info-row"><span>GPS</span><b id="gps">Aguardando localização...</b></div><div class="info-row"><span>Velocidade da via</span><b id="limiteVelocidade">-- km/h</b></div><div class="info-row"><span>Alarme de limite</span><b id="statusLimiteVelocidade">Preparado</b></div><div class="info-row"><span>Ocorrências de excesso</span><b id="ocorrenciasVelocidade">0</b></div><div class="info-row"><span>Consultas de limite</span><b id="consultasLimite">0 / 2300</b></div><div class="info-row"><span>Consultas restantes</span><b id="consultasRestantes">2300</b></div><div class="info-row"><span>Último limite conhecido</span><b id="ultimoLimite">--</b></div><div class="info-row"><span>Correção de distância</span><b id="correcaoGps">Pronta</b></div><div class="info-row"><span>Tela durante a viagem</span><b id="telaStatus">Ativa</b></div><div class="future-space"></div><p class="note">Dados adicionais podem ser incorporados aqui sem alterar os cartões existentes.</p></div></details>
+<details class="card"><summary>ℹ️ Informações da viagem</summary><div class="details-body"><div class="info-row"><span>GPS</span><b id="gps">Aguardando localização...</b></div><div class="info-row"><span>Velocidade da via</span><b id="limiteVelocidade">-- km/h</b></div><div class="info-row"><span>Alarme de limite</span><b id="statusLimiteVelocidade">Preparado</b></div><div class="info-row"><span>Ocorrências de excesso</span><b id="ocorrenciasVelocidade">0</b></div><div class="info-row"><span>Consultas de limite</span><b id="consultasLimite">0 / 2300</b></div><div class="info-row"><span>Consultas restantes</span><b id="consultasRestantes">2300</b></div><div class="info-row"><span>Último limite conhecido</span><b id="ultimoLimite">--</b></div>
+<div class="info-row"><span>Fonte do limite</span><b id="fonteLimite">Manual</b></div>
+<div class="info-row"><span>Tipo de via</span><b id="tipoVia">--</b></div>
+<div class="info-row"><span>Próxima consulta</span><b id="proximaConsultaLimite">--</b></div>
+<div class="info-row"><span>Consultas realizadas</span><b id="consultasTomTom">0</b></div>
+<div class="tomtom-box" id="tomtomBox">
+  <div class="tomtom-title">🛣️ Controle do limite de velocidade</div>
+  <label class="tomtom-label">Modo de controle</label>
+  <select id="tomtomModo">
+    <option value="tomtom">TomTom — limite da via</option>
+    <option value="manual">Limite definido por mim</option>
+  </select>
+  <label class="tomtom-label">Chave TomTom</label>
+  <input id="tomtomApiKey" type="password" autocomplete="off" placeholder="Cole sua API Key da TomTom">
+  <div class="tomtom-actions">
+    <button type="button" class="secondary" id="tomtomSalvar">Salvar chave</button>
+    <button type="button" class="secondary" id="tomtomLimpar">Limpar chave</button>
+  </div>
+  <label class="tomtom-label">Limite manual / reserva (km/h)</label>
+  <input id="tomtomLimiteManual" type="number" min="1" max="300" step="1" placeholder="Ex.: 110">
+  <div class="tomtom-actions">
+    <button type="button" class="secondary" id="tomtomSalvarManual">Salvar limite</button>
+    <button type="button" class="secondary" id="tomtomObterChave">🔑 Obter chave TomTom</button>
+  </div>
+  <div class="note" id="tomtomStatus">Configure a TomTom ou use um limite manual.</div>
+</div>
+<div class="info-row"><span>Correção de distância</span><b id="correcaoGps">Pronta</b></div><div class="info-row"><span>Tela durante a viagem</span><b id="telaStatus">Ativa</b></div><div class="future-space"></div><p class="note">Dados adicionais podem ser incorporados aqui sem alterar os cartões existentes.</p></div></details>
 </section>
 <section id="tabAbastecimento" class="tab-page">
 <div class="card"><h3>🚗 Cadastrar veículo</h3><label>Nome/modelo</label><input id="abVeiculo" type="text" placeholder="Ex.: Etios Sedan 2012"><label>Capacidade do tanque (L)</label><input id="abTanque" type="number" step="0.1" placeholder="Ex.: 45"><label>Quantidade de barras do indicador</label><input id="abBarras" type="number" min="1" max="30" step="1" placeholder="Ex.: 8"><div class="note">O indicador e os cálculos de combustível serão ajustados para este veículo.</div><label>Combustível</label><select id="abComb"><option>Gasolina</option><option>Etanol</option><option>Flex</option><option>Diesel</option></select><button type="button" class="primary" style="width:100%;margin-top:8px" id="abSalvarVeiculo">Cadastrar veículo</button><button type="button" class="secondary" style="width:100%;margin-top:8px;display:none" id="abCancelarEdicaoVeiculo">Cancelar edição</button></div><div class="card"><h3>🚗 Carros cadastrados</h3><div id="abVeiculosCadastrados"></div></div>
@@ -129,7 +167,11 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <section id="tabHistorico" class="tab-page">
 <div class="card"><h3>🚗 Histórico do veículo</h3><label>Selecione o veículo</label><select id="historicoVeiculoSelect" class="trip-vehicle-select"></select><div id="historicoKmResumo" class="history-km-summary"></div></div>
 <div class="card"><h3>📋 Histórico de viagens</h3><div id="historicoViagens"></div></div>
-<div class="card"><h3>⛽ Histórico de abastecimentos</h3><div id="historicoAbastecimentos"></div></div><div class="card"><h3>🔧 Histórico de manutenção</h3><div id="historicoManutencao"></div></div><div class="card"><h3>🔧 Histórico de ajustes</h3><div id="historicoAjustes"></div></div>
+<div class="card"><h3>⛽ Histórico de abastecimentos</h3><div id="historicoAbastecimentos"></div></div><div class="card"><h3>🔧 Histórico de manutenção</h3>
+<div class="history-report-actions">
+  <button type="button" class="primary" id="btnRelatorioManutencao">📄 Gerar relatório PDF</button>
+</div>
+<div id="historicoManutencao"></div></div><div class="card"><h3>🔧 Histórico de ajustes</h3><div id="historicoAjustes"></div></div>
 </section>
 <section id="tabManutencao" class="tab-page">
 <div class="card maintenance-panel">
@@ -154,7 +196,11 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <label><input id="mntAlerta" type="checkbox" style="width:auto"> Criar alerta para esta manutenção</label>
 <button class="primary" style="width:100%;margin-top:10px" id="mntSalvar" type="button">Salvar manutenção</button>
 </div>
-<div class="card"><h3>📋 Histórico de manutenção</h3><div id="mntHistorico"></div></div>
+<div class="card"><h3>📋 Histórico de manutenção</h3>
+<div class="history-report-actions">
+  <button type="button" class="primary" id="btnRelatorioManutencao2">📄 Gerar relatório PDF</button>
+</div>
+<div id="mntHistorico"></div></div>
 </section>
 
 <section id="tabNotificacoes" class="tab-page">
@@ -321,7 +367,7 @@ function onGpsError(){if(!activeTrip())return;$('gps').textContent='Sinal tempor
 function onGps(pos){
   if(!state.trip||!state.trip.running)return;
   const now=Date.now(),c={lat:Number(pos.coords.latitude),lon:Number(pos.coords.longitude),accuracy:Number(pos.coords.accuracy)||0,speed:Math.max(0,(Number(pos.coords.speed)||0)*3.6),at:now};
-  $('gps').textContent=`${c.lat.toFixed(5)}, ${c.lon.toFixed(5)} • ±${Math.round(c.accuracy)} m`;$('gpsDot').style.background='#20d84a';currentSpeed=c.speed;
+  $('gps').textContent=`${c.lat.toFixed(5)}, ${c.lon.toFixed(5)} • ±${Math.round(c.accuracy)} m`;$('gpsDot').style.background='#20d84a';currentSpeed=c.speed;if(typeof window.maybeConsultTomTom==='function')window.maybeConsultTomTom(c);
   if(state.trip.paused){lastGps=c;state.trip.lastPosition={lat:c.lat,lon:c.lon,at:now};save();render();return;}
   if(lastGps){
     const gap=lossStarted?now-lossStarted:0;
@@ -1135,7 +1181,7 @@ function saveDestino(){
 function voiceDestino(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Comando de voz estará disponível no APK com o recurso de voz habilitado.');return}voiceRecognition=new SR();voiceRecognition.lang='pt-BR';voiceRecognition.onresult=e=>{$('destinoModalInput').value=e.results[0][0].transcript};voiceRecognition.start()}
 function nativeGpsUpdate(raw){try{const d=JSON.parse(raw);if(d.lat&&d.lon&&state.trip?.running)onGps({coords:{latitude:Number(d.lat),longitude:Number(d.lon),accuracy:Number(d.accuracy)||0,speed:Number(d.speed)>=0?Number(d.speed)/3.6:0}})}catch(e){}}
 window.nativeGpsUpdate=nativeGpsUpdate;
-function setLimitFromProvider(limit){const n=Number(limit);if(!Number.isFinite(n)||n<=0)return false;if(state.settings.limitQueries>=state.settings.limitQueryMax)return false;currentLimit=n;state.settings.lastLimit=n;state.settings.lastLimitAt=new Date().toISOString();state.settings.limitQueries++;save();updateSpeed();render();return true}
+function setLimitFromProvider(limit){const n=Number(limit);if(!Number.isFinite(n)||n<=0)return false;if(!window.__avSettingLocalLimit && !window.__avTomTomUpdate && state.settings.limitQueries>=state.settings.limitQueryMax)return false;currentLimit=n;state.settings.lastLimit=n;state.settings.lastLimitAt=new Date().toISOString();state.settings.limitQueries++;save();updateSpeed();render();return true}
 window.setLimitFromProvider=setLimitFromProvider;
 $('avOdoCard').onclick=openAjusteOdo;
 $('avOdoCard').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')openAjusteOdo()};
@@ -1158,6 +1204,218 @@ render();
 initViagemTelaLock(); installViagemLockTouchGuard(); initVehiclePanelExpandable();
 if($('viagemLockTag'))$('viagemLockTag').style.display='flex';
 </script>
+
+<script id="tomtom-manutencao-integrado-js">
+(function(){
+  const TOMTOM_KEY='av_tomtom_api_key';
+  const TOMTOM_MODE='av_tomtom_mode';
+  const TOMTOM_MANUAL='av_tomtom_manual_limit';
+  const TOMTOM_LAST='av_tomtom_last';
+  const CITY_MS=120000;
+  const ROAD_MS=360000;
+  const MIN_MS=90000;
+  let ttTimer=null, ttBusy=false, ttLastLat=null, ttLastLon=null, ttLastRoute='';
+  const $id=(id)=>document.getElementById(id);
+  const n=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
+  const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function readSettings(){
+    const mode=localStorage.getItem(TOMTOM_MODE)||'manual';
+    const key=localStorage.getItem(TOMTOM_KEY)||'';
+    const manual=n(localStorage.getItem(TOMTOM_MANUAL),110);
+    if($id('tomtomModo'))$id('tomtomModo').value=mode;
+    if($id('tomtomApiKey'))$id('tomtomApiKey').value=key;
+    if($id('tomtomLimiteManual'))$id('tomtomLimiteManual').value=manual||'';
+    return {mode,key,manual};
+  }
+  function setStatus(t){if($id('tomtomStatus'))$id('tomtomStatus').textContent=t}
+  function saveConfig(){
+    const key=($id('tomtomApiKey')?.value||'').trim();
+    const mode=$id('tomtomModo')?.value||'manual';
+    const manual=n($id('tomtomLimiteManual')?.value,110);
+    localStorage.setItem(TOMTOM_KEY,key);
+    localStorage.setItem(TOMTOM_MODE,mode);
+    if(manual>0)localStorage.setItem(TOMTOM_MANUAL,String(Math.round(manual)));
+    applyManualIfNeeded();
+    setStatus(mode==='tomtom'
+      ? (key?'TomTom configurada.':'TomTom selecionada, mas a chave ainda não foi informada.')
+      : `Limite manual configurado em ${Math.round(manual)} km/h.`);
+  }
+  function applyManualIfNeeded(){
+    const mode=localStorage.getItem(TOMTOM_MODE)||'manual';
+    const manual=n(localStorage.getItem(TOMTOM_MANUAL),110);
+    if(mode==='manual'&&manual>0&&typeof window.setLimitFromProvider==='function'){
+      // Não conta como consulta TomTom: é um limite local.
+      window.__avSettingLocalLimit=true;
+      window.setLimitFromProvider(manual);
+      window.__avSettingLocalLimit=false;
+      if($id('fonteLimite'))$id('fonteLimite').textContent='Manual';
+    }
+  }
+  function hav(a,b){
+    const R=6371, p=Math.PI/180, dLat=(b.lat-a.lat)*p, dLon=(b.lon-a.lon)*p;
+    const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(x));
+  }
+  function setNext(ms){
+    const el=$id('proximaConsultaLimite');
+    if(!el)return;
+    if(!ms){el.textContent='--';return}
+    const sec=Math.max(0,Math.ceil(ms/1000));
+    el.textContent=sec>=60?`${Math.ceil(sec/60)} min`:`${sec} s`;
+  }
+  function classifyRoad(data){
+    const a=data?.addresses?.[0]?.address||{};
+    const ru=(data?.addresses?.[0]?.roadUse||data?.addresses?.[0]?.roadUses||[]).map(String);
+    const routeNumbers=data?.addresses?.[0]?.routeNumbers||[];
+    const route=routeNumbers.length>0 || ru.some(x=>/limitedaccess|arterial|ramp/i.test(x));
+    return {type:route?'Rodovia/arterial':'Cidade',route:a.street||a.streetName||routeNumbers.join(', ')||'',address:a.freeformAddress||'',road:route};
+  }
+  function extractLimit(data){
+    const a=data?.addresses?.[0]?.address||{};
+    const candidates=[
+      data?.addresses?.[0]?.speedLimit,
+      a.speedLimit,
+      data?.speedLimit
+    ];
+    for(const c of candidates){
+      const m=String(c??'').match(/([0-9]+(?:\.[0-9]+)?)/);
+      if(m){const v=Number(m[1]);if(v>0&&v<300)return v;}
+    }
+    return null;
+  }
+  async function consultTomTom(lat,lon){
+    const cfg=readSettings();
+    if(cfg.mode!=='tomtom'){applyManualIfNeeded();return;}
+    if(!cfg.key){
+      applyManualIfNeeded();
+      setStatus('Informe sua chave TomTom ou selecione Limite definido por mim.');
+      return;
+    }
+    if(ttBusy)return;
+    const now=Date.now();
+    const last=Number(localStorage.getItem(TOMTOM_LAST)||0);
+    if(now-last<MIN_MS){setNext(MIN_MS-(now-last));return;}
+    ttBusy=true;
+    try{
+      const url=`https://api.tomtom.com/search/2/reverseGeocode/${encodeURIComponent(lat)},${encodeURIComponent(lon)}.json?key=${encodeURIComponent(cfg.key)}&returnSpeedLimit=true&returnRoadUse=true`;
+      const r=await fetch(url,{cache:'no-store'});
+      if(r.status===401||r.status===403){
+        setStatus('Chave TomTom inválida ou sem autorização. Usando limite manual.');
+        applyManualFallback('Chave inválida');
+        return;
+      }
+      if(r.status===429){
+        setStatus('Cota TomTom atingida. Usando limite manual.');
+        applyManualFallback('Cota atingida');
+        return;
+      }
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const data=await r.json();
+      localStorage.setItem(TOMTOM_LAST,String(Date.now()));
+      ttLastLat=lat;ttLastLon=lon;
+      const cls=classifyRoad(data);
+      ttLastRoute=cls.route||'';
+      const lim=extractLimit(data);
+      if($id('tipoVia'))$id('tipoVia').textContent=cls.type;
+      if(lim){
+        if(typeof window.setLimitFromProvider==='function'){
+          window.__avTomTomUpdate=true;
+          window.setLimitFromProvider(lim);
+          window.__avTomTomUpdate=false;
+        }
+        if($id('fonteLimite'))$id('fonteLimite').textContent='TomTom';
+        setStatus(`TomTom: limite ${Math.round(lim)} km/h • ${cls.type}.`);
+      }else{
+        setStatus(`TomTom consultada, mas não retornou limite para este trecho. ${cls.type}.`);
+        applyManualFallback('Sem limite disponível');
+      }
+      const wait=cls.road?ROAD_MS:CITY_MS;
+      setNext(wait);
+      clearTimeout(ttTimer);
+      ttTimer=setTimeout(()=>{ttTimer=null;if(window.__avLastGps)consultTomTom(window.__avLastGps.lat,window.__avLastGps.lon)},wait);
+    }catch(e){
+      setStatus('TomTom indisponível. Usando limite manual.');
+      applyManualFallback('Falha de consulta');
+    }finally{ttBusy=false}
+  }
+  function applyManualFallback(reason){
+    const manual=n(localStorage.getItem(TOMTOM_MANUAL),110);
+    if(manual>0&&typeof window.setLimitFromProvider==='function'){
+      window.__avSettingLocalLimit=true;
+      window.setLimitFromProvider(manual);
+      window.__avSettingLocalLimit=false;
+      if($id('fonteLimite'))$id('fonteLimite').textContent='Manual (reserva)';
+      setStatus(`⚠️ ${reason}. Limite manual de ${Math.round(manual)} km/h em uso.`);
+    }
+  }
+  window.maybeConsultTomTom=function(pos){
+    if(!pos||!Number.isFinite(pos.lat)||!Number.isFinite(pos.lon))return;
+    window.__avLastGps=pos;
+    const cfg=readSettings();
+    if(cfg.mode!=='tomtom'){applyManualIfNeeded();return;}
+    const last=Number(localStorage.getItem(TOMTOM_LAST)||0);
+    const now=Date.now();
+    const waitRoad=ttLastRoute?ROAD_MS:CITY_MS;
+    const moved=ttLastLat==null?999:hav({lat:ttLastLat,lon:ttLastLon},pos);
+    if(now-last>=waitRoad || moved>=1.5 || !ttLastLat) consultTomTom(pos.lat,pos.lon);
+    else setNext(waitRoad-(now-last));
+  }
+  function hookGps(){
+    const original=window.nativeGpsUpdate;
+    window.nativeGpsUpdate=function(raw){
+      try{
+        const d=typeof raw==='string'?JSON.parse(raw):raw;
+        if(d?.lat&&d?.lon)maybeConsult({lat:Number(d.lat),lon:Number(d.lon)});
+      }catch(e){}
+      return original?original.apply(this,arguments):undefined;
+    };
+  }
+  function reportMaintenance(){
+    const arr=Array.isArray(state?.manutencoes)?state.manutencoes.slice():[];
+    const esc2=(v)=>esc(v);
+    arr.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    const vehicleFilter=$id('historicoVeiculoSelect')?.value||'';
+    const filtered=vehicleFilter?arr.filter(m=>String(m.vehicleId||'')===String(vehicleFilter)):arr;
+    const rows=filtered.map(m=>{
+      const data=m.date?new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR'):'Não informada';
+      return `<tr><td>${esc2(m.vehicleName||'Não informado')}</td><td>${esc2(m.type||'Manutenção')}</td><td>${esc2(data)}</td><td>${esc2(m.odometerKm??'')}</td><td>R$ ${n(m.cost,0).toFixed(2).replace('.',',')}</td><td>${esc2(m.description||'')}</td><td>${m.nextKm??''}</td><td>${m.nextDate?new Date(m.nextDate+'T00:00:00').toLocaleDateString('pt-BR'):''}</td></tr>`;
+    }).join('');
+    const now=new Date().toLocaleString('pt-BR');
+    const vehicle=vehicleFilter?($id('historicoVeiculoSelect')?.selectedOptions?.[0]?.textContent||'Veículo selecionado'):'Todos os veículos';
+    const w=window.open('','_blank');
+    if(!w){alert('Permita a abertura de janela para gerar o PDF.');return}
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Histórico de manutenção</title>
+      <style>@page{size:A4 landscape;margin:12mm}body{font-family:Arial,sans-serif;color:#111}h1{font-size:22px;margin:0 0 5px}p{margin:4px 0 12px;color:#555}.meta{margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #999;padding:6px;text-align:left;vertical-align:top}th{font-weight:700} .empty{text-align:center;padding:30px;border:1px solid #aaa}footer{margin-top:12px;font-size:10px;color:#666}@media print{button{display:none}}</style></head><body>
+      <h1>Histórico de Manutenção — Assistente de Viagem</h1>
+      <p class="meta"><b>Veículo:</b> ${esc2(vehicle)}<br><b>Gerado em:</b> ${esc2(now)}</p>
+      ${rows?`<table><thead><tr><th>Veículo</th><th>Manutenção</th><th>Data</th><th>Odômetro</th><th>Custo</th><th>Descrição</th><th>Próxima por km</th><th>Próxima por data</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">Nenhuma manutenção registrada para este veículo.</div>'}
+      <footer>Documento gerado pelo Assistente de Viagem. Use “Salvar como PDF” na janela de impressão.</footer>
+      <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`);
+    w.document.close();
+  }
+  function init(){
+    readSettings();
+    applyManualIfNeeded();
+    $id('tomtomSalvar')?.addEventListener('click',saveConfig);
+    $id('tomtomSalvarManual')?.addEventListener('click',saveConfig);
+    $id('tomtomModo')?.addEventListener('change',saveConfig);
+    $id('tomtomLimpar')?.addEventListener('click',()=>{localStorage.removeItem(TOMTOM_KEY);if($id('tomtomApiKey'))$id('tomtomApiKey').value='';setStatus('Chave TomTom removida.')});
+    $id('tomtomObterChave')?.addEventListener('click',()=>window.open('https://developer.tomtom.com/','_blank'));
+    $id('btnRelatorioManutencao')?.addEventListener('click',reportMaintenance);
+    $id('btnRelatorioManutencao2')?.addEventListener('click',reportMaintenance);
+    hookGps();
+    if(typeof window.render==='function'){
+      const oldRender=window.render;
+      window.render=function(){const r=oldRender.apply(this,arguments);readSettings();return r}
+    }
+    setStatus((localStorage.getItem(TOMTOM_MODE)||'manual')==='tomtom'?'TomTom selecionada.':'Limite manual selecionado.');
+  }
+  // Espera o HTML original terminar de criar os elementos e funções.
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));
+  else setTimeout(init,0);
+})();
+</script>
+
 </body></html>
 
 <script>document.addEventListener('change',e=>{if(e.target&&e.target.id==='historicoVeiculoSelect')renderHistorico()});</script>
