@@ -2,18 +2,19 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Assistente de Viagem V33</title>
+<link rel="icon" type="image/png" href="assets/icon.png"><link rel="apple-touch-icon" href="assets/icon.png">
+<title>Assistente de Viagem V35</title>
 <style>
 :root{--bg:#eef1f4;--card:#fff;--text:#17202a;--muted:#667085;--line:#d9dee5;--green:#16a34a;--green2:#0b7a35;--danger:#dc2626;--warn:#d97706;--shadow:0 2px 9px #0001}
 body.dark{--bg:#11151a;--card:#1a2027;--text:#f4f6f8;--muted:#aab3bd;--line:#343b44;--green:#16a34a;--green2:#0b7a35;--danger:#dc2626;--warn:#d97706;--shadow:0 2px 10px #0005;background:#11151a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:var(--text);padding-top:64px;padding-bottom:82px}.hidden{display:none!important}
 .history-stack{display:grid;gap:10px}.history-card{background:var(--card);border:1px solid #d8dde3;border-radius:15px;box-shadow:var(--shadow);overflow:hidden}.history-card summary{padding:13px;display:block;font-weight:800;cursor:pointer}.history-card summary .history-title{display:flex;justify-content:space-between;gap:8px;align-items:center}.history-card summary .history-sub{display:block;font-size:12px;color:#667085;font-weight:500;margin-top:5px}.history-body{padding:0 13px 13px}.history-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.history-item{background:#f7f8fa;border:1px solid #e1e5e9;border-radius:10px;padding:8px}.history-item span{display:block;font-size:11px;color:#667085}.history-item b{display:block;margin-top:3px;overflow-wrap:anywhere}.history-empty{padding:14px;text-align:center;color:#667085;border:1px dashed #cfd5db;border-radius:12px}
-body.dark .history-item{background:#20262d;border-color:#3b444e;color:#f4f6f8}
+body.dark .history-item{background:#20262d;border-color:#3b444e;color:#f4f6f8}body.dark .history-item b{color:#f4f6f8}
 #av-fixed-header{position:fixed;z-index:1000;top:0;left:0;right:0;height:64px;background:#fff;display:flex;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid #ddd;box-shadow:0 2px 8px #0002}
 .av-menu-btn,.av-theme{border:0;background:transparent;font-size:28px;width:42px;height:42px;border-radius:10px}.av-title{font-size:20px;font-weight:800;flex:1;text-align:center;white-space:nowrap}.av-gps{font-size:12px;padding:7px 9px;border:1px solid #d9dee5;border-radius:999px;background:#f7f8fa}.av-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#20d84a;margin-left:3px}
 .av-menu-panel{position:fixed;z-index:1002;top:58px;left:8px;width:235px;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 30px #0003;padding:8px;display:none}.av-menu-panel.open{display:block}.av-menu-panel button{width:100%;text-align:left;padding:13px;border:0;background:#fff;border-radius:10px;font-size:16px}.av-menu-panel button:hover{background:#f0f3f5}.av-menu-backdrop{display:none;position:fixed;inset:0;z-index:1001}.av-menu-backdrop.open{display:block}
 main{max-width:700px;margin:auto;padding:10px}.tab-page{display:none}.tab-page.active{display:block}
-#av-trip-panel{position:sticky;top:64px;z-index:50;background:var(--bg);padding:2px 0 7px}.av-trip-panel-inner{padding:9px 10px}.av-trip-panel-title{margin-bottom:7px}.av-trip-panel-inner{background:#fff;border-radius:16px;padding:12px;box-shadow:var(--shadow);border:1px solid #ddd}.av-trip-panel-title{font-weight:800;text-align:center;margin-bottom:9px}.av-dashboard{display:grid;grid-template-columns:1fr 1fr;gap:9px}.av-box{background:#fff;border:1px solid #dfe4e8;border-radius:13px;padding:10px;min-width:0}.av-box-label{font-size:11px;color:#59636f;font-weight:800}.av-box-value{font-size:24px;font-weight:900;margin-top:4px;overflow-wrap:anywhere}.av-fuel-bars{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:8px}.av-fuel-bars span{height:10px;border-radius:3px;background:#aeb6bf;border:1px solid #89939e}.av-fuel-bars span.on{background:#16a34a;border-color:#0b7a35}.av-fuel-legend{display:flex;justify-content:space-between;font-size:11px;color:#59636f;margin-top:3px}
+#av-trip-panel{position:sticky;top:64px;z-index:50;background:var(--bg);padding:2px 0 7px}.av-trip-panel-inner{padding:8px 9px;position:relative}.av-trip-panel-title{margin-bottom:7px;padding-right:90px}.av-trip-panel-inner{background:#fff;border-radius:16px;padding:12px;box-shadow:var(--shadow);border:1px solid #ddd}.av-trip-panel-title{font-weight:800;text-align:center;margin-bottom:9px}.av-dashboard{display:grid;grid-template-columns:1fr 1fr;gap:9px}.av-box{background:#fff;border:1px solid #dfe4e8;border-radius:13px;padding:8px;min-width:0}.av-box-label{font-size:11px;color:#59636f;font-weight:800}.av-box-value{font-size:21px;font-weight:900;margin-top:4px;overflow-wrap:anywhere}.av-fuel-bars{display:grid;grid-template-columns:repeat(var(--fuel-bars-count,8),1fr);gap:3px;margin-top:8px}.av-fuel-bars span{height:8px;border-radius:3px;background:#aeb6bf;border:1px solid #89939e}.av-fuel-bars span.on{background:#16a34a;border-color:#0b7a35}.av-fuel-legend{display:flex;justify-content:space-between;font-size:11px;color:#59636f;margin-top:3px}
 .card{background:var(--card);border:1px solid #d8dde3;border-radius:15px;box-shadow:var(--shadow);padding:13px;margin:10px 0}.card h3{margin:0 0 10px}.trip-data-card{padding:12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{min-height:67px;background:#fff;border:1px solid #d8dde3;border-radius:12px;padding:9px;display:flex;flex-direction:column;justify-content:center;min-width:0}.metric span{font-size:12px;color:#59636f}.metric b{font-size:17px;margin-top:4px;overflow-wrap:anywhere}.trip-destination-metric{cursor:pointer}.saveStatus{text-align:center;font-size:12px;color:#59636f;padding:3px}
 details.card{padding:0;overflow:hidden}details summary{list-style:none;cursor:pointer;padding:13px;font-weight:800}details summary::-webkit-details-marker{display:none}.details-body{padding:0 13px 13px}.status{font-weight:900;text-align:center;padding:9px;border-radius:10px;background:#edf7ef;margin-bottom:9px}.info-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #e5e7eb}.info-row span{color:#59636f}.info-row b{text-align:right;overflow-wrap:anywhere}.future-space{min-height:20px}.note{font-size:12px;color:#667085;line-height:1.4}.danger{color:#b91c1c!important}.warn{color:#b45309!important}
 #av-trip-footer{position:fixed;z-index:999;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #d7dce2;box-shadow:0 -3px 12px #0002;padding:7px max(7px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.av-action{border:1px solid #d0d6dc;background:#fff;border-radius:10px;padding:9px 4px;font-size:12px;font-weight:800}.av-action.primary{background:#16a34a;color:#fff;border-color:#16a34a}.av-action.danger{background:#dc2626;color:#fff!important;border-color:#dc2626}.av-action.danger b,.av-action.danger span{color:#fff!important}
@@ -25,7 +26,7 @@ details.card{padding:0;overflow:hidden}details summary{list-style:none;cursor:po
 body.dark .ajuste-odo-dialog{background:#1a2027;color:#f4f6f8}
 body.dark .ajuste-odo-dialog .ajuste-help{color:#aab3bd}
 body.dark .ajuste-odo-dialog input,body.dark .ajuste-odo-dialog select{background:#20262d;color:#f4f6f8;border-color:#3b444e}
-#destinoModal{display:none;position:fixed;z-index:1100;inset:0;background:#0007;align-items:center;justify-content:center;padding:18px}.destino-dialog{width:min(440px,100%);background:#fff;border-radius:17px;padding:18px}.destino-dialog h3{margin-top:0}.destino-dialog input{width:100%;padding:12px;border:1px solid #cfd5db;border-radius:10px;font-size:16px}.destino-modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.card input,.card select{width:100%;padding:11px;margin:4px 0 9px;border:1px solid #cfd5db;border-radius:10px;font-size:15px;background:#fff;color:#17202a}.primary,.secondary{border:0;border-radius:10px;padding:11px;font-weight:800}.trip-vehicle-select{width:100%;padding:12px;border:1px solid #cfd5db;border-radius:10px;font-size:16px;background:#fff;color:#17202a}.trip-vehicle-note{font-size:13px;color:var(--muted);margin-top:6px}body.dark .trip-vehicle-select{background:#20262d;color:#f4f6f8;border-color:#3b444e}.primary{background:#16a34a;color:#fff}.secondary{background:#eef1f4;color:#17202a}.vehicle-list{display:grid;gap:10px;margin-top:12px}.vehicle-card{border:1px solid #d7dde3;border-radius:14px;padding:13px;background:#fff}.vehicle-card h4{margin:0 0 4px;font-size:16px}.vehicle-card .vehicle-sub{color:var(--muted);font-size:13px;margin-bottom:8px}.vehicle-card .vehicle-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.vehicle-card .vehicle-item{background:#f5f7f9;border-radius:9px;padding:8px}.vehicle-card .vehicle-item span{display:block;font-size:11px;color:var(--muted)}.vehicle-card .vehicle-item b{display:block;font-size:13px;margin-top:2px}.vehicle-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.vehicle-empty{padding:12px;border:1px dashed #cbd2d9;border-radius:12px;color:var(--muted);text-align:center}.vehicle-current-badge{display:inline-block;font-size:11px;font-weight:800;padding:4px 7px;border-radius:999px;background:#dcfce7;color:#166534;margin-left:5px}body.dark .vehicle-card{background:#1a2027;border-color:#343b44}body.dark .vehicle-card .vehicle-item{background:#20262d}body.dark .vehicle-current-badge{background:#14532d;color:#dcfce7}
+#destinoModal{display:none;position:fixed;z-index:1100;inset:0;background:#0007;align-items:center;justify-content:center;padding:18px}.destino-dialog{width:min(440px,100%);background:#fff;border-radius:17px;padding:18px}.destino-dialog h3{margin-top:0}.destino-dialog input{width:100%;padding:12px;border:1px solid #cfd5db;border-radius:10px;font-size:16px}.destino-modal-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.card input,.card select{width:100%;padding:11px;margin:4px 0 9px;border:1px solid #cfd5db;border-radius:10px;font-size:15px;background:#fff;color:#17202a}.primary,.secondary{border:0;border-radius:10px;padding:11px;font-weight:800}.trip-vehicle-select{width:100%;padding:12px;border:1px solid #cfd5db;border-radius:10px;font-size:16px;background:#fff;color:#17202a}.trip-vehicle-note{font-size:13px;color:var(--muted);margin-top:6px}body.dark .trip-vehicle-select{background:#20262d;color:#f4f6f8;border-color:#3b444e}.primary{background:#16a34a;color:#fff}.secondary{background:#eef1f4;color:#17202a}.vehicle-list{display:grid;gap:10px;margin-top:12px}.vehicle-card{border:1px solid #d7dde3;border-radius:14px;padding:13px;background:#fff}.vehicle-card h4{margin:0 0 4px;font-size:16px}.vehicle-card .vehicle-sub{color:var(--muted);font-size:13px;margin-bottom:8px}.vehicle-card .vehicle-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.vehicle-card .vehicle-item{background:#f5f7f9;border-radius:9px;padding:8px}.vehicle-card .vehicle-item span{display:block;font-size:11px;color:var(--muted)}.vehicle-card .vehicle-item b{display:block;font-size:13px;margin-top:2px}.vehicle-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.vehicle-empty{padding:12px;border:1px dashed #cbd2d9;border-radius:12px;color:var(--muted);text-align:center}.vehicle-current-badge{display:inline-block;font-size:11px;font-weight:800;padding:4px 7px;border-radius:999px;background:#dcfce7;color:#166534;margin-left:5px}body.dark .vehicle-card{background:#1a2027;border-color:#343b44}body.dark .vehicle-card .vehicle-item{background:#20262d}body.dark .vehicle-current-badge{background:#14532d;color:#dcfce7}
 body.dark #av-fixed-header,body.dark #av-trip-footer,body.dark .av-menu-panel,body.dark .av-menu-panel button{background:#1a2027;color:#f4f6f8;border-color:#343b44}body.dark .av-menu-btn{color:#fff}body:not(.dark) .av-menu-btn{color:#000}body.dark .av-gps,body.dark .av-box,body.dark .metric,body.dark .destino-dialog,body.dark .av-trip-panel-inner{background:#1a2027;color:#f4f6f8;border-color:#343b44}body.dark .card{background:#1a2027;color:#f4f6f8;border-color:#343b44}body.dark .note,body.dark .metric span,body.dark .av-box-label,body.dark .av-fuel-legend,body.dark .info-row span{color:#aab3bd}body.dark .metric,body.dark .av-box{background:#20262d}body.dark .card input,body.dark .card select{background:#20262d;color:#f4f6f8;border-color:#3b444e}body.dark .secondary{background:#20262d;color:#f4f6f8}body.dark .history-card{background:#1a2027;border-color:#343b44}body.dark .history-card summary .history-sub{color:#aab3bd}body.dark .av-action{background:#20262d;color:#f4f6f8;border-color:#3b444e}
 @media(max-width:520px){.av-title{font-size:18px}.av-gps{font-size:11px}.av-dashboard,.grid{gap:7px}.av-box-value{font-size:21px}.metric{min-height:62px;padding:8px}.metric b{font-size:16px}}
 
@@ -55,12 +56,24 @@ body.dark .maintenance-badge.warn{background:#3a2a14;color:#fbbf24!important}
 body.dark .maintenance-badge.over{background:#3b1818;color:#fca5a5!important}
 @media(max-width:520px){.maintenance-grid{grid-template-columns:1fr}}
 
+/* PAINEL DO VEÍCULO EXPANSÍVEL */
+.av-trip-panel-title{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding-right:0!important;white-space:nowrap}
+.av-expand-icon{font-size:15px;line-height:1;transition:transform .15s ease}
+#av-trip-panel.vehicle-collapsed .av-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin:0}
+#av-trip-panel.vehicle-collapsed .av-box{padding:7px 8px;display:flex;align-items:center;min-height:43px}
+#av-trip-panel.vehicle-collapsed .av-box-label,#av-trip-panel.vehicle-collapsed .av-fuel-legend,#av-trip-panel.vehicle-collapsed .av-box .note,#av-trip-panel.vehicle-collapsed .av-box .future-space,#av-trip-panel.vehicle-collapsed #avFuelValue{display:none}
+#av-trip-panel.vehicle-collapsed .av-fuel-bars{flex:1;margin:0;align-self:center}
+#av-trip-panel.vehicle-collapsed .av-fuel-bars span{height:7px}
+#av-trip-panel.vehicle-collapsed #avOdoCard{justify-content:center;cursor:pointer}
+#av-trip-panel.vehicle-collapsed #avOdoCard .av-box-value{margin:0;font-size:18px;line-height:1.1}
+#av-trip-panel.vehicle-collapsed .av-expand-icon{transform:rotate(180deg)}
+@media(max-width:520px){#av-trip-panel.vehicle-collapsed .av-box{min-height:40px;padding:6px}#av-trip-panel.vehicle-collapsed #avOdoCard .av-box-value{font-size:17px}}
 /* TAG DE TRAVA DA TELA DA VIAGEM */
-.viagem-lock-tag{position:fixed;right:12px;top:78px;z-index:1050;border:1px solid #b8c0c8;border-radius:999px;padding:7px 10px;background:#fff;color:#111;font-size:12px;font-weight:800;box-shadow:0 3px 12px #0002;display:none;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.viagem-lock-tag{position:absolute;right:9px;top:8px;z-index:1050;border:1px solid #b8c0c8;border-radius:999px;width:36px;height:36px;padding:0;background:#fff;color:#111;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px #0002;display:none;align-items:center;gap:6px;cursor:pointer;user-select:none}
 .viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
 body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
 body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
-.viagem-scroll-locked{overflow:hidden!important;touch-action:none!important}
+.viagem-scroll-locked{overflow:hidden!important;touch-action:none!important;overscroll-behavior:none!important}.viagem-lock-shield{position:absolute;inset:0;z-index:1049;background:transparent;display:none;touch-action:none;pointer-events:none}.viagem-lock-shield.active{display:block;pointer-events:auto}.viagem-lock-tag{z-index:1051!important} .tab-page#tabViagem{position:relative}.tab-page#tabViagem .av-action{position:relative;z-index:1052}.tab-page#tabViagem #viagemLockTag{position:relative;z-index:1053}
 
 
 .fuel-alert-card{border:1px solid #d7e2de}
@@ -72,17 +85,15 @@ body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
 .fuel-alert-save{margin-top:8px;width:100%}
 body.dark .fuel-alert-card{border-color:#46534f}
 body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
+
+.history-km-summary{margin-top:10px;background:var(--card);border:1px solid #d8dde3;border-radius:12px;padding:11px}.history-km-summary .km-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.history-km-summary .km-item{background:#f5f7f9;border-radius:9px;padding:8px}.history-km-summary .km-item span{display:block;font-size:11px;color:var(--muted)}.history-km-summary .km-item b{display:block;margin-top:3px;font-size:15px;color:var(--text)}body.dark .history-km-summary .km-item b{color:#f4f6f8}body.dark .history-km-summary{border-color:#343b44}body.dark .history-km-summary .km-item{background:#20262d}@media(max-width:520px){.history-km-summary .km-grid{grid-template-columns:1fr 1fr}.history-km-summary .km-item:last-child{grid-column:1/-1}}
 </style>
-<style id="painel-veiculo-solto-final">
-#av-trip-panel,
-.av-trip-panel,
-#av-trip-panel.av-trip-panel {
+<style id="v35-ajuste-final">
+/* Somente: painel do veículo móvel, sem alterar cadastro/combustível */
+#av-trip-panel {
   position: static !important;
   top: auto !important;
   bottom: auto !important;
-  left: auto !important;
-  right: auto !important;
-  transform: none !important;
 }
 </style>
 
@@ -94,8 +105,7 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <div id="avMenuPanel" class="av-menu-panel"><button data-tab="viagem">🚗 Viagem</button><button data-tab="abastecimento">⛽ Abastecimento</button><button data-tab="historico">📋 Histórico de viagem</button><button data-tab="manutencao">🔧 Manutenção</button><button data-tab="notificacoes">🔔 Notificações</button><button id="btnResetApp" type="button">♻️ Resetar aplicativo</button></div><div id="avMenuBackdrop" class="av-menu-backdrop"></div>
 <main>
 <section id="tabViagem" class="tab-page active">
-
-<section id="av-trip-panel"><div class="av-trip-panel-inner"><div class="av-trip-panel-title">🚗 Painel do veículo</div><div class="av-dashboard">
+<section id="av-trip-panel"><div class="av-trip-panel-inner"><div class="av-trip-panel-title" id="avVehiclePanelToggle" role="button" tabindex="0" aria-expanded="true">🚗 Painel do veículo <span class="av-expand-icon">⌃</span></div><div class="av-dashboard">
 <div class="av-box"><div class="av-box-label">COMBUSTÍVEL</div><div class="av-box-value" id="avFuelValue">-- / 8 <small>tanque</small></div><div class="av-fuel-bars" id="avFuelBars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="av-fuel-legend"><span>E</span><span>F</span></div><div class="future-space" id="fuelFuture"></div></div>
 <div class="av-box" id="avOdoCard" role="button" tabindex="0" aria-label="Ajustar odômetro"><div class="av-box-label">ODÔMETRO • REFERÊNCIA</div><div class="av-box-value" id="avOdoDemo">-- km</div><div class="note">Referência atual do veículo</div><div class="future-space" id="odoFuture"></div></div>
 </div></div></section>
@@ -112,11 +122,12 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <details class="card"><summary>ℹ️ Informações da viagem</summary><div class="details-body"><div class="info-row"><span>GPS</span><b id="gps">Aguardando localização...</b></div><div class="info-row"><span>Velocidade da via</span><b id="limiteVelocidade">-- km/h</b></div><div class="info-row"><span>Alarme de limite</span><b id="statusLimiteVelocidade">Preparado</b></div><div class="info-row"><span>Ocorrências de excesso</span><b id="ocorrenciasVelocidade">0</b></div><div class="info-row"><span>Consultas de limite</span><b id="consultasLimite">0 / 2300</b></div><div class="info-row"><span>Consultas restantes</span><b id="consultasRestantes">2300</b></div><div class="info-row"><span>Último limite conhecido</span><b id="ultimoLimite">--</b></div><div class="info-row"><span>Correção de distância</span><b id="correcaoGps">Pronta</b></div><div class="info-row"><span>Tela durante a viagem</span><b id="telaStatus">Ativa</b></div><div class="future-space"></div><p class="note">Dados adicionais podem ser incorporados aqui sem alterar os cartões existentes.</p></div></details>
 </section>
 <section id="tabAbastecimento" class="tab-page">
-<div class="card"><h3>🚗 Cadastrar veículo</h3><label>Nome/modelo</label><input id="abVeiculo" type="text" placeholder="Ex.: Etios Sedan 2012"><label>Capacidade do tanque (L)</label><input id="abTanque" type="number" step="0.1" placeholder="Ex.: 45"><label>Combustível</label><select id="abComb"><option>Gasolina</option><option>Etanol</option><option>Flex</option><option>Diesel</option></select><button type="button" class="primary" style="width:100%;margin-top:8px" id="abSalvarVeiculo">Cadastrar veículo</button><button type="button" class="secondary" style="width:100%;margin-top:8px;display:none" id="abCancelarEdicaoVeiculo">Cancelar edição</button></div><div class="card"><h3>🚗 Carros cadastrados</h3><div id="abVeiculosCadastrados"></div></div>
+<div class="card"><h3>🚗 Cadastrar veículo</h3><label>Nome/modelo</label><input id="abVeiculo" type="text" placeholder="Ex.: Etios Sedan 2012"><label>Capacidade do tanque (L)</label><input id="abTanque" type="number" step="0.1" placeholder="Ex.: 45"><label>Quantidade de barras do indicador</label><input id="abBarras" type="number" min="1" max="30" step="1" placeholder="Ex.: 8"><div class="note">O indicador e os cálculos de combustível serão ajustados para este veículo.</div><label>Combustível</label><select id="abComb"><option>Gasolina</option><option>Etanol</option><option>Flex</option><option>Diesel</option></select><button type="button" class="primary" style="width:100%;margin-top:8px" id="abSalvarVeiculo">Cadastrar veículo</button><button type="button" class="secondary" style="width:100%;margin-top:8px;display:none" id="abCancelarEdicaoVeiculo">Cancelar edição</button></div><div class="card"><h3>🚗 Carros cadastrados</h3><div id="abVeiculosCadastrados"></div></div>
 <div class="card"><h3>⛽ Registrar abastecimento</h3><label>Veículo do abastecimento</label><select id="abAbastecimentoVeiculo"></select><label>Valor pago (R$)</label><input id="abValor" type="number" step="0.01" placeholder="Ex.: 98,15"><label>Preço por litro (R$/L)</label><input id="abPreco" type="number" step="0.001" placeholder="Ex.: 3,59"><label>Tipo de combustível</label><select id="abCombustivelAbastecimento"><option>Gasolina</option><option>Etanol</option><option>Flex</option><option>Diesel</option></select><label>Litros <span class="note">(calculado automaticamente; pode corrigir)</span></label><input id="abLitros" type="number" step="0.01" placeholder="Ex.: 27,34"><label>Odômetro (km)</label><input id="abOdo" type="number" step="0.001" placeholder="Ex.: 125450,312"><label>Situação do tanque</label><select id="abSituacao"><option>Tanque cheio</option><option>Completei o tanque</option><option>Abastecimento parcial</option></select><button type="button" class="primary" style="width:100%;margin-top:8px" id="abSalvar">Salvar abastecimento</button><div class="saveStatus" id="abMsg"></div></div>
 <div class="card"><h3>📋 Histórico de abastecimentos</h3><div id="abHistorico"></div></div>
 </section>
 <section id="tabHistorico" class="tab-page">
+<div class="card"><h3>🚗 Histórico do veículo</h3><label>Selecione o veículo</label><select id="historicoVeiculoSelect" class="trip-vehicle-select"></select><div id="historicoKmResumo" class="history-km-summary"></div></div>
 <div class="card"><h3>📋 Histórico de viagens</h3><div id="historicoViagens"></div></div>
 <div class="card"><h3>⛽ Histórico de abastecimentos</h3><div id="historicoAbastecimentos"></div></div><div class="card"><h3>🔧 Histórico de manutenção</h3><div id="historicoManutencao"></div></div><div class="card"><h3>🔧 Histórico de ajustes</h3><div id="historicoAjustes"></div></div>
 </section>
@@ -180,17 +191,7 @@ Quando o marcador chegar a 1 barra, o aplicativo exibirá uma mensagem escolhida
     <label>Odômetro atual (km)</label>
     <input id="ajusteOdoInput" type="number" step="0.001" placeholder="Ex.: 162312.000">
     <label>Nível atual do combustível</label>
-    <select id="ajusteCombNivel">
-      <option value="0">0 / 8 — Reserva</option>
-      <option value="1">1 / 8</option>
-      <option value="2">2 / 8</option>
-      <option value="3">3 / 8</option>
-      <option value="4">4 / 8 — Meio tanque</option>
-      <option value="5">5 / 8</option>
-      <option value="6">6 / 8</option>
-      <option value="7">7 / 8</option>
-      <option value="8">8 / 8 — Tanque cheio</option>
-    </select>
+    <select id="ajusteCombNivel"></select>
     <div class="ajuste-odo-actions">
       <button type="button" class="secondary" id="cancelarAjusteOdo">Fechar</button>
       <button type="button" class="primary" id="salvarAjusteOdo">Salvar</button>
@@ -198,12 +199,12 @@ Quando o marcador chegar a 1 barra, o aplicativo exibirá uma mensagem escolhida
     <div class="saveStatus" id="ajusteOdoMsg"></div>
   </div>
 </div>
-<div id="destinoModal"><div class="destino-dialog"><h3>🗺️ Definir viagem</h3><label for="destinoModalInput">Destino</label><input id="destinoModalInput" placeholder="Ex.: São Paulo" autocomplete="off"><label for="destinoModalVeiculo" style="display:block;margin-top:10px">🚗 Veículo da viagem</label><select id="destinoModalVeiculo" class="trip-vehicle-select"></select><div id="destinoModalVeiculoNota" class="trip-vehicle-note">Escolha o veículo que será usado nesta viagem.</div><div class="destino-modal-actions"><button class="secondary" id="vozDestino">🎙️ Voz</button><button class="primary" id="salvarDestino">Salvar</button></div></div></div>
+<div id="destinoModal"><div class="destino-dialog"><h3>🗺️ Definir viagem</h3><label for="destinoModalInput">Destino</label><input id="destinoModalInput" placeholder="Ex.: São Paulo" autocomplete="off"><label for="destinoModalVeiculo" style="display:block;margin-top:10px">🚗 Veículo da viagem</label><select id="destinoModalVeiculo" class="trip-vehicle-select"></select><div id="destinoModalVeiculoNota" class="trip-vehicle-note">Escolha o veículo que será usado nesta viagem.</div><div class="destino-modal-actions"><button class="secondary" id="cancelarDestino">Cancelar</button><button class="secondary" id="vozDestino">🎙️ Voz</button><button class="primary" id="salvarDestino">Salvar</button></div></div></div>
 <footer id="av-trip-footer"><button class="av-action primary" id="btnIniciar">▶<br>Iniciar</button><button class="av-action danger" id="btnFim">■<br>Fim da viagem</button><button class="av-action" id="btnPausar">⏸<br>Pausar</button><button class="av-action" id="btnNova">↻<br>Nova viagem</button></footer>
 <script>
 'use strict';
 const NS='assistente_viagem_v3';
-const DEFAULT={schemaVersion:1,vehicle:{id:null,name:'',tankL:0,fuelType:'Flex',fuelL:0,priceL:0,odometerRef:0,extra:{}},vehicles:[],selectedVehicleId:null,tripDraft:{destination:'',vehicleId:null},trip:null,fuelings:[],settings:{refKml:10,priceL:0,limitQueryMax:2300,limitQueries:0,lastLimit:null,lastLimitAt:null,fuelAlerts:{messages:['O mão de vaca abastece aí.','Seu tanque está pedindo socorro.','Já passou da hora de abastecer.','Vai esperar o carro parar?','Aí espera para empurrar o carro.'],lowTriggered:false,destinationWarned:false,destinationDistanceKm:null,lastLowAlertAt:0,extra:{}},extra:{}},history:[],events:[],manutencoes:[],maintenanceTypes:[],extra:{}};
+const DEFAULT={schemaVersion:1,vehicle:{id:null,name:'',tankL:0,fuelType:'Flex',fuelL:0,priceL:0,odometerRef:0,fuelBars:8,extra:{}},vehicles:[],selectedVehicleId:null,tripDraft:{destination:'',vehicleId:null},trip:null,fuelings:[],settings:{refKml:10,priceL:0,limitQueryMax:2300,limitQueries:0,lastLimit:null,lastLimitAt:null,fuelAlerts:{messages:['O mão de vaca abastece aí.','Seu tanque está pedindo socorro.','Já passou da hora de abastecer.','Vai esperar o carro parar?','Aí espera para empurrar o carro.'],lowTriggered:false,destinationWarned:false,destinationDistanceKm:null,lastLowAlertAt:0,extra:{}},extra:{}},history:[],events:[],manutencoes:[],maintenanceTypes:[],extra:{}};
 let state=loadState();loadHistory();let gpsWatch=null,timer=null,lastGps=null,lossStarted=null,currentSpeed=0,currentLimit=null,speedingSince=null,voiceRecognition=null;
 function $(id){return document.getElementById(id)}
 function clone(o){return JSON.parse(JSON.stringify(o))}
@@ -220,7 +221,7 @@ function fmt(n,d=2){return Number(n||0).toLocaleString('pt-BR',{minimumFractionD
 function money(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function hav(a,b){const R=6371,rad=Math.PI/180,dLat=(b.lat-a.lat)*rad,dLon=(b.lon-a.lon)*rad;const q=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(q))}
 function loadState(){try{const x=JSON.parse(localStorage.getItem(NS)||'null');return mergeState(x)}catch(e){return clone(DEFAULT)}}
-function mergeState(x){const o=clone(DEFAULT);if(!x)return o;Object.assign(o,x);o.vehicle=Object.assign(clone(DEFAULT.vehicle),x.vehicle||{});o.vehicles=Array.isArray(x.vehicles)?x.vehicles:[];o.selectedVehicleId=x.selectedVehicleId??o.vehicle.id??null;o.tripDraft=Object.assign(clone(DEFAULT.tripDraft),x.tripDraft||{});o.settings=Object.assign(clone(DEFAULT.settings),x.settings||{});o.history=Array.isArray(x.history)?x.history:[];o.events=Array.isArray(x.events)?x.events:[];o.fuelings=Array.isArray(x.fuelings)?x.fuelings:[];o.manutencoes=Array.isArray(x.manutencoes)?x.manutencoes:[];o.maintenanceTypes=Array.isArray(x.maintenanceTypes)?x.maintenanceTypes:[];if(o.vehicle.name&&!o.vehicles.some(v=>v.id===o.vehicle.id)){if(!o.vehicle.id)o.vehicle.id=uid('veh');o.vehicles.push(clone(o.vehicle));}if(!o.selectedVehicleId&&o.vehicle.id)o.selectedVehicleId=o.vehicle.id;return o}
+function mergeState(x){const o=clone(DEFAULT);if(!x)return o;Object.assign(o,x);o.vehicle=Object.assign(clone(DEFAULT.vehicle),x.vehicle||{});o.vehicle.fuelBars=Math.max(1,Math.min(30,Math.round(Number(o.vehicle.fuelBars)||8)));o.vehicles=Array.isArray(x.vehicles)?x.vehicles:[];o.selectedVehicleId=x.selectedVehicleId??o.vehicle.id??null;o.tripDraft=Object.assign(clone(DEFAULT.tripDraft),x.tripDraft||{});o.settings=Object.assign(clone(DEFAULT.settings),x.settings||{});o.history=Array.isArray(x.history)?x.history:[];o.events=Array.isArray(x.events)?x.events:[];o.fuelings=Array.isArray(x.fuelings)?x.fuelings:[];o.manutencoes=Array.isArray(x.manutencoes)?x.manutencoes:[];o.maintenanceTypes=Array.isArray(x.maintenanceTypes)?x.maintenanceTypes:[];if(o.vehicle.name&&!o.vehicles.some(v=>v.id===o.vehicle.id)){if(!o.vehicle.id)o.vehicle.id=uid('veh');o.vehicles.push(clone(o.vehicle));}if(!o.selectedVehicleId&&o.vehicle.id)o.selectedVehicleId=o.vehicle.id;return o}
 function save(){
   state.schemaVersion=1;
   try{
@@ -246,7 +247,7 @@ function normalizeVehicles(){
   }
   if(state.selectedVehicleId){
     const selected=state.vehicles.find(v=>String(v.id)===String(state.selectedVehicleId));
-    if(selected) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
+    if(selected) selected.fuelBars=Math.max(1,Math.min(30,Math.round(Number(selected.fuelBars)||8)));state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
   }
 }
 function getSelectedVehicle(){normalizeVehicles();return state.vehicles.find(v=>String(v.id)===String(state.selectedVehicleId))||state.vehicle}
@@ -275,11 +276,31 @@ function readExternalVehicle(){
   normalizeVehicles();
 }
 function syncExternalReferences(){
-  readExternalVehicle();
-  const candidates=['assistente_viagem_abastecimentos_v1','abastecimentos_v1','cv2_abastecimentos'];
-  let arr=null;for(const k of candidates){try{const x=JSON.parse(localStorage.getItem(k)||'null');if(Array.isArray(x)){arr=x;break}}catch(e){}}
-  if(arr&&arr.length){const sorted=arr.slice().filter(x=>Number.isFinite(Number(x.odometro))).sort((a,b)=>Number(b.odometro)-Number(a.odometro));const last=sorted[0];if(last){state.vehicle.odometerRef=Number(last.odometro);if(Number.isFinite(Number(last.litros))&&String(last.statusTanque||last.tanqueStatus||'').toLowerCase().includes('cheio')){state.vehicle.fuelL=Math.max(0,Number(last.litros));}}}
+  // Migração pontual de dados antigos, sem sobrescrever um veículo já
+  // cadastrado com dados vazios de uma chave legada.
+  normalizeVehicles();
+  const selectedId=state.selectedVehicleId||state.vehicle?.id||'';
+  const selected=state.vehicles.find(v=>String(v.id)===String(selectedId));
+  if(selected){
+    selected.fuelBars=Math.max(1,Math.min(30,Math.round(Number(selected.fuelBars)||8)));state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
+    return;
+  }
+  const keys=['assistente_viagem_veiculo_v1','assistente_viagem_vehicle_v1','cv2_veiculo_atual','veiculo_atual'];
+  for(const k of keys){
+    try{
+      const x=JSON.parse(localStorage.getItem(k)||'null');
+      if(x&&typeof x==='object'){
+        if(!x.id)x.id=uid('veh');
+        state.vehicle=Object.assign(clone(DEFAULT.vehicle),x);
+        if(!state.vehicles.some(v=>String(v.id)===String(x.id)))state.vehicles.push(clone(x));
+        state.selectedVehicleId=x.id;
+        save();
+        return;
+      }
+    }catch(e){}
+  }
 }
+
 function activeTrip(){return !!state.trip?.running&&!state.trip?.paused}
 function initTrip(){
   if(state.trip?.running||state.trip?.paused)return;
@@ -289,7 +310,7 @@ function initTrip(){
   const destination=String(state.tripDraft?.destination||'').trim();
   if(!selected?.id||!selected?.name){alert('Selecione ou cadastre o veículo antes de iniciar a viagem.');return;}
   if(!destination){alert('Defina o destino antes de iniciar a viagem. O relógio só começará depois que o destino e o veículo estiverem definidos.');openDestino();return;}
-  state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
+  selected.fuelBars=Math.max(1,Math.min(30,Math.round(Number(selected.fuelBars)||8)));state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
   const now=Date.now();
   state.trip={id:uid('trip'),schemaVersion:1,createdAt:new Date(now).toISOString(),updatedAt:new Date(now).toISOString(),vehicle:clone(state.vehicle),destination,startedAt:now,endedAt:null,running:true,paused:false,pausedAt:null,pausedMs:0,distanceKm:0,correctedKm:0,liters:0,cost:0,lastPosition:null,avgSpeed:0,drivingMs:0,extra:{}};
   lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=state.settings.lastLimit||null;save();startGps();startTimer();render();checkDestinationFuelAlert(destination);
@@ -309,7 +330,36 @@ function onGps(pos){
   }
   lossStarted=null;lastGps=c;state.trip.lastPosition={lat:c.lat,lon:c.lon,at:now};updateSpeed();save();render();
 }
-function addDistance(a,b){const d=hav(a,b);if(!Number.isFinite(d)||d<=0||d>5)return;state.trip.distanceKm=Number((state.trip.distanceKm+d).toFixed(3));state.trip.drivingMs+=Math.max(0,b.at-a.at);const ref=realConsumptionKml(state.vehicle.fuelType);state.trip.liters=ref>0?Number((state.trip.distanceKm/ref).toFixed(3)):0;const price=Number(state.vehicle.priceL)||lastFuelPrice()||0;state.trip.cost=Number((state.trip.liters*price).toFixed(2));state.trip.avgSpeed=state.trip.drivingMs>0?state.trip.distanceKm/(state.trip.drivingMs/3600000):0;if(Number(state.vehicle.fuelL)>0)state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)))}
+function addDistance(a,b){
+  const d=hav(a,b);if(!Number.isFinite(d)||d<=0||d>5)return;
+  state.trip.distanceKm=Number((state.trip.distanceKm+d).toFixed(3));
+  state.trip.drivingMs+=Math.max(0,b.at-a.at);
+  const ref=realConsumptionKml(state.vehicle.fuelType);
+  state.trip.liters=ref>0?Number((state.trip.distanceKm/ref).toFixed(3)):0;
+  const price=Number(state.vehicle.priceL)||lastFuelPrice()||0;
+  state.trip.cost=Number((state.trip.liters*price).toFixed(2));
+  state.trip.avgSpeed=state.trip.drivingMs>0?state.trip.distanceKm/(state.trip.drivingMs/3600000):0;
+
+  // O odômetro do veículo acompanha a distância real registrada pelo GPS.
+  const beforeOdo=Number(state.vehicle.odometerRef)||0;
+  if(beforeOdo>0){
+    const nextOdo=Number((beforeOdo+d).toFixed(3));
+    state.vehicle.odometerRef=nextOdo;
+    const vid=state.selectedVehicleId||state.vehicle.id;
+    const v=state.vehicles.find(x=>String(x.id)===String(vid));
+    if(v){v.odometerRef=nextOdo;v.updatedAt=new Date().toISOString();}
+    if(state.trip.vehicle)state.trip.vehicle.odometerRef=nextOdo;
+  }
+
+  // O combustível diminui somente quando existe uma referência de consumo válida.
+  if(ref>0 && Number(state.vehicle.fuelL)>0){
+    state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)));
+    const vid=state.selectedVehicleId||state.vehicle.id;
+    const v=state.vehicles.find(x=>String(x.id)===String(vid));
+    if(v){v.fuelL=state.vehicle.fuelL;v.updatedAt=new Date().toISOString();}
+    if(state.trip.vehicle)state.trip.vehicle.fuelL=state.vehicle.fuelL;
+  }
+}
 function updateSpeed(){$('velocidade').textContent=fmt(currentSpeed,0)+' km/h';if(currentLimit){const over=currentSpeed>currentLimit;$('statusLimiteVelocidade').textContent=over?'⚠️ Acima do limite':'Dentro do limite';$('statusLimiteVelocidade').className=over?'danger':'';if(over&&!speedingSince)speedingSince=Date.now();if(!over&&speedingSince){recordSpeedEvent(Date.now()-speedingSince);speedingSince=null}}}
 function recordSpeedEvent(duration){if(!state.trip||!currentLimit)return;state.events.push({id:uid('speed'),schemaVersion:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),tipo:'excesso_velocidade',tripId:state.trip.id,velocidadeMax:Number(currentSpeed.toFixed(1)),limite:Number(currentLimit),duracaoMs:Math.max(0,duration),location:state.trip.lastPosition||null,extra:{}});save();}
 function clearTripForNext(){
@@ -429,9 +479,11 @@ function renderAb(){
   renderAbastecimentoVehicleSelect();
 }
 
+function renderFuelAdjustmentOptions(barCount,selected){const sel=$('ajusteCombNivel');if(!sel)return;const n=Math.max(1,Math.min(30,Math.round(Number(barCount)||8)));sel.innerHTML=Array.from({length:n+1},(_,i)=>`<option value="${i}">${i} / ${n}${i===0?' — Reserva':''}${i===n?' — Tanque cheio':''}</option>`).join('');sel.value=String(Math.max(0,Math.min(n,Number(selected)||0)));}
 function resetVehicleForm(){
   if($('abVeiculo'))$('abVeiculo').value='';
   if($('abTanque'))$('abTanque').value='';
+  if($('abBarras'))$('abBarras').value='8';
   if($('abComb'))$('abComb').value='Flex';
   editingVehicleId=null;
   if($('abSalvarVeiculo'))$('abSalvarVeiculo').textContent='Cadastrar veículo';
@@ -448,7 +500,8 @@ function saveVehicle(){
   if(editingVehicleId){
     const v=state.vehicles.find(x=>String(x.id)===String(editingVehicleId));
     if(!v){editingVehicleId=null;return saveVehicle();}
-    Object.assign(v,{name,tankL:tank,fuelType,updatedAt:now});
+    const fuelBars=Math.max(1,Math.min(30,Math.round(Number($('abBarras').value)||Number(v.fuelBars)||8)));
+    Object.assign(v,{name,tankL:tank,fuelType,fuelBars,updatedAt:now});
     if(String(state.selectedVehicleId)===String(v.id)) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(v));
     if(String(state.vehicle?.id)===String(v.id)) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(v));
     save();
@@ -457,7 +510,8 @@ function saveVehicle(){
     alert('✅ Veículo atualizado.');
     return;
   }
-  const v={id:uid('veh'),schemaVersion:1,createdAt:now,updatedAt:now,name,tankL:tank,fuelType,fuelL:0,priceL:0,odometerRef:0,extra:{}};
+  const fuelBars=Math.max(1,Math.min(30,Math.round(Number($('abBarras').value)||8)));
+  const v={id:uid('veh'),schemaVersion:1,createdAt:now,updatedAt:now,name,tankL:tank,fuelType,fuelL:0,priceL:0,odometerRef:0,fuelBars,extra:{}};
   state.vehicles.push(v);
   state.selectedVehicleId=v.id;
   state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(v));
@@ -470,7 +524,7 @@ function editVehicle(id){
   normalizeVehicles();
   const v=state.vehicles.find(x=>String(x.id)===String(id));if(!v)return;
   editingVehicleId=v.id;
-  $('abVeiculo').value=v.name||'';$('abTanque').value=v.tankL||'';$('abComb').value=v.fuelType||'Flex';
+  $('abVeiculo').value=v.name||'';$('abTanque').value=v.tankL||'';$('abBarras').value=v.fuelBars||8;$('abComb').value=v.fuelType||'Flex';
   $('abSalvarVeiculo').textContent='Atualizar veículo';
   if($('abCancelarEdicaoVeiculo'))$('abCancelarEdicaoVeiculo').style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
@@ -520,6 +574,7 @@ function saveFueling(){
     normalizeVehicles();
     const fuelVehicleId=$('abAbastecimentoVeiculo')?.value||state.selectedVehicleId||state.vehicle?.id||'';
     const fuelVehicle=state.vehicles.find(v=>String(v.id)===String(fuelVehicleId))||state.vehicle;
+    if(fuelVehicle)fuelVehicle.fuelBars=Math.max(1,Math.min(30,Math.round(Number(fuelVehicle.fuelBars)||8)));
     if(!(valor>0)||!(preco>0)||!(litros>0)||!(odo>=0)){
       $('abMsg').textContent='⚠️ Informe valor pago, preço/L, litros e odômetro.';
       return;
@@ -538,7 +593,6 @@ function saveFueling(){
       veiculo:fuelVehicle?.name||'',
       createdAt:now,
       updatedAt:now,
-      veiculo:state.vehicle.name||'',
       combustivel:tipoCombustivel,
       tipoCombustivel:tipoCombustivel,
       valorPago:Number(valor.toFixed(2)),
@@ -563,9 +617,24 @@ function saveFueling(){
       return;
     }
 
-    state.vehicle.priceL=rec.precoLitro;
-    state.vehicle.odometerRef=rec.odometro;
-    if(situacao==='Tanque cheio'||situacao==='Completei o tanque')state.vehicle.fuelL=Number(state.vehicle.tankL||0);
+    // Atualiza também o cadastro permanente do veículo.
+    // O painel usa esse registro como fonte do odômetro/combustível.
+    if(fuelVehicle?.id){
+      const v=state.vehicles.find(x=>String(x.id)===String(fuelVehicle.id));
+      if(v){
+        v.priceL=rec.precoLitro;
+        if(!(Number(v.odometerInitial)>0))v.odometerInitial=rec.odometro;
+         v.odometerRef=Math.max(Number(v.odometerRef)||0,rec.odometro);
+        if(situacao==='Tanque cheio'||situacao==='Completei o tanque')v.fuelL=Number(v.tankL||0);
+        else if(Number(rec.litros)>0){const cap=Number(v.tankL)||0;const atual=Math.max(0,Number(v.fuelL)||0);v.fuelL=cap>0?Math.min(cap,Number((atual+Number(rec.litros)).toFixed(3))):Number((atual+Number(rec.litros)).toFixed(3));}
+        v.updatedAt=now;
+      }
+      state.selectedVehicleId=fuelVehicle.id;
+      state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(v||fuelVehicle));
+    }else{
+      state.vehicle.priceL=rec.precoLitro;
+      state.vehicle.odometerRef=rec.odometro;
+    }
     resetFuelAlertAfterRefuel();
 
     // Grava novamente após atualizar as referências do veículo.
@@ -589,11 +658,33 @@ function saveFueling(){
     console.error(e);
   }
 }
-function renderHistorico(){const hv=$('historicoViagens'),ha=$('historicoAbastecimentos'),hm=$('historicoManutencao'),hj=$('historicoAjustes');const viagens=Array.isArray(state.history)?state.history:[];hv.innerHTML=viagens.length?'<div class="history-stack">'+viagens.slice().sort((a,b)=>Number(b.endedAt||0)-Number(a.endedAt||0)).map(x=>{const dur=timeText(x);return `<details class="history-card"><summary><div class="history-title"><span>🚗 ${esc(x.destination?'Viagem para '+x.destination:'Viagem')}</span><span>${fmt(x.distanceKm||0)} km</span></div><span class="history-sub">${x.endedAt?new Date(x.endedAt).toLocaleString('pt-BR'):'Data não informada'} • ${esc(x.vehicle?.name||'Veículo não informado')}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Origem</span><b>Localização registrada</b></div><div class="history-item"><span>Destino</span><b>${esc(x.destination||'Não definido')}</b></div><div class="history-item"><span>Veículo</span><b>${esc(x.vehicle?.name||'Não informado')}</b></div><div class="history-item"><span>Combustível</span><b>${esc(x.fuelType||x.vehicle?.fuelType||'Não informado')}</b></div><div class="history-item"><span>Distância</span><b>${fmt(x.distanceKm||0)} km</b></div><div class="history-item"><span>Tempo</span><b>${dur}</b></div><div class="history-item"><span>Velocidade média</span><b>${fmt(x.avgSpeed||0)} km/h</b></div><div class="history-item"><span>Consumo real</span><b>${Number(x.consumptionKml)>0?fmt(x.consumptionKml)+' km/L':'Não disponível'}</b></div><div class="history-item"><span>Combustível gasto</span><b>${fmt(x.liters||0)} L</b></div><div class="history-item"><span>Custo combustível</span><b>${money(x.fuelCost||x.cost||0)}</b></div><div class="history-item"><span>Preço/L</span><b>${Number(x.fuelPriceL)>0?money(x.fuelPriceL):'Não informado'}</b></div><div class="history-item"><span>Custo total</span><b>${money(x.totalCost||x.cost||0)}</b></div></div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhuma viagem finalizada registrada.</div>';const ab=readAb();ha.innerHTML=ab.length?'<div class="history-stack">'+ab.slice().reverse().map(x=>`<details class="history-card"><summary><div class="history-title"><span>⛽ ${esc(x.tipoCombustivel||x.combustivel||'Não informado')}</span><span>${money(x.valorPago)}</span></div><span class="history-sub">${esc(x.veiculo||'Veículo não informado')} • ${x.createdAt?new Date(x.createdAt).toLocaleString('pt-BR'):'Data não informada'}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Tipo de combustível</span><b>${esc(x.tipoCombustivel||x.combustivel||'Não informado')}</b></div><div class="history-item"><span>Valor pago</span><b>${money(x.valorPago)}</b></div><div class="history-item"><span>Preço/L</span><b>${money(x.precoLitro)}</b></div><div class="history-item"><span>Litros</span><b>${fmt(x.litros)} L</b></div><div class="history-item"><span>Odômetro</span><b>${fmt(x.odometro,0)} km</b></div><div class="history-item"><span>Tanque</span><b>${esc(x.situacao||'Não informado')}</b></div><div class="history-item"><span>Distância desde anterior</span><b>${x.distanciaDesdeAnterior==null?'Não calculável':fmt(x.distanciaDesdeAnterior)+' km'}</b></div></div></div></details>`).join('')+'</div>':'<div class="history-empty">Nenhum abastecimento registrado.</div>' 
-const manutencoes=Array.isArray(state.manutencoes)?state.manutencoes.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||''))):[];
-if(hm)hm.innerHTML=manutencoes.length?'<div class="history-stack">'+manutencoes.map(m=>{const data=m.date?new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR'):'Data não informada';const veiculo=m.vehicleName||state.vehicle?.name||'Veículo não informado';const od=m.odometerKm!==''&&m.odometerKm!=null?fmt(m.odometerKm,2)+' km':'Não informado';const custo=money(m.cost||0);const proxKm=m.nextKm!==''&&m.nextKm!=null?fmt(m.nextKm,2)+' km':'Não informado';const proxData=m.nextDate?new Date(m.nextDate+'T00:00:00').toLocaleDateString('pt-BR'):'Não informada';const desc=m.description?`<div class="history-item" style="grid-column:1/-1"><span>Descrição</span><b>${esc(m.description)}</b></div>`:'';return `<details class="history-card"><summary><div class="history-title"><span>🔧 ${esc(m.type||'Manutenção')}</span><span>${custo}</span></div><span class="history-sub">${esc(data)} • ${esc(veiculo)}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Tipo de manutenção</span><b>${esc(m.type||'Manutenção')}</b></div><div class="history-item"><span>Data</span><b>${esc(data)}</b></div><div class="history-item"><span>Veículo</span><b>${esc(veiculo)}</b></div><div class="history-item"><span>Odômetro</span><b>${esc(od)}</b></div><div class="history-item"><span>Custo</span><b>${custo}</b></div><div class="history-item"><span>Próxima por km</span><b>${esc(proxKm)}</b></div><div class="history-item"><span>Próxima por data</span><b>${esc(proxData)}</b></div>${desc}</div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhuma manutenção registrada.</div>';
-const ajustes=(Array.isArray(state.events)?state.events:[]).filter(e=>e.type==='AJUSTE_ODOMETRO').slice().reverse();
-if(hj)hj.innerHTML=ajustes.length?'<div class="history-stack">'+ajustes.map(e=>`<details class="history-card"><summary><div class="history-title"><span>🔧 Ajuste de odômetro</span><span>${fmt(e.odometroNovo,3)} km</span></div><span class="history-sub">${e.createdAt?new Date(e.createdAt).toLocaleString('pt-BR'):'Data não informada'}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Odômetro anterior</span><b>${fmt(e.odometroAnterior,3)} km</b></div><div class="history-item"><span>Novo odômetro</span><b>${fmt(e.odometroNovo,3)} km</b></div><div class="history-item"><span>Distância ajustada</span><b>${fmt(Math.max(0,Number(e.odometroNovo)-Number(e.odometroAnterior)),3)} km</b></div><div class="history-item"><span>Nível do combustível</span><b>${Number(e.nivelCombustivel)} / 8${Number(e.nivelCombustivel)===4?' — Meio tanque':''}</b></div><div class="history-item"><span>Origem</span><b>Ajuste manual na Viagem</b></div></div></div></details>`).join('')+'</div>':'<div class="history-empty">Nenhum ajuste de odômetro registrado.</div>';
+function getHistoricoVehicleId(){return String($('historicoVeiculoSelect')?.value||state.selectedVehicleId||'');}
+function renderHistoricoVehicleSelect(){
+  const sel=$('historicoVeiculoSelect'); if(!sel)return;
+  normalizeVehicles();
+  const list=state.vehicles.filter(v=>v&&v.name);
+  if(!list.length){sel.innerHTML='<option value="">Nenhum veículo cadastrado</option>';sel.disabled=true;return;}
+  sel.disabled=false;
+  const current=String(state.selectedVehicleId||list[0].id);
+  sel.innerHTML=list.map(v=>`<option value="${esc(v.id)}">${esc(v.name)}</option>`).join('');
+  sel.value=list.some(v=>String(v.id)===current)?current:String(list[0].id);
+}
+function renderHistorico(){
+  renderHistoricoVehicleSelect();
+  const vid=getHistoricoVehicleId();
+  const hv=$('historicoViagens'),ha=$('historicoAbastecimentos'),hm=$('historicoManutencao'),hj=$('historicoAjustes');
+  const viagens=(Array.isArray(state.history)?state.history:[]).filter(x=>!vid||String(x.vehicle?.id||x.vehicleId||'')===vid);
+  hv.innerHTML=viagens.length?'<div class="history-stack">'+viagens.slice().sort((a,b)=>Number(b.endedAt||0)-Number(a.endedAt||0)).map(x=>{const dur=timeText(x);return `<details class="history-card"><summary><div class="history-title"><span>🚗 ${esc(x.destination?'Viagem para '+x.destination:'Viagem')}</span><span>${fmt(x.distanceKm||0)} km</span></div><span class="history-sub">${x.endedAt?new Date(x.endedAt).toLocaleString('pt-BR'):'Data não informada'} • ${esc(x.vehicle?.name||'Veículo não informado')}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Origem</span><b>Localização registrada</b></div><div class="history-item"><span>Destino</span><b>${esc(x.destination||'Não definido')}</b></div><div class="history-item"><span>Veículo</span><b>${esc(x.vehicle?.name||'Não informado')}</b></div><div class="history-item"><span>Combustível</span><b>${esc(x.fuelType||x.vehicle?.fuelType||'Não informado')}</b></div><div class="history-item"><span>Distância</span><b>${fmt(x.distanceKm||0)} km</b></div><div class="history-item"><span>Tempo</span><b>${dur}</b></div><div class="history-item"><span>Velocidade média</span><b>${fmt(x.avgSpeed||0)} km/h</b></div><div class="history-item"><span>Consumo real</span><b>${Number(x.consumptionKml)>0?fmt(x.consumptionKml)+' km/L':'Não disponível'}</b></div><div class="history-item"><span>Combustível gasto</span><b>${fmt(x.liters||0)} L</b></div><div class="history-item"><span>Custo combustível</span><b>${money(x.fuelCost||x.cost||0)}</b></div><div class="history-item"><span>Preço/L</span><b>${Number(x.fuelPriceL)>0?money(x.fuelPriceL):'Não informado'}</b></div><div class="history-item"><span>Custo total</span><b>${money(x.totalCost||x.cost||0)}</b></div></div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhuma viagem registrada para este veículo.</div>';
+  const ab=readAb().filter(x=>!vid||String(x.vehicleId||'')===vid);
+  ha.innerHTML=ab.length?'<div class="history-stack">'+ab.slice().reverse().map(x=>`<details class="history-card"><summary><div class="history-title"><span>⛽ ${esc(x.tipoCombustivel||x.combustivel||'Não informado')}</span><span>${money(x.valorPago)}</span></div><span class="history-sub">${esc(x.veiculo||'Veículo não informado')} • ${x.createdAt?new Date(x.createdAt).toLocaleString('pt-BR'):'Data não informada'}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Tipo de combustível</span><b>${esc(x.tipoCombustivel||x.combustivel||'Não informado')}</b></div><div class="history-item"><span>Valor pago</span><b>${money(x.valorPago)}</b></div><div class="history-item"><span>Preço/L</span><b>${money(x.precoLitro)}</b></div><div class="history-item"><span>Litros</span><b>${fmt(x.litros)} L</b></div><div class="history-item"><span>Odômetro</span><b>${fmt(x.odometro,3)} km</b></div><div class="history-item"><span>Tanque</span><b>${esc(x.situacao||'Não informado')}</b></div><div class="history-item"><span>Distância desde anterior</span><b>${x.distanciaDesdeAnterior==null?'Não calculável':fmt(x.distanciaDesdeAnterior,3)+' km'}</b></div></div></div></details>`).join('')+'</div>':'<div class="history-empty">Nenhum abastecimento registrado para este veículo.</div>';
+  const manutencoes=(Array.isArray(state.manutencoes)?state.manutencoes:[]).filter(m=>!vid||String(m.vehicleId||'')===vid).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  hm.innerHTML=manutencoes.length?'<div class="history-stack">'+manutencoes.map(m=>{const data=m.date?new Date(m.date+'T00:00:00').toLocaleDateString('pt-BR'):'Data não informada';const vehicle=m.vehicleName||'Veículo não informado';const od=m.odometerKm!==''&&m.odometerKm!=null?fmt(m.odometerKm,2)+' km':'Não informado';const custo=money(m.cost||0);return `<details class="history-card"><summary><div class="history-title"><span>🔧 ${esc(m.type||'Manutenção')}</span><span>${custo}</span></div><span class="history-sub">${esc(data)} • ${esc(vehicle)}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Tipo</span><b>${esc(m.type||'Manutenção')}</b></div><div class="history-item"><span>Data</span><b>${esc(data)}</b></div><div class="history-item"><span>Veículo</span><b>${esc(vehicle)}</b></div><div class="history-item"><span>Odômetro</span><b>${esc(od)}</b></div><div class="history-item"><span>Custo</span><b>${custo}</b></div><div class="history-item"><span>Próxima por km</span><b>${m.nextKm!==''&&m.nextKm!=null?fmt(m.nextKm,2)+' km':'Não informado'}</b></div><div class="history-item"><span>Próxima por data</span><b>${m.nextDate?new Date(m.nextDate+'T00:00:00').toLocaleDateString('pt-BR'):'Não informada'}</b></div>${m.description?`<div class="history-item" style="grid-column:1/-1"><span>Descrição</span><b>${esc(m.description)}</b></div>`:''}</div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhuma manutenção registrada para este veículo.</div>';
+  const ajustes=(Array.isArray(state.events)?state.events:[]).filter(e=>e.type==='AJUSTE_ODOMETRO'&&(!vid||String(e.vehicleId||state.selectedVehicleId||'')===vid)).slice().reverse();
+  hj.innerHTML=ajustes.length?'<div class="history-stack">'+ajustes.map(e=>`<details class="history-card"><summary><div class="history-title"><span>🔧 Ajuste de odômetro</span><span>${fmt(e.odometroNovo,3)} km</span></div><span class="history-sub">${e.createdAt?new Date(e.createdAt).toLocaleString('pt-BR'):'Data não informada'}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Odômetro anterior</span><b>${fmt(e.odometroAnterior,3)} km</b></div><div class="history-item"><span>Novo odômetro</span><b>${fmt(e.odometroNovo,3)} km</b></div><div class="history-item"><span>Distância ajustada</span><b>${fmt(Math.max(0,Number(e.odometroNovo)-Number(e.odometroAnterior)),3)} km</b></div><div class="history-item"><span>Nível do combustível</span><b>${Number(e.nivelCombustivel)} / ${Number(e.fuelBars||8)}</b></div></div></div></details>`).join('')+'</div>':'<div class="history-empty">Nenhum ajuste de odômetro registrado para este veículo.</div>';
+  const v=state.vehicles.find(x=>String(x.id)===vid)||getSelectedVehicle();
+  const initial=Number(v?.odometerInitial||0), current=Number(v?.odometerRef||0), km=Math.max(0,current-initial);
+  const summary=$('historicoKmResumo');
+  if(summary)summary.innerHTML=v?`<div class="km-grid"><div class="km-item"><span>KM inicial</span><b>${initial>0?fmt(initial,3)+' km':'--'}</b></div><div class="km-item"><span>KM atual</span><b>${current>0?fmt(current,3)+' km':'--'}</b></div><div class="km-item"><span>KM rodados</span><b>${initial>0&&current>=initial?fmt(km,3)+' km':'--'}</b></div></div>`:'<div class="history-empty">Selecione um veículo.</div>';
 }
 
 function getFuelAlertSettings(){
@@ -629,7 +720,8 @@ function randomFuelAlertMessage(){
 function checkLowFuelAlert(){
   const tank=Number(state.vehicle.tankL)||0,fuel=Math.max(0,Number(state.vehicle.fuelL)||0);
   if(tank<=0)return;
-  const bars=Math.round(Math.max(0,Math.min(1,fuel/tank))*8);
+  const barCount=getFuelBarCount(state.vehicle);
+  const bars=Math.floor(Math.max(0,Math.min(barCount,(fuel/tank)*barCount)+1e-9));
   const f=getFuelAlertSettings();
   if(bars<=1){
     if(!f.lowTriggered){
@@ -675,40 +767,97 @@ async function checkDestinationFuelAlert(destination){
   }
 }
 function render(){
+  // Não sincroniza fontes legadas a cada render: isso podia sobrescrever o
+  // odômetro correto do veículo com um valor antigo/vazio.
   const pb=$('btnPausar'); if(pb) pb.innerHTML=state.trip?.paused?'▶<br>Retomar':'⏸<br>Pausar';
 
-  syncExternalReferences();
   const t=state.trip,running=!!t?.running,paused=!!t?.paused;
   $('av-trip-footer').style.display=document.getElementById('tabViagem').classList.contains('active')?'grid':'none';
   $('status').textContent=running?(paused?'Viagem pausada':'Viagem em andamento'):'Viagem parada';$('distancia').textContent=fmt(t?.distanceKm||0)+' km';$('litros').textContent=fmt(t?.liters||0)+' L';$('velMedia').textContent=fmt(t?.avgSpeed||0)+' km/h';$('tempo').textContent=timeText(t);$('custo').textContent=money(t?.cost||0);$('custokm').textContent=money((t?.distanceKm||0)>0?(t.cost||0)/t.distanceKm:0);const real=realConsumptionKml();$('consumo').textContent=real>0?fmt(real,2)+' km/L':'Aguardando 2 abastecimentos válidos do mesmo combustível';$('precoInfo').textContent=lastFuelPrice()>0?money(lastFuelPrice())+'/L':'--';$('refInfo').textContent=real>0?fmt(real,2)+' km/L':'--';$('destinoDisplay').textContent=t?.destination||state.tripDraft?.destination||'Não definido';$('avOdoDemo').textContent=Number(state.vehicle.odometerRef)>0?fmt(state.vehicle.odometerRef,3)+' km':'-- km';renderFuel();checkLowFuelAlert();renderFuelAlertSettings();$('ocorrenciasVelocidade').textContent=state.events.filter(e=>e.tripId===t?.id).length;$('consultasLimite').textContent=`${state.settings.limitQueries} / ${state.settings.limitQueryMax}`;$('consultasRestantes').textContent=Math.max(0,state.settings.limitQueryMax-state.settings.limitQueries);$('ultimoLimite').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'--';$('limiteVelocidade').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'-- km/h';$('autonomia').textContent=real>0&&Number(state.vehicle.fuelL)>0?fmt(state.vehicle.fuelL*real,0)+' km':'-- km';if(!running&&!paused)stopTimer()
 }
-function renderFuel(){const tank=Number(state.vehicle.tankL)||0,f=Number(state.vehicle.fuelL);const frac=tank>0?Math.max(0,Math.min(1,(Number.isFinite(f)?f:0)/tank)):0;const bars=Math.round(frac*8);$('avFuelValue').innerHTML=`${bars} / 8 <small>tanque</small>`;[...$('avFuelBars').children].forEach((x,i)=>x.classList.toggle('on',i<bars))}
+function getFuelBarCount(v){return Math.max(1,Math.min(30,Math.round(Number(v?.fuelBars)||8)))}
+function fuelLitersPerBar(v){const tank=Number(v?.tankL)||0;const bars=getFuelBarCount(v);return tank>0?tank/bars:0}
+function renderFuel(){const tank=Number(state.vehicle.tankL)||0,f=Number(state.vehicle.fuelL);const barCount=getFuelBarCount(state.vehicle);const frac=tank>0?Math.max(0,Math.min(1,(Number.isFinite(f)?f:0)/tank)):0;const bars=Math.floor(frac*barCount+1e-9);const wrap=$('avFuelBars');wrap.style.setProperty('--fuel-bars-count',barCount);while(wrap.children.length<barCount)wrap.appendChild(document.createElement('span'));while(wrap.children.length>barCount)wrap.removeChild(wrap.lastElementChild);[...wrap.children].forEach((x,i)=>x.classList.toggle('on',i<bars));$('avFuelValue').innerHTML=`${bars} / ${barCount} <small>tanque</small>`}
 function openAjusteOdo(){
   const modal=$('ajusteOdoModal');
   const odo=Number(state.vehicle.odometerRef)||0;
   const tank=Number(state.vehicle.tankL)||0;
   const fuel=Number(state.vehicle.fuelL)||0;
   $('ajusteOdoInput').value=odo>0?odo.toFixed(3):'';
-  const nivel=tank>0?Math.max(0,Math.min(8,Math.round((fuel/tank)*8))):0;
-  $('ajusteCombNivel').value=String(nivel);
+  const barCount=getFuelBarCount(state.vehicle);
+  const nivel=tank>0?Math.max(0,Math.min(barCount,Math.floor((fuel/tank)*barCount+1e-9))):0;
+  renderFuelAdjustmentOptions(barCount,nivel);
   $('ajusteOdoMsg').textContent='';
   modal.style.display='flex';
   setTimeout(()=>$('ajusteOdoInput').focus(),50);
 }
 function closeAjusteOdo(){$('ajusteOdoModal').style.display='none'}
+function persistSelectedVehicleReference(){
+  normalizeVehicles();
+  const id=state.selectedVehicleId||state.vehicle?.id;
+  if(!id)return;
+  const v=state.vehicles.find(x=>String(x.id)===String(id));
+  if(!v)return;
+  Object.assign(v,{
+    name:state.vehicle.name||v.name,
+    tankL:Number(state.vehicle.tankL)||Number(v.tankL)||0,
+    fuelType:state.vehicle.fuelType||v.fuelType||'Flex',
+    fuelL:Number(state.vehicle.fuelL)||0,
+    fuelBars:getFuelBarCount(state.vehicle),
+    priceL:Number(state.vehicle.priceL)||0,
+    odometerRef:Number(state.vehicle.odometerRef)||0,
+    updatedAt:new Date().toISOString()
+  });
+  state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(v));
+}
 function saveAjusteOdo(){
+  const now=new Date().toISOString();
   const odo=Number($('ajusteOdoInput').value);
-  const nivel=Number($('ajusteCombNivel').value);
   if(!(odo>=0)){
     $('ajusteOdoMsg').textContent='⚠️ Informe o odômetro atual.';
     return;
   }
-  const oldOdo=Number(state.vehicle.odometerRef)||0;
-  const tank=Number(state.vehicle.tankL)||0;
-  state.vehicle.odometerRef=Number(odo.toFixed(3));
-  if(tank>0) state.vehicle.fuelL=Number((tank*(nivel/8)).toFixed(3));
 
-  const now=new Date().toISOString();
+  // A lista de veículos é a fonte definitiva. Localiza o veículo escolhido
+  // antes de alterar qualquer valor para impedir que uma rotina posterior
+  // recarregue o combustível antigo.
+  if(!Array.isArray(state.vehicles))state.vehicles=[];
+  let vid=state.selectedVehicleId||state.vehicle?.id||'';
+  let vv=state.vehicles.find(v=>String(v.id)===String(vid));
+  if(!vv && state.vehicle?.id){
+    vid=state.vehicle.id;
+    vv=state.vehicles.find(v=>String(v.id)===String(vid));
+  }
+  if(!vv){
+    $('ajusteOdoMsg').textContent='⚠️ Selecione um veículo cadastrado.';
+    return;
+  }
+
+  const oldOdo=Number(vv.odometerRef)||0;
+  const oldFuel=Number(vv.fuelL)||0;
+  const tank=Number(vv.tankL)||Number(state.vehicle.tankL)||0;
+  const barCount=getFuelBarCount(vv);
+  const nivel=Math.max(0,Math.min(barCount,Number($('ajusteCombNivel').value)));
+  const novoOdo=Number(odo.toFixed(3));
+  const novoFuel=tank>0?Number((tank*(nivel/barCount)).toFixed(3)):0;
+
+  if(!(Number(vv.odometerInitial)>0))vv.odometerInitial=novoOdo;
+  vv.odometerRef=Math.max(Number(vv.odometerRef)||0,novoOdo);
+  vv.odometro=novoOdo;
+  if(tank>0)vv.fuelL=novoFuel;
+  vv.updatedAt=now;
+
+  // Atualiza a referência em memória imediatamente.
+  state.selectedVehicleId=vv.id;
+  state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vv));
+
+  // Se houver viagem ativa, mantém também o veículo da viagem sincronizado.
+  if(state.trip){
+    state.trip.vehicle=Object.assign(clone(state.trip.vehicle||{}),{
+      id:vv.id,name:vv.name,tankL:vv.tankL,fuelType:vv.fuelType,priceL:vv.priceL,odometerRef:vv.odometerRef,fuelL:vv.fuelL
+    });
+  }
+
   state.events=Array.isArray(state.events)?state.events:[];
   state.events.push({
     id:uid('odo'),
@@ -717,15 +866,43 @@ function saveAjusteOdo(){
     createdAt:now,
     updatedAt:now,
     tripId:state.trip?.id||null,
+    vehicleId:vv.id,
     odometroAnterior:oldOdo,
     odometroNovo:state.vehicle.odometerRef,
     nivelCombustivel:nivel,
+    combustivelAnteriorLitros:oldFuel,
+    combustivelNovoLitros:novoFuel,
     extra:{origem:'ajuste manual pelo painel da Viagem'}
   });
+
   save();
+  // Renderiza diretamente a partir do veículo recém-atualizado.
+  renderTripVehicleSelect();
+  renderAb();
   render();
+  renderHistorico();
   $('ajusteOdoMsg').textContent='✅ Odômetro e nível do combustível atualizados.';
   setTimeout(closeAjusteOdo,700);
+}
+
+function initVehiclePanelExpandable(){
+  const panel=document.getElementById('av-trip-panel');
+  const title=document.getElementById('avVehiclePanelToggle');
+  if(!panel||!title)return;
+  const apply=(collapsed)=>{
+    panel.classList.toggle('vehicle-collapsed',!!collapsed);
+    title.setAttribute('aria-expanded', collapsed?'false':'true');
+    const icon=title.querySelector('.av-expand-icon');
+    if(icon)icon.textContent=collapsed?'⌄':'⌃';
+  };
+  const toggle=()=>{
+    const collapsed=!panel.classList.contains('vehicle-collapsed');
+    apply(collapsed);
+    try{localStorage.setItem('assistente_viagem_painel_veiculo_recolhido',collapsed?'1':'0')}catch(e){}
+  };
+  title.onclick=toggle;
+  title.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}};
+  try{apply(localStorage.getItem('assistente_viagem_painel_veiculo_recolhido')==='1')}catch(e){apply(false)}
 }
 
 let viagemTelaTravada=false;
@@ -733,16 +910,49 @@ function setViagemTelaTravada(travar){
   viagemTelaTravada=!!travar;
   const tag=$('viagemLockTag');
   const page=$('tabViagem');
+  const shield=$('viagemLockShield');
   if(tag){
     tag.classList.toggle('active',viagemTelaTravada);
-    tag.innerHTML=viagemTelaTravada?'🔒 <span>TRAVADA</span>':'🔓 <span>TRAVAR</span>';
+    tag.innerHTML=viagemTelaTravada?'🔒':'🔓';
+    tag.setAttribute('aria-label',viagemTelaTravada?'Destravar tela da viagem':'Travar tela da viagem');
   }
+  if(shield)shield.classList.toggle('active',viagemTelaTravada);
   if(page)page.classList.toggle('viagem-scroll-locked',viagemTelaTravada);
-  document.body.classList.toggle('viagem-scroll-locked',viagemTelaTravada);
+  // O cadeado protege somente a área da viagem. Menu e controles operacionais
+  // (Iniciar, Fim, Pausar e Nova viagem) permanecem utilizáveis.
+  document.body.classList.remove('viagem-scroll-locked');
+  document.documentElement.classList.remove('viagem-scroll-locked');
   try{sessionStorage.setItem('assistente_viagem_tela_travada',viagemTelaTravada?'1':'0')}catch(e){}
 }
 function toggleViagemTela(){
   setViagemTelaTravada(!viagemTelaTravada);
+}
+let viagemLockTouchHandler=null;
+function viagemLockAllowedTarget(target){
+  if(!viagemTelaTravada)return true;
+  const el=target?.nodeType===1?target:target?.parentElement;
+  if(!el)return true;
+  if(el.closest?.('#viagemLockTag'))return true;
+  if(el.closest?.('#btnIniciar,#btnFim,#btnPausar,#btnNova'))return true;
+  return false;
+}
+function installViagemLockTouchGuard(){
+  if(viagemLockTouchHandler)return;
+  const guard=e=>{
+    if(!viagemTelaTravada)return;
+    const tab=$('tabViagem');
+    const el=e.target?.nodeType===1?e.target:e.target?.parentElement;
+    if(!tab || !el || !tab.contains(el))return;
+    if(viagemLockAllowedTarget(el))return;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  viagemLockTouchHandler=guard;
+  document.addEventListener('touchstart',guard,{passive:false,capture:true});
+  document.addEventListener('touchmove',guard,{passive:false,capture:true});
+  document.addEventListener('pointerdown',guard,{passive:false,capture:true});
+  document.addEventListener('pointermove',guard,{passive:false,capture:true});
+  document.addEventListener('wheel',guard,{passive:false,capture:true});
 }
 function initViagemTelaLock(){
   const tag=$('viagemLockTag');
@@ -850,48 +1060,46 @@ function showTab(tab){
   $('tab'+tab[0].toUpperCase()+tab.slice(1)).classList.add('active');
   const lock=$('viagemLockTag');
   if(lock)lock.style.display=tab==='viagem'?'flex':'none';
+  if(tab!=='viagem' && viagemTelaTravada)setViagemTelaTravada(false);
   if(tab==='abastecimento')renderAb();
   if(tab==='historico')renderHistorico();
   if(tab==='manutencao')renderManutencao(); if(tab==='notificacoes')renderFuelAlertSettings();
   render()
 }
-async function resetApp(){
-  if(!confirm('⚠️ RESETAR O APLICATIVO?\n\nTodos os dados salvos neste aparelho serão apagados: viagens, abastecimentos, veículos, histórico, manutenção, ajustes, alertas e configurações. Esta ação não pode ser desfeita.'))return;
-
-  // 1) Interrompe qualquer atividade antes de limpar os dados.
-  try{stopGps()}catch(e){}
-  try{stopTimer()}catch(e){}
-  try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll()}catch(e){}
-
-  // 2) Limpeza TOTAL do armazenamento usado pelo aplicativo.
-  //    O reset anterior removia apenas algumas chaves e deixava dados
-  //    auxiliares (veículo/abastecimento) que eram carregados novamente.
-  try{localStorage.clear()}catch(e){console.error('Falha ao limpar localStorage',e)}
-  try{sessionStorage.clear()}catch(e){console.error('Falha ao limpar sessionStorage',e)}
-
-  // 3) Limpa bancos IndexedDB caso alguma versão do APK tenha criado um.
-  try{
-    if(window.indexedDB&&indexedDB.databases){
-      const dbs=await indexedDB.databases();
-      for(const db of (dbs||[])) if(db&&db.name) try{indexedDB.deleteDatabase(db.name)}catch(e){}
-    }
-  }catch(e){console.warn('IndexedDB não pôde ser limpo',e)}
-
-  // 4) Reconstrói o estado inicial em memória.
+function resetApp(){
+  if(!confirm('⚠️ Isso apagará TODOS os dados deste aplicativo neste aparelho, incluindo viagens, abastecimentos, veículos, manutenção, históricos, ajustes e configurações. Deseja realmente resetar?'))return;
+  try{stopGps();stopTimer();}catch(e){}
+  try{if(window.AndroidGPS&&typeof window.AndroidGPS.resetAll==='function')window.AndroidGPS.resetAll();}catch(e){}
+  // Remove todas as chaves conhecidas, inclusive integrações antigas que
+  // poderiam repopular o painel depois do reset.
+  const knownKeys=[NS,'assistente_viagem_historico_v1','assistente_viagem_eventos_v1','av_abastecimentos_v2','assistente_viagem_manutencao_v1','av_theme','assistente_viagem_veiculo_v1','assistente_viagem_vehicle_v1','cv2_veiculo_atual','veiculo_atual','assistente_viagem_abastecimentos_v1','abastecimentos_v1','cv2_abastecimentos','assistente_viagem_tela_travada','assistente_viagem_painel_veiculo_recolhido'];
+  knownKeys.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  try{localStorage.clear()}catch(e){}
+  try{sessionStorage.clear()}catch(e){}
+  try{indexedDB.databases?.().then(dbs=>dbs.forEach(db=>{try{indexedDB.deleteDatabase(db.name)}catch(e){}})).catch(()=>{})}catch(e){}
   state=clone(DEFAULT);
-  if(!Array.isArray(state.manutencoes))state.manutencoes=[];
-  if(!Array.isArray(state.maintenanceTypes))state.maintenanceTypes=[];
   lastGps=null;lossStarted=null;currentSpeed=0;currentLimit=null;speedingSince=null;viagemTelaTravada=false;
   document.body.classList.remove('dark');
   if($('avThemeBtn'))$('avThemeBtn').textContent='🌙';
+  ['destinoModalInput','abVeiculo','abTanque','abValor','abPreco','abLitros','abOdo','mntTipo','mntData','mntDescricao','mntOdom','mntCusto','mntProximoKm','mntProximaData'].forEach(id=>{if($(id))$(id).value=''});
+  if($('abComb'))$('abComb').value='Flex';
+  if($('abSituacao'))$('abSituacao').selectedIndex=0;
+  if($('ajusteOdoInput'))$('ajusteOdoInput').value='';
+  if($('ajusteCombNivel'))renderFuelAdjustmentOptions(getFuelBarCount(state.vehicle),0);
+  if($('destinoModal'))$('destinoModal').style.display='none';
+  if($('ajusteOdoModal'))$('ajusteOdoModal').style.display='none';
   try{setViagemTelaTravada(false)}catch(e){}
-
-  renderAb();renderHistorico();if(typeof renderManutencao==='function')renderManutencao();render();closeMenu();
-
-  alert('✅ Aplicativo resetado com sucesso.\n\nTodos os dados locais foram apagados.');
-  // Recarrega para garantir que o APK volte exatamente ao estado inicial.
-  try{location.reload()}catch(e){}
+  renderAb();renderHistorico();if(typeof renderManutencao==='function')renderManutencao();renderTripVehicleSelect();render();
+  closeMenu();
+  alert('✅ Aplicativo resetado. Todos os dados locais foram apagados.');
+  setTimeout(()=>{
+    try{
+      const cleanUrl=location.href.split('#')[0].split('?')[0];
+      location.href=cleanUrl+'?reset='+Date.now();
+    }catch(e){try{location.reload()}catch(_){}}
+  },120);
 }
+
 function openMenu(){$('avMenuPanel').classList.add('open');$('avMenuBackdrop').classList.add('open')}function closeMenu(){$('avMenuPanel').classList.remove('open');$('avMenuBackdrop').classList.remove('open')}
 function renderDestinoModalVeiculos(){
   const sel=$('destinoModalVeiculo');if(!sel)return;
@@ -918,9 +1126,9 @@ function saveDestino(){
   if(!selected){alert('Selecione um veículo antes de salvar a viagem.');return}
   if(state.trip){
     if(state.trip.running||state.trip.paused){alert('O veículo não pode ser alterado durante uma viagem.');return}
-    state.trip.destination=value;state.trip.vehicle=clone(selected);state.trip.updatedAt=new Date().toISOString();state.selectedVehicleId=selected.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
+    state.trip.destination=value;state.trip.vehicle=clone(selected);state.trip.updatedAt=new Date().toISOString();state.selectedVehicleId=selected.id;selected.fuelBars=Math.max(1,Math.min(30,Math.round(Number(selected.fuelBars)||8)));state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
   }else{
-    state.tripDraft.destination=value;state.tripDraft.vehicleId=selected.id;state.selectedVehicleId=selected.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
+    state.tripDraft.destination=value;state.tripDraft.vehicleId=selected.id;state.selectedVehicleId=selected.id;selected.fuelBars=Math.max(1,Math.min(30,Math.round(Number(selected.fuelBars)||8)));state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(selected));
   }
   save();$('destinoModal').style.display='none';render()
 }
@@ -937,16 +1145,9 @@ $('ajusteOdoModal').onclick=e=>{if(e.target.id==='ajusteOdoModal')closeAjusteOdo
 
 $('saveFuelAlerts').onclick=saveFuelAlertSettings;
 $('abSalvarVeiculo').onclick=saveVehicle;$('abCancelarEdicaoVeiculo').onclick=()=>{resetVehicleForm()};$('abValor').oninput=calcLitersFromValue;$('abPreco').oninput=calcLitersFromValue;$('abSalvar').onclick=saveFueling;$('avMenuBtn').onclick=openMenu;
-$('btnResetApp').onclick=resetApp;$('avMenuBackdrop').onclick=closeMenu;document.querySelectorAll('#avMenuPanel button[data-tab]').forEach(b=>b.onclick=()=>{showTab(b.dataset.tab);closeMenu()});$('avThemeBtn').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('av_theme',document.body.classList.contains('dark')?'dark':'light');$('avThemeBtn').textContent=document.body.classList.contains('dark')?'☀️':'🌙'};$('destinoCard').onclick=openDestino;$('destinoCard').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')openDestino()};$('salvarDestino').onclick=saveDestino;$('vozDestino').onclick=voiceDestino;$('btnIniciar').onclick=()=>{if(state.trip?.running||state.trip?.paused){alert(state.trip.paused?'A viagem está pausada. Use o botão Pausar para retomar.':'A viagem já está em andamento.');return}initTrip()};$('btnFim').onclick=finishTrip;$('btnPausar').onclick=pauseTrip;$('btnNova').onclick=newTrip;
+$('btnResetApp').onclick=resetApp;$('avMenuBackdrop').onclick=closeMenu;document.querySelectorAll('#avMenuPanel button[data-tab]').forEach(b=>b.onclick=()=>{showTab(b.dataset.tab);closeMenu()});$('avThemeBtn').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('av_theme',document.body.classList.contains('dark')?'dark':'light');$('avThemeBtn').textContent=document.body.classList.contains('dark')?'☀️':'🌙'};$('cancelarDestino').onclick=()=>{$('destinoModal').style.display='none'};$('destinoCard').onclick=openDestino;$('destinoCard').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')openDestino()};$('salvarDestino').onclick=saveDestino;$('vozDestino').onclick=voiceDestino;$('btnIniciar').onclick=()=>{if(state.trip?.running||state.trip?.paused){alert(state.trip.paused?'A viagem está pausada. Use o botão Pausar para retomar.':'A viagem já está em andamento.');return}initTrip()};$('btnFim').onclick=finishTrip;$('btnPausar').onclick=pauseTrip;$('btnNova').onclick=newTrip;
 if(localStorage.getItem('av_theme')==='dark'){document.body.classList.add('dark');$('avThemeBtn').textContent='☀️'}
 loadFuelings();
-if(Array.isArray(state.fuelings)){
-  state.fuelings = state.fuelings.filter(x => Math.abs(Number(x.valorPago ?? x.valor ?? 0) - 98.15) < 0.01);
-  try{
-    localStorage.setItem(NS,JSON.stringify(state));
-    localStorage.setItem('av_abastecimentos_v2',JSON.stringify(state.fuelings));
-  }catch(e){console.error(e)}
-}
 syncExternalReferences();
 normalizeVehicles();
 renderTripVehicleSelect();
@@ -954,7 +1155,9 @@ renderAb();
 renderHistorico();
 initManutencao();
 render();
-
+initViagemTelaLock(); installViagemLockTouchGuard(); initVehiclePanelExpandable();
 if($('viagemLockTag'))$('viagemLockTag').style.display='flex';
 </script>
 </body></html>
+
+<script>document.addEventListener('change',e=>{if(e.target&&e.target.id==='historicoVeiculoSelect')renderHistorico()});</script>
