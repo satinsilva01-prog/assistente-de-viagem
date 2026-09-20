@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
 import android.webkit.WebStorage
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -31,11 +32,10 @@ class MainActivity : Activity() {
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
+        webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                // Ajustes do APK, sem alterar a lógica oficial do HTML.
-                // O bind do reset é repetido porque o menu pode ser reconstruído pelo HTML.
                 webView.evaluateJavascript("""
                     (function(){
                       try{
@@ -44,30 +44,6 @@ class MainActivity : Activity() {
                         var panel=document.getElementById('av-trip-panel');
                         if(panel){panel.style.position='static';panel.style.top='auto';panel.style.zIndex='50';}
                         document.querySelectorAll('.viagem-scroll-locked').forEach(function(e){e.classList.remove('viagem-scroll-locked');});
-
-                        function bindNativeReset(){
-                          var reset=document.getElementById('btnResetApp');
-                          if(!reset || reset.dataset.nativeResetBound==='1') return;
-                          reset.dataset.nativeResetBound='1';
-                          var go=function(ev){
-                            if(ev){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();}
-                            try{
-                              if(window.AndroidGPS && typeof window.AndroidGPS.resetAll==='function'){
-                                window.AndroidGPS.resetAll();
-                              } else {
-                                alert('Função nativa de reset não disponível.');
-                              }
-                            }catch(e){ alert('Erro ao executar o reset: '+e); }
-                            return false;
-                          };
-                          reset.addEventListener('click',go,true);
-                          reset.addEventListener('touchend',go,true);
-                          reset.addEventListener('pointerup',go,true);
-                        }
-                        bindNativeReset();
-                        setTimeout(bindNativeReset,300);
-                        setTimeout(bindNativeReset,800);
-                        setTimeout(bindNativeReset,1500);
                       }catch(e){}
                     })();
                 """.trimIndent(), null)
@@ -118,7 +94,7 @@ class MainActivity : Activity() {
                 webView.clearCache(true)
                 WebStorage.getInstance().deleteAllData()
                 webView.evaluateJavascript("try{localStorage.clear();sessionStorage.clear();}catch(e){}", null)
-                webView.loadUrl("file:///android_asset/index.html")
+                webView.postDelayed({ webView.loadUrl("file:///android_asset/index.html") }, 150)
             } catch (e: Exception) {
                 Toast.makeText(this, "Erro ao resetar dados nativos: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
             }
@@ -132,6 +108,12 @@ class MainActivity : Activity() {
         val t=JSONObject.quote(d.toString()); runOnUiThread{webView.evaluateJavascript("window.nativeGpsUpdate && window.nativeGpsUpdate($t);",null)}
     }
 
-    inner class AndroidBridge { @JavascriptInterface fun startTrip(){runOnUiThread{iniciarServicoGps()}}; @JavascriptInterface fun stopTrip(){runOnUiThread{pararServicoGps()}}; @JavascriptInterface fun resetAll(){resetAplicativoNativo()}; @JavascriptInterface fun isNative():Boolean=true }
+    inner class AndroidBridge {
+        @JavascriptInterface fun startTrip(){runOnUiThread{iniciarServicoGps()}}
+        @JavascriptInterface fun stopTrip(){runOnUiThread{pararServicoGps()}}
+        @JavascriptInterface fun resetAll(){resetAplicativoNativo()}
+        @JavascriptInterface fun isNative():Boolean=true
+    }
+
     override fun onDestroy(){handler.removeCallbacksAndMessages(null);super.onDestroy()}
 }
