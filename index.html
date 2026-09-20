@@ -1390,7 +1390,43 @@ if($('viagemLockTag'))$('viagemLockTag').style.display='flex';
       <p class="meta"><b>Veículo:</b> ${esc2(vehicle)}<br><b>Gerado em:</b> ${esc2(now)}</p>
       ${rows?`<table><thead><tr><th>Veículo</th><th>Manutenção</th><th>Data</th><th>Odômetro</th><th>Custo</th><th>Descrição</th><th>Próxima por km</th><th>Próxima por data</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">Nenhuma manutenção registrada para este veículo.</div>'}
       <footer>Documento gerado pelo Assistente de Viagem. Use “Salvar como PDF” na janela de impressão.</footer>
-      <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`);
+      <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+<script>
+/* Correção V35 — botão Salvar chave TomTom */
+document.addEventListener('click', function(e){
+  const btn = e.target && e.target.closest ? e.target.closest('#tomtomSalvar') : null;
+  if(!btn) return;
+  e.preventDefault();
+  try{
+    const keyEl=document.getElementById('tomtomApiKey');
+    const modeEl=document.getElementById('tomtomModo');
+    const manualEl=document.getElementById('tomtomLimiteManual');
+    const key=(keyEl?.value||'').trim();
+    const mode=modeEl?.value||'manual';
+    const manual=parseFloat(manualEl?.value||'110');
+    localStorage.setItem('assistente_tomtom_api_key',key);
+    localStorage.setItem('assistente_tomtom_mode',mode);
+    if(Number.isFinite(manual)&&manual>0) localStorage.setItem('assistente_tomtom_manual',String(Math.round(manual)));
+    const status=document.getElementById('tomtomStatus');
+    if(status) status.textContent = mode==='tomtom'
+      ? (key ? 'Chave TomTom salva com sucesso.' : 'TomTom selecionada, mas a chave ainda não foi informada.')
+      : `Limite manual configurado em ${Math.round(manual||110)} km/h.`;
+    btn.textContent='✓ Chave salva';
+    setTimeout(()=>{btn.textContent='Salvar chave'},1500);
+  }catch(err){
+    const status=document.getElementById('tomtomStatus');
+    if(status) status.textContent='Não foi possível salvar a chave neste dispositivo.';
+    console.error(err);
+  }
+});
+document.addEventListener('DOMContentLoaded', function(){
+  const keyEl=document.getElementById('tomtomApiKey');
+  if(keyEl && !keyEl.value){
+    keyEl.value=localStorage.getItem('assistente_tomtom_api_key')||'';
+  }
+});
+</script>
+</body></html>`);
     w.document.close();
   }
   function init(){
@@ -1416,6 +1452,42 @@ if($('viagemLockTag'))$('viagemLockTag').style.display='flex';
 })();
 </script>
 
+
+<script>
+/* Correção V35 — botão Salvar chave TomTom */
+document.addEventListener('click', function(e){
+  const btn = e.target && e.target.closest ? e.target.closest('#tomtomSalvar') : null;
+  if(!btn) return;
+  e.preventDefault();
+  try{
+    const keyEl=document.getElementById('tomtomApiKey');
+    const modeEl=document.getElementById('tomtomModo');
+    const manualEl=document.getElementById('tomtomLimiteManual');
+    const key=(keyEl?.value||'').trim();
+    const mode=modeEl?.value||'manual';
+    const manual=parseFloat(manualEl?.value||'110');
+    localStorage.setItem('assistente_tomtom_api_key',key);
+    localStorage.setItem('assistente_tomtom_mode',mode);
+    if(Number.isFinite(manual)&&manual>0) localStorage.setItem('assistente_tomtom_manual',String(Math.round(manual)));
+    const status=document.getElementById('tomtomStatus');
+    if(status) status.textContent = mode==='tomtom'
+      ? (key ? 'Chave TomTom salva com sucesso.' : 'TomTom selecionada, mas a chave ainda não foi informada.')
+      : `Limite manual configurado em ${Math.round(manual||110)} km/h.`;
+    btn.textContent='✓ Chave salva';
+    setTimeout(()=>{btn.textContent='Salvar chave'},1500);
+  }catch(err){
+    const status=document.getElementById('tomtomStatus');
+    if(status) status.textContent='Não foi possível salvar a chave neste dispositivo.';
+    console.error(err);
+  }
+});
+document.addEventListener('DOMContentLoaded', function(){
+  const keyEl=document.getElementById('tomtomApiKey');
+  if(keyEl && !keyEl.value){
+    keyEl.value=localStorage.getItem('assistente_tomtom_api_key')||'';
+  }
+});
+</script>
 </body></html>
 
 <script>document.addEventListener('change',e=>{if(e.target&&e.target.id==='historicoVeiculoSelect')renderHistorico()});</script>
