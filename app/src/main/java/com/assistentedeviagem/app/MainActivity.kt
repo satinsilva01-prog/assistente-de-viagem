@@ -93,8 +93,19 @@ class MainActivity : Activity() {
                 webView.clearFormData()
                 webView.clearCache(true)
                 WebStorage.getInstance().deleteAllData()
-                webView.evaluateJavascript("try{localStorage.clear();sessionStorage.clear();}catch(e){}", null)
-                webView.postDelayed({ webView.loadUrl("file:///android_asset/index.html") }, 150)
+
+                // A limpeza do WebView precisa terminar antes do reload.
+                // O callback garante que localStorage/sessionStorage foram
+                // limpos antes de carregar novamente o index.html.
+                webView.evaluateJavascript("try{localStorage.clear();sessionStorage.clear();}catch(e){}") {
+                    handler.postDelayed({
+                        try {
+                            webView.loadUrl("file:///android_asset/index.html")
+                        } catch (e: Exception) {
+                            Toast.makeText(this, "Erro ao recarregar após reset: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
+                        }
+                    }, 700)
+                }
             } catch (e: Exception) {
                 Toast.makeText(this, "Erro ao resetar dados nativos: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
             }
