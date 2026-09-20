@@ -55,15 +55,28 @@ body.dark .maintenance-badge.warn{background:#3a2a14;color:#fbbf24!important}
 body.dark .maintenance-badge.over{background:#3b1818;color:#fca5a5!important}
 @media(max-width:520px){.maintenance-grid{grid-template-columns:1fr}}
 
+/* TAG DE TRAVA DA TELA DA VIAGEM */
+.viagem-lock-tag{position:fixed;right:12px;top:78px;z-index:1050;border:1px solid #b8c0c8;border-radius:999px;padding:7px 10px;background:#fff;color:#111;font-size:12px;font-weight:800;box-shadow:0 3px 12px #0002;display:none;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.viagem-lock-tag.active{background:#20262d;color:#fff;border-color:#fff}
+body.dark .viagem-lock-tag{background:#20262d;color:#fff;border-color:#68727d}
+body.dark .viagem-lock-tag.active{background:#fff;color:#111;border-color:#fff}
+.viagem-scroll-locked{overflow:hidden!important;touch-action:none!important}
 
+
+.fuel-alert-card{border:1px solid #d7e2de}
+.fuel-alert-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fuel-alert-status{font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;background:#eef5f2;color:#17644d}
+.fuel-alert-grid{display:grid;gap:8px}
+.fuel-alert-input{width:100%;padding:10px;border:1px solid #ccd8d4;border-radius:9px;font-size:14px;background:var(--app-card,#fff);color:inherit}
+.fuel-alert-note{font-size:12px;line-height:1.4;color:#657d75}
+.fuel-alert-save{margin-top:8px;width:100%}
+body.dark .fuel-alert-card{border-color:#46534f}
+body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 </style>
-
-<style id="assistente-painel-veiculo-solto">
-/* Painel do veículo: não fica preso à tela */
+<style id="painel-veiculo-solto-final">
 #av-trip-panel,
-#av-trip-panel .av-trip-panel-inner,
 .av-trip-panel,
-.av-trip-panel-inner {
+#av-trip-panel.av-trip-panel {
   position: static !important;
   top: auto !important;
   bottom: auto !important;
@@ -941,5 +954,7 @@ renderAb();
 renderHistorico();
 initManutencao();
 render();
+
+if($('viagemLockTag'))$('viagemLockTag').style.display='flex';
 </script>
 </body></html>
