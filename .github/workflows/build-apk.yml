@@ -1,4 +1,4 @@
-name: Gerar APK NOVO
+name: Gerar APK
 
 on:
   push:
@@ -9,53 +9,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar código limpo
+      - name: Baixar código
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Limpar qualquer build anterior
-        run: |
-          set -euxo pipefail
-          rm -rf app/build .gradle
-          rm -f app/src/main/assets/index.html app/src/main/assets/tomtom-integracao.js
-          mkdir -p app/src/main/assets
-
-      - name: Preparar INDEX V35 com integração TomTom econômica
+      - name: Preparar INDEX atual
         run: |
           set -euxo pipefail
           test -s index.html
-          test -s tomtom-integracao.js
+          mkdir -p app/src/main/assets
           cp -f index.html app/src/main/assets/index.html
-          cp -f tomtom-integracao.js app/src/main/assets/tomtom-integracao.js
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('app/src/main/assets/index.html')
-          s=p.read_text(encoding='utf-8')
-          tag='<script src="tomtom-integracao.js"></script>'
-          if tag not in s:
-              pos=s.lower().rfind('</body>')
-              if pos < 0:
-                  raise SystemExit('INDEX sem </body>')
-              s=s[:pos]+tag+'\n'+s[pos:]
-          p.write_text(s,encoding='utf-8')
-          PY
           test -s app/src/main/assets/index.html
-          grep -q 'Assistente de Viagem V35' index.html
-          grep -q 'av-trip-panel' index.html
-          grep -q 'function resetApp' index.html
-          grep -q 'id="btnIniciar"' index.html
-          grep -q 'id="abBarras"' index.html
-          grep -q 'tomtom-integracao.js' app/src/main/assets/index.html
-          grep -q 'MIN_QUERY_MS=90000' app/src/main/assets/tomtom-integracao.js
-          echo "=== INDEX V35 ORIGINAL ==="
+          echo "INDEX atual preparado para o APK"
           wc -c index.html
           sha256sum index.html
-          echo "=== INDEX V35 COM TOMTOM NO APK ==="
           wc -c app/src/main/assets/index.html
           sha256sum app/src/main/assets/index.html
-          echo "=== INTEGRACAO TOMTOM ==="
-          wc -c app/src/main/assets/tomtom-integracao.js
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -69,20 +39,19 @@ jobs:
           gradle-version: '8.13'
           cache-disabled: true
 
-      - name: Compilar APK totalmente novo
+      - name: Compilar APK
         run: |
           set -euxo pipefail
           gradle clean :app:assembleDebug --no-build-cache
 
-      - name: Validar APK novo
+      - name: Validar APK
         run: |
           set -euxo pipefail
           test -s app/build/outputs/apk/debug/app-debug.apk
           sha256sum app/build/outputs/apk/debug/app-debug.apk
-          echo "APK V35 + TOMTOM ECONOMICO VALIDADO"
 
-      - name: Disponibilizar APK novo
+      - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Assistente-de-Viagem-V35-TomTom-APK
+          name: Assistente-de-Viagem-APK
           path: app/build/outputs/apk/debug/app-debug.apk
