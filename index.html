@@ -508,17 +508,44 @@ function saveManualTrip(){
     const date=$('manualTripDate')?.value||'';
     const origin=String($('manualTripOrigin')?.value||'').trim();
     const destination=String($('manualTripDestination')?.value||'').trim();
-    const odoStart=Number($('manualTripOdoStart')?.value),odoEnd=Number($('manualTripOdoEnd')?.value);
+    const odoStartRaw=$('manualTripOdoStart')?.value;
+    const odoEndRaw=$('manualTripOdoEnd')?.value;
+    const odoStart=Number(odoStartRaw), odoEnd=Number(odoEndRaw);
+    const directDistance=Number($('manualTripDistanceInput')?.value);
     const litersInput=Number($('manualTripLiters')?.value);
     const barsInput=Number($('manualTripFuelBars')?.value);
     const notes=String($('manualTripNotes')?.value||'').trim();
+
     if(!vehicle){$('manualTripMsg').textContent='⚠️ Cadastre e selecione um veículo.';return;}
-    if(!date||!Number.isFinite(odoStart)||!Number.isFinite(odoEnd)||odoEnd<odoStart){$('manualTripMsg').textContent='⚠️ Informe data e confira os odômetros.';return;}
-    const directDistance=Number($('manualTripDistanceInput')?.value);
-    const distance=Number.isFinite(directDistance)&&directDistance>0?Number(directDistance.toFixed(3)):Number((odoEnd-odoStart).toFixed(3));
-    if(distance<=0){$('manualTripMsg').textContent='⚠️ O odômetro final precisa ser maior que o inicial.';return;}
-    const oldOdo=Number(vehicle.odometerRef)||0;
-    if(oldOdo>0 && odoStart<oldOdo){$('manualTripMsg').textContent='⚠️ O odômetro inicial está menor que o último valor registrado ('+fmt(oldOdo,3)+' km).';return;}
+    if(!date){$('manualTripMsg').textContent='⚠️ Informe a data da viagem.';return;}
+
+    // A viagem avulsa pode ser cadastrada de duas formas:
+    // 1) odômetro inicial + final; ou
+    // 2) distância diretamente.
+    const hasOdos=Number.isFinite(odoStart)&&Number.isFinite(odoEnd);
+    const hasDirect=Number.isFinite(directDistance)&&directDistance>0;
+    if(!hasOdos&&!hasDirect){
+      $('manualTripMsg').textContent='⚠️ Informe os dois odômetros ou informe diretamente a distância da viagem.';
+      return;
+    }
+    if(hasOdos&&odoEnd<odoStart){
+      $('manualTripMsg').textContent='⚠️ O odômetro final não pode ser menor que o inicial.';
+      return;
+    }
+
+    let distance=hasDirect?Number(directDistance.toFixed(3)):Number((odoEnd-odoStart).toFixed(3));
+    if(distance<=0){
+      $('manualTripMsg').textContent='⚠️ A distância da viagem precisa ser maior que zero.';
+      return;
+    }
+
+    // Se só a distância foi informada, usamos o odômetro atual como referência.
+    const currentOdo=Number(vehicle.odometerRef)||0;
+    const effectiveStart=hasOdos?odoStart:currentOdo;
+    const effectiveEnd=hasOdos?odoEnd:Number((effectiveStart+distance).toFixed(3));
+
+    // Viagem avulsa pode ser histórica. Não bloquear porque o odômetro atual
+    // pode estar maior que o odômetro da viagem que está sendo lançada.
     const fuelInfo=fuelAfterDistance(vehicle,distance,'viagem',litersInput);
     let finalFuel=fuelInfo.nextFuel;
     let fuelSource=fuelInfo.estimated?'estimado pela melhor base disponível':'informado pelo usuário';
@@ -527,20 +554,64 @@ function saveManualTrip(){
       finalFuel=Number((Number(vehicle.tankL)*(barsInput/barsCount)).toFixed(3));
       fuelSource='nível final informado em barras';
     }
+
     const started=new Date(date+'T08:00:00').getTime();
-    const trip={id:uid('tripm'),schemaVersion:2,createdAt:new Date(started).toISOString(),updatedAt:new Date(started).toISOString(),vehicle:clone(vehicle),vehicleId:vehicle.id,origin,destination,startedAt:started,endedAt:started,distanceKm:distance,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:0,fuelCost:0,fuelPriceL:Number(vehicle.priceL||lastFuelPrice()||0),totalCost:0,avgSpeed:0,drivingMs:0,running:false,paused:false,manual:true,extra:{finalized:true,tipoRegistro:'viagem_sem_app',odometroInicial:odoStart,odometroFinal:odoEnd,combustivelFonte:fuelSource,observacoes:notes}};
+    const trip={
+      id:uid('tripm'),schemaVersion:3,createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),
+      vehicle:clone(vehicle),vehicleId:vehicle.id,origin,destination,startedAt:started,endedAt:started,
+      distanceKm:distance,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:0,fuelCost:0,
+      fuelPriceL:Number(vehicle.priceL||lastFuelPrice()||0),totalCost:0,avgSpeed:0,drivingMs:0,
+      running:false,paused:false,manual:true,
+      extra:{finalized:true,tipoRegistro:'viagem_sem_app',odometroInicial:effectiveStart,
+      odometroFinal:effectiveEnd,combustivelFonte:fuelSource,observacoes:notes}
+    };
+
     state.history.unshift(trip);
     if(fuelInfo.liters>0)addConsumptionBase(vehicle,distance,fuelInfo.liters,'viagem');
-    vehicle.odometerRef=Math.max(Number(vehicle.odometerRef)||0,odoEnd);
-    vehicle.odometro=vehicle.odometerRef;
-    vehicle.fuelL=finalFuel;
+
+    // Só avançamos o odômetro atual; nunca o fazemos voltar por causa de
+    // uma viagem histórica cadastrada posteriormente.
+    if(effectiveEnd>currentOdo){
+      vehicle.odometerRef=effectiveEnd;
+      vehicle.odometro=effectiveEnd;
+      vehicle.fuelL=finalFuel;
+    }else if(!Number.isFinite(Number(vehicle.fuelL))){
+      vehicle.fuelL=finalFuel;
+    }else if(hasOdos && effectiveStart>=currentOdo){
+      vehicle.fuelL=finalFuel;
+    }
+
     vehicle.updatedAt=new Date().toISOString();
-    state.selectedVehicleId=vehicle.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
-    state.events.push({id:uid('ajuste'),schemaVersion:2,type:'REGISTRO_VIAGEM_SEM_APP',createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),vehicleId:vehicle.id,vehicleName:vehicle.name,odometroAnterior:odoStart,odometroNovo:odoEnd,distancia:distance,combustivelConsumido:fuelInfo.liters,combustivelFinal:finalFuel,extra:{origem:'viagem cadastrada posteriormente',observacoes:notes}});
-    save();renderHistorico();render();
-    $('manualTripMsg').textContent='✅ Viagem registrada: '+fmt(distance,2)+' km. Odômetro atualizado para '+fmt(odoEnd,3)+' km. Combustível '+(fuelInfo.estimated?'estimado':'registrado')+'.';
-    ['manualTripOdoStart','manualTripOdoEnd','manualTripDistanceInput','manualTripOrigin','manualTripDestination','manualTripLiters','manualTripFuelBars','manualTripNotes'].forEach(id=>{if($(id))$(id).value=''});updateManualTripDistance();
-  }catch(e){$('manualTripMsg').textContent='❌ Não foi possível registrar: '+(e?.message||'erro');console.error(e)}
+    state.selectedVehicleId=vehicle.id;
+    state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
+
+    if(!Array.isArray(state.events))state.events=[];
+    state.events.push({
+      id:uid('ajuste'),schemaVersion:3,type:'REGISTRO_VIAGEM_SEM_APP',
+      createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),
+      vehicleId:vehicle.id,vehicleName:vehicle.name,odometroAnterior:effectiveStart,
+      odometroNovo:effectiveEnd,distancia:distance,combustivelConsumido:fuelInfo.liters,
+      combustivelFinal:finalFuel,
+      extra:{origem:'viagem cadastrada posteriormente',observacoes:notes,
+      historica:effectiveEnd<=currentOdo}
+    });
+
+    save();
+    renderHistorico();
+    render();
+
+    $('manualTripMsg').textContent='✅ Viagem registrada: '+fmt(distance,2)+' km.'+
+      (effectiveEnd>currentOdo?' Odômetro atualizado para '+fmt(effectiveEnd,3)+' km.':' Viagem histórica adicionada sem alterar o odômetro atual.')+
+      ' Combustível '+(fuelInfo.estimated?'estimado':'registrado')+'.';
+
+    ['manualTripOdoStart','manualTripOdoEnd','manualTripDistanceInput','manualTripOrigin',
+     'manualTripDestination','manualTripLiters','manualTripFuelBars','manualTripNotes']
+     .forEach(id=>{if($(id))$(id).value=''});
+    updateManualTripDistance();
+  }catch(e){
+    $('manualTripMsg').textContent='❌ Não foi possível registrar: '+(e?.message||'erro');
+    console.error(e);
+  }
 }
 function saveUrbanTrip(){
   try{
