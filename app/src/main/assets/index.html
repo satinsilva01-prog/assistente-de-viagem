@@ -272,7 +272,7 @@ Quando o marcador chegar a 1 barra, o aplicativo exibirá uma mensagem escolhida
 <script>
 'use strict';
 const NS='assistente_viagem_v3';
-const DEFAULT={schemaVersion:1,vehicle:{id:null,name:'',tankL:0,fuelType:'Flex',fuelL:0,priceL:0,odometerRef:0,consumptionTotalKm:0,consumptionTotalLiters:0,consumptionTripCount:0,fuelBars:8,extra:{}},vehicles:[],selectedVehicleId:null,tripDraft:{origin:'',destination:'',vehicleId:null},trip:null,fuelings:[],settings:{refKml:10,priceL:0,limitQueryMax:2300,limitQueries:0,lastLimit:null,lastLimitAt:null,fuelAlerts:{messages:['O mão de vaca abastece aí.','Seu tanque está pedindo socorro.','Já passou da hora de abastecer.','Vai esperar o carro parar?','Aí espera para empurrar o carro.'],lowTriggered:false,destinationWarned:false,destinationDistanceKm:null,lastLowAlertAt:0,extra:{}},extra:{}},history:[],events:[],manutencoes:[],maintenanceTypes:[],extra:{}};
+const DEFAULT={schemaVersion:1,vehicle:{id:null,name:'',tankL:0,fuelType:'Flex',fuelL:0,priceL:0,odometerRef:0,consumptionTotalKm:0,consumptionTotalLiters:0,consumptionTripCount:0,fuelConsumptionKm:0,fuelConsumptionLiters:0,fuelConsumptionCount:0,fuelConsumptionKml:0,fuelBars:8,extra:{}},vehicles:[],selectedVehicleId:null,tripDraft:{origin:'',destination:'',vehicleId:null},trip:null,fuelings:[],settings:{refKml:10,priceL:0,limitQueryMax:2300,limitQueries:0,lastLimit:null,lastLimitAt:null,fuelAlerts:{messages:['O mão de vaca abastece aí.','Seu tanque está pedindo socorro.','Já passou da hora de abastecer.','Vai esperar o carro parar?','Aí espera para empurrar o carro.'],lowTriggered:false,destinationWarned:false,destinationDistanceKm:null,lastLowAlertAt:0,extra:{}},extra:{}},history:[],events:[],manutencoes:[],maintenanceTypes:[],extra:{}};
 let state=loadState();loadHistory();let gpsWatch=null,timer=null,lastGps=null,lossStarted=null,currentSpeed=0,currentLimit=null,speedingSince=null,speedingEventId=null,voiceRecognition=null;
 function $(id){return document.getElementById(id)}
 function clone(o){return JSON.parse(JSON.stringify(o))}
@@ -404,28 +404,26 @@ function addDistance(a,b){
   const d=hav(a,b);if(!Number.isFinite(d)||d<=0||d>5)return;
   state.trip.distanceKm=Number((state.trip.distanceKm+d).toFixed(3));
   state.trip.drivingMs+=Math.max(0,b.at-a.at);
-  const ref=realConsumptionKml(state.vehicle.fuelType)||Number(state.settings.refKml)||10;
+  const ref=bestKnownConsumption(state.vehicle,'viagem')||Number(state.settings.refKml)||10;
   state.trip.liters=ref>0?Number((state.trip.distanceKm/ref).toFixed(3)):0;
   const price=Number(state.vehicle.priceL)||lastFuelPrice()||0;
   state.trip.cost=Number((state.trip.liters*price).toFixed(2));
   state.trip.avgSpeed=state.trip.drivingMs>0?state.trip.distanceKm/(state.trip.drivingMs/3600000):0;
 
-  // O odômetro do veículo acompanha a distância real registrada pelo GPS.
+  // Odômetro e combustível são estado permanente do veículo: cada km registrado
+  // na viagem atualiza os dois e persiste imediatamente no cadastro do veículo.
   const beforeOdo=Number(state.vehicle.odometerRef)||0;
-  if(beforeOdo>0){
-    const nextOdo=Number((beforeOdo+d).toFixed(3));
-    state.vehicle.odometerRef=nextOdo;
-    const vid=state.selectedVehicleId||state.vehicle.id;
-    const v=state.vehicles.find(x=>String(x.id)===String(vid));
-    if(v){v.odometerRef=nextOdo;v.updatedAt=new Date().toISOString();}
-    if(state.trip.vehicle)state.trip.vehicle.odometerRef=nextOdo;
-  }
+  const nextOdo=Number((beforeOdo+d).toFixed(3));
+  state.vehicle.odometerRef=nextOdo;
+  const vid=state.selectedVehicleId||state.vehicle.id;
+  const v=state.vehicles.find(x=>String(x.id)===String(vid));
+  if(v){v.odometerRef=nextOdo;v.fuelL=state.vehicle.fuelL;v.updatedAt=new Date().toISOString();}
+  if(state.trip.vehicle)state.trip.vehicle.odometerRef=nextOdo;
 
-  // O combustível diminui somente quando existe uma referência de consumo válida.
+  // Mesmo sem média real, usa a referência configurada para não deixar o
+  // combustível parado. O marcador é derivado dos litros restantes.
   if(ref>0 && Number(state.vehicle.fuelL)>0){
     state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)));
-    const vid=state.selectedVehicleId||state.vehicle.id;
-    const v=state.vehicles.find(x=>String(x.id)===String(vid));
     if(v){v.fuelL=state.vehicle.fuelL;v.updatedAt=new Date().toISOString();}
     if(state.trip.vehicle)state.trip.vehicle.fuelL=state.vehicle.fuelL;
   }
@@ -487,7 +485,9 @@ function bestKnownConsumption(vehicle,tipo){
   if(specific>0)return specific;
   const generic=getCumulativeConsumptionKml(v,'viagem')||getCumulativeConsumptionKml(v,'urbano');
   if(generic>0)return generic;
-  return realConsumptionKml(v.fuelType)||0;
+  const fuelBase=Number(v.fuelConsumptionKml)||realConsumptionKml(v.fuelType)||0;
+  if(fuelBase>0)return fuelBase;
+  return 0;
 }
 function fuelAfterDistance(vehicle,km,tipo,providedLiters){
   const tank=Number(vehicle?.tankL)||0; const current=Math.max(0,Number(vehicle?.fuelL)||0);
@@ -508,17 +508,44 @@ function saveManualTrip(){
     const date=$('manualTripDate')?.value||'';
     const origin=String($('manualTripOrigin')?.value||'').trim();
     const destination=String($('manualTripDestination')?.value||'').trim();
-    const odoStart=Number($('manualTripOdoStart')?.value),odoEnd=Number($('manualTripOdoEnd')?.value);
+    const odoStartRaw=$('manualTripOdoStart')?.value;
+    const odoEndRaw=$('manualTripOdoEnd')?.value;
+    const odoStart=Number(odoStartRaw), odoEnd=Number(odoEndRaw);
+    const directDistance=Number($('manualTripDistanceInput')?.value);
     const litersInput=Number($('manualTripLiters')?.value);
     const barsInput=Number($('manualTripFuelBars')?.value);
     const notes=String($('manualTripNotes')?.value||'').trim();
+
     if(!vehicle){$('manualTripMsg').textContent='⚠️ Cadastre e selecione um veículo.';return;}
-    if(!date||!Number.isFinite(odoStart)||!Number.isFinite(odoEnd)||odoEnd<odoStart){$('manualTripMsg').textContent='⚠️ Informe data e confira os odômetros.';return;}
-    const directDistance=Number($('manualTripDistanceInput')?.value);
-    const distance=Number.isFinite(directDistance)&&directDistance>0?Number(directDistance.toFixed(3)):Number((odoEnd-odoStart).toFixed(3));
-    if(distance<=0){$('manualTripMsg').textContent='⚠️ O odômetro final precisa ser maior que o inicial.';return;}
-    const oldOdo=Number(vehicle.odometerRef)||0;
-    if(oldOdo>0 && odoStart<oldOdo){$('manualTripMsg').textContent='⚠️ O odômetro inicial está menor que o último valor registrado ('+fmt(oldOdo,3)+' km).';return;}
+    if(!date){$('manualTripMsg').textContent='⚠️ Informe a data da viagem.';return;}
+
+    // A viagem avulsa pode ser cadastrada de duas formas:
+    // 1) odômetro inicial + final; ou
+    // 2) distância diretamente.
+    const hasOdos=Number.isFinite(odoStart)&&Number.isFinite(odoEnd);
+    const hasDirect=Number.isFinite(directDistance)&&directDistance>0;
+    if(!hasOdos&&!hasDirect){
+      $('manualTripMsg').textContent='⚠️ Informe os dois odômetros ou informe diretamente a distância da viagem.';
+      return;
+    }
+    if(hasOdos&&odoEnd<odoStart){
+      $('manualTripMsg').textContent='⚠️ O odômetro final não pode ser menor que o inicial.';
+      return;
+    }
+
+    let distance=hasDirect?Number(directDistance.toFixed(3)):Number((odoEnd-odoStart).toFixed(3));
+    if(distance<=0){
+      $('manualTripMsg').textContent='⚠️ A distância da viagem precisa ser maior que zero.';
+      return;
+    }
+
+    // Se só a distância foi informada, usamos o odômetro atual como referência.
+    const currentOdo=Number(vehicle.odometerRef)||0;
+    const effectiveStart=hasOdos?odoStart:currentOdo;
+    const effectiveEnd=hasOdos?odoEnd:Number((effectiveStart+distance).toFixed(3));
+
+    // Viagem avulsa pode ser histórica. Não bloquear porque o odômetro atual
+    // pode estar maior que o odômetro da viagem que está sendo lançada.
     const fuelInfo=fuelAfterDistance(vehicle,distance,'viagem',litersInput);
     let finalFuel=fuelInfo.nextFuel;
     let fuelSource=fuelInfo.estimated?'estimado pela melhor base disponível':'informado pelo usuário';
@@ -527,20 +554,64 @@ function saveManualTrip(){
       finalFuel=Number((Number(vehicle.tankL)*(barsInput/barsCount)).toFixed(3));
       fuelSource='nível final informado em barras';
     }
+
     const started=new Date(date+'T08:00:00').getTime();
-    const trip={id:uid('tripm'),schemaVersion:2,createdAt:new Date(started).toISOString(),updatedAt:new Date(started).toISOString(),vehicle:clone(vehicle),vehicleId:vehicle.id,origin,destination,startedAt:started,endedAt:started,distanceKm:distance,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:0,fuelCost:0,fuelPriceL:Number(vehicle.priceL||lastFuelPrice()||0),totalCost:0,avgSpeed:0,drivingMs:0,running:false,paused:false,manual:true,extra:{finalized:true,tipoRegistro:'viagem_sem_app',odometroInicial:odoStart,odometroFinal:odoEnd,combustivelFonte:fuelSource,observacoes:notes}};
+    const trip={
+      id:uid('tripm'),schemaVersion:3,createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),
+      vehicle:clone(vehicle),vehicleId:vehicle.id,origin,destination,startedAt:started,endedAt:started,
+      distanceKm:distance,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:0,fuelCost:0,
+      fuelPriceL:Number(vehicle.priceL||lastFuelPrice()||0),totalCost:0,avgSpeed:0,drivingMs:0,
+      running:false,paused:false,manual:true,
+      extra:{finalized:true,tipoRegistro:'viagem_sem_app',odometroInicial:effectiveStart,
+      odometroFinal:effectiveEnd,combustivelFonte:fuelSource,observacoes:notes}
+    };
+
     state.history.unshift(trip);
     if(fuelInfo.liters>0)addConsumptionBase(vehicle,distance,fuelInfo.liters,'viagem');
-    vehicle.odometerRef=Math.max(Number(vehicle.odometerRef)||0,odoEnd);
-    vehicle.odometro=vehicle.odometerRef;
-    vehicle.fuelL=finalFuel;
+
+    // Só avançamos o odômetro atual; nunca o fazemos voltar por causa de
+    // uma viagem histórica cadastrada posteriormente.
+    if(effectiveEnd>currentOdo){
+      vehicle.odometerRef=effectiveEnd;
+      vehicle.odometro=effectiveEnd;
+      vehicle.fuelL=finalFuel;
+    }else if(!Number.isFinite(Number(vehicle.fuelL))){
+      vehicle.fuelL=finalFuel;
+    }else if(hasOdos && effectiveStart>=currentOdo){
+      vehicle.fuelL=finalFuel;
+    }
+
     vehicle.updatedAt=new Date().toISOString();
-    state.selectedVehicleId=vehicle.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
-    state.events.push({id:uid('ajuste'),schemaVersion:2,type:'REGISTRO_VIAGEM_SEM_APP',createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),vehicleId:vehicle.id,vehicleName:vehicle.name,odometroAnterior:odoStart,odometroNovo:odoEnd,distancia:distance,combustivelConsumido:fuelInfo.liters,combustivelFinal:finalFuel,extra:{origem:'viagem cadastrada posteriormente',observacoes:notes}});
-    save();renderHistorico();render();
-    $('manualTripMsg').textContent='✅ Viagem registrada: '+fmt(distance,2)+' km. Odômetro atualizado para '+fmt(odoEnd,3)+' km. Combustível '+(fuelInfo.estimated?'estimado':'registrado')+'.';
-    ['manualTripOdoStart','manualTripOdoEnd','manualTripDistanceInput','manualTripOrigin','manualTripDestination','manualTripLiters','manualTripFuelBars','manualTripNotes'].forEach(id=>{if($(id))$(id).value=''});updateManualTripDistance();
-  }catch(e){$('manualTripMsg').textContent='❌ Não foi possível registrar: '+(e?.message||'erro');console.error(e)}
+    state.selectedVehicleId=vehicle.id;
+    state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
+
+    if(!Array.isArray(state.events))state.events=[];
+    state.events.push({
+      id:uid('ajuste'),schemaVersion:3,type:'REGISTRO_VIAGEM_SEM_APP',
+      createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),
+      vehicleId:vehicle.id,vehicleName:vehicle.name,odometroAnterior:effectiveStart,
+      odometroNovo:effectiveEnd,distancia:distance,combustivelConsumido:fuelInfo.liters,
+      combustivelFinal:finalFuel,
+      extra:{origem:'viagem cadastrada posteriormente',observacoes:notes,
+      historica:effectiveEnd<=currentOdo}
+    });
+
+    save();
+    renderHistorico();
+    render();
+
+    $('manualTripMsg').textContent='✅ Viagem registrada: '+fmt(distance,2)+' km.'+
+      (effectiveEnd>currentOdo?' Odômetro atualizado para '+fmt(effectiveEnd,3)+' km.':' Viagem histórica adicionada sem alterar o odômetro atual.')+
+      ' Combustível '+(fuelInfo.estimated?'estimado':'registrado')+'.';
+
+    ['manualTripOdoStart','manualTripOdoEnd','manualTripDistanceInput','manualTripOrigin',
+     'manualTripDestination','manualTripLiters','manualTripFuelBars','manualTripNotes']
+     .forEach(id=>{if($(id))$(id).value=''});
+    updateManualTripDistance();
+  }catch(e){
+    $('manualTripMsg').textContent='❌ Não foi possível registrar: '+(e?.message||'erro');
+    console.error(e);
+  }
 }
 function saveUrbanTrip(){
   try{
@@ -554,7 +625,7 @@ function saveUrbanTrip(){
     const started=new Date(date+'T08:00:00').getTime();const price=Number(vehicle.priceL)||lastFuelPrice()||0;
     const trip={id:uid('urb'),schemaVersion:2,createdAt:new Date(started).toISOString(),updatedAt:new Date(started).toISOString(),vehicle:clone(vehicle),vehicleId:vehicle.id,origin:'Uso urbano',destination:'Uso diário',startedAt:started,endedAt:started,distanceKm:km,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:Number((fuelInfo.liters*price).toFixed(2)),fuelCost:Number((fuelInfo.liters*price).toFixed(2)),fuelPriceL:price,totalCost:Number((fuelInfo.liters*price).toFixed(2)),avgSpeed:0,drivingMs:0,running:false,paused:false,manual:true,extra:{finalized:true,tipoRegistro:'circuito_urbano',deslocamentos:stops,observacoes:notes,odometroInicial:a,odometroFinal:b,combustivelFonte:fuelSource}};
     state.history.unshift(trip);if(fuelInfo.liters>0)addConsumptionBase(vehicle,km,fuelInfo.liters,'urbano');
-    vehicle.odometerRef=Math.max(Number(vehicle.odometerRef)||0,b);vehicle.odometro=vehicle.odometerRef;vehicle.fuelL=finalFuel;vehicle.updatedAt=new Date().toISOString();state.selectedVehicleId=vehicle.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
+    vehicle.odometerRef=Math.max(Number(vehicle.odometerRef)||0,b);vehicle.odometro=vehicle.odometerRef;vehicle.fuelL=finalFuel;vehicle.priceL=Number(vehicle.priceL)||lastFuelPrice()||0;vehicle.updatedAt=new Date().toISOString();state.selectedVehicleId=vehicle.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
     save();renderHistorico();render();
     $('urbanTripMsg').textContent='✅ Uso urbano registrado: '+fmt(km,2)+' km. Odômetro atualizado. '+(fuelInfo.estimated?'Combustível estimado pela base disponível.':'Combustível informado.');
     ['urbanTripOdoStart','urbanTripOdoEnd','urbanTripLiters','urbanTripFuelBars','urbanTripStops','urbanTripNotes'].forEach(id=>{if($(id))$(id).value=''});updateUrbanTripDistance();
@@ -677,9 +748,42 @@ function persistFuelings(){
 
 function lastFuelPrice(){const a=readAb();return a.length?Number(a[a.length-1].precoLitro||0):0}
 function fuelTypeNorm(v){const s=String(v||'').trim().toLowerCase();if(s.includes('gas'))return'Gasolina';if(s.includes('etan')||s.includes('álcool')||s.includes('alcool'))return'Etanol';if(s.includes('flex')||s.includes('mistura'))return'Flex';if(s.includes('dies'))return'Diesel';return String(v||'').trim()||'Não informado'}
+function rebuildFuelConsumptionBasesFromFuelings(){
+  normalizeVehicles();
+  state.vehicles.forEach(v=>{
+    v.fuelConsumptionKm=0;v.fuelConsumptionLiters=0;v.fuelConsumptionCount=0;
+  });
+  const groups={};
+  validFuelRecords().forEach(r=>{const id=String(r.vehicleId||'');if(!id)return;(groups[id]??=[]).push(r)});
+  Object.entries(groups).forEach(([id,arr])=>{
+    arr.sort((a,b)=>Number(a.odometro)-Number(b.odometro));
+    const v=state.vehicles.find(x=>String(x.id)===id);if(!v)return;
+    for(let i=1;i<arr.length;i++){
+      const km=Number(arr[i].odometro)-Number(arr[i-1].odometro),lit=Number(arr[i].litros);
+      if(km>0&&lit>0){v.fuelConsumptionKm+=km;v.fuelConsumptionLiters+=lit;v.fuelConsumptionCount++;}
+    }
+    if(v.fuelConsumptionKm>0&&v.fuelConsumptionLiters>0)v.fuelConsumptionKml=v.fuelConsumptionKm/v.fuelConsumptionLiters;
+  });
+  const v=state.vehicles.find(x=>String(x.id)===String(state.selectedVehicleId));
+  if(v)state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(v));
+}
+
 function validFuelRecords(){return readAb().filter(x=>Number(x.odometro)>0&&Number(x.litros)>0&&(x.situacao==='Tanque cheio'||x.situacao==='Completei o tanque')).sort((x,y)=>Number(x.odometro)-Number(y.odometro))}
-function consumptionByFuelType(tipo){const wanted=fuelTypeNorm(tipo);const a=validFuelRecords().filter(x=>fuelTypeNorm(x.combustivel||x.tipoCombustivel)===wanted);if(a.length<2)return 0;const vals=[];for(let i=1;i<a.length;i++){const km=Number(a[i].odometro)-Number(a[i-1].odometro);if(km>0&&Number(a[i].litros)>0)vals.push(km/Number(a[i].litros))}return vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0}
-function realConsumptionKml(tipo){return consumptionByFuelType(tipo||state.vehicle.fuelType||'Flex')}
+function consumptionByVehicle(vehicleId,tipo){
+  const wanted=fuelTypeNorm(tipo);
+  const a=validFuelRecords().filter(x=>String(x.vehicleId||'')===String(vehicleId||''));
+  const filtered=(wanted==='Flex'||!wanted||wanted==='Não informado')?a:a.filter(x=>fuelTypeNorm(x.combustivel||x.tipoCombustivel)===wanted);
+  if(filtered.length<2)return 0;
+  const vals=[];
+  for(let i=1;i<filtered.length;i++){
+    const km=Number(filtered[i].odometro)-Number(filtered[i-1].odometro);
+    const litros=Number(filtered[i].litros);
+    if(km>0&&litros>0)vals.push(km/litros);
+  }
+  return vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;
+}
+function consumptionByFuelType(tipo){return consumptionByVehicle(state.selectedVehicleId||state.vehicle?.id,tipo)}
+function realConsumptionKml(tipo){return consumptionByVehicle(state.selectedVehicleId||state.vehicle?.id,tipo||state.vehicle.fuelType||'Flex')}
 function allFuelConsumptions(){const tipos=[...new Set(validFuelRecords().map(x=>fuelTypeNorm(x.combustivel||x.tipoCombustivel)))];return tipos.map(tipo=>({tipo,consumo:consumptionByFuelType(tipo)})).filter(x=>x.consumo>0)}
 function renderAb(){
   const a=readAb();
@@ -1163,7 +1267,7 @@ function render(){
 
   const t=state.trip,running=!!t?.running,paused=!!t?.paused;
   $('av-trip-footer').style.display=document.getElementById('tabViagem').classList.contains('active')?'grid':'none';
-  $('status').textContent=running?(paused?'Viagem pausada':'Viagem em andamento'):'Viagem parada';$('distancia').textContent=fmt(t?.distanceKm||0)+' km';$('litros').textContent=fmt(t?.liters||0)+' L';$('velMedia').textContent=fmt(t?.avgSpeed||0)+' km/h';$('tempo').textContent=timeText(t);$('custo').textContent=money(t?.cost||0);$('custokm').textContent=money((t?.distanceKm||0)>0?(t.cost||0)/t.distanceKm:0);const real=realConsumptionKml();const tripCons=getCumulativeConsumptionKml(state.vehicle,'viagem');const urbanCons=getCumulativeConsumptionKml(state.vehicle,'urbano');$('consumo').textContent=tripCons>0?fmt(tripCons,2)+' km/L':'Aguardando dados de viagem';const cum=tripCons||real;$('consumoAcumulado').textContent=cum>0?fmt(cum,2)+' km/L':'-- km/L';$('baseConsumo').textContent='Viagem: '+fmt(state.vehicle.consumptionTripKm||0,1)+' km / '+fmt(state.vehicle.consumptionTripLiters||0,2)+' L • Urbano: '+fmt(state.vehicle.consumptionUrbanKm||0,1)+' km / '+fmt(state.vehicle.consumptionUrbanLiters||0,2)+' L';$('precoInfo').textContent=lastFuelPrice()>0?money(lastFuelPrice())+'/L':'--';$('refInfo').textContent=real>0?fmt(real,2)+' km/L':'--';$('origemDisplay').textContent=t?.origin||state.tripDraft?.origin||'Não definida';$('destinoDisplay').textContent=t?.destination||state.tripDraft?.destination||'Não definido';$('avOdoDemo').textContent=Number(state.vehicle.odometerRef)>0?fmt(state.vehicle.odometerRef,3)+' km':'-- km';renderFuel();checkLowFuelAlert();renderFuelAlertSettings();$('ocorrenciasVelocidade').textContent=state.events.filter(e=>e.tripId===t?.id&&e.tipo==='excesso_velocidade').length;$('consultasLimite').textContent=`${state.settings.limitQueries} / ${state.settings.limitQueryMax}`;$('consultasRestantes').textContent=Math.max(0,state.settings.limitQueryMax-state.settings.limitQueries);$('ultimoLimite').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'--';$('limiteVelocidade').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'-- km/h';$('autonomia').textContent=real>0&&Number(state.vehicle.fuelL)>0?fmt(state.vehicle.fuelL*real,0)+' km':'-- km';if(!running&&!paused)stopTimer()
+  $('status').textContent=running?(paused?'Viagem pausada':'Viagem em andamento'):'Viagem parada';$('distancia').textContent=fmt(t?.distanceKm||0)+' km';$('litros').textContent=fmt(t?.liters||0)+' L';$('velMedia').textContent=fmt(t?.avgSpeed||0)+' km/h';$('tempo').textContent=timeText(t);$('custo').textContent=money(t?.cost||0);$('custokm').textContent=money((t?.distanceKm||0)>0?(t.cost||0)/t.distanceKm:0);const real=bestKnownConsumption(state.vehicle,'viagem');const tripCons=getCumulativeConsumptionKml(state.vehicle,'viagem');const urbanCons=getCumulativeConsumptionKml(state.vehicle,'urbano');$('consumo').textContent=tripCons>0?fmt(tripCons,2)+' km/L':'Aguardando dados de viagem';const cum=tripCons||real;$('consumoAcumulado').textContent=cum>0?fmt(cum,2)+' km/L':'-- km/L';$('baseConsumo').textContent='Viagem: '+fmt(state.vehicle.consumptionTripKm||0,1)+' km / '+fmt(state.vehicle.consumptionTripLiters||0,2)+' L • Urbano: '+fmt(state.vehicle.consumptionUrbanKm||0,1)+' km / '+fmt(state.vehicle.consumptionUrbanLiters||0,2)+' L';$('precoInfo').textContent=lastFuelPrice()>0?money(lastFuelPrice())+'/L':'--';$('refInfo').textContent=real>0?fmt(real,2)+' km/L':'--';$('origemDisplay').textContent=t?.origin||state.tripDraft?.origin||'Não definida';$('destinoDisplay').textContent=t?.destination||state.tripDraft?.destination||'Não definido';$('avOdoDemo').textContent=Number(state.vehicle.odometerRef)>0?fmt(state.vehicle.odometerRef,3)+' km':'-- km';renderFuel();checkLowFuelAlert();renderFuelAlertSettings();$('ocorrenciasVelocidade').textContent=state.events.filter(e=>e.tripId===t?.id&&e.tipo==='excesso_velocidade').length;$('consultasLimite').textContent=`${state.settings.limitQueries} / ${state.settings.limitQueryMax}`;$('consultasRestantes').textContent=Math.max(0,state.settings.limitQueryMax-state.settings.limitQueries);$('ultimoLimite').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'--';$('limiteVelocidade').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'-- km/h';$('autonomia').textContent=real>0&&Number(state.vehicle.fuelL)>0?fmt(state.vehicle.fuelL*real,0)+' km':'-- km';if(!running&&!paused)stopTimer()
 }
 function getFuelBarCount(v){return Math.max(1,Math.min(30,Math.round(Number(v?.fuelBars)||8)))}
 function fuelLitersPerBar(v){const tank=Number(v?.tankL)||0;const bars=getFuelBarCount(v);return tank>0?tank/bars:0}
