@@ -114,6 +114,8 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 .manual-trip-card{border-left:4px solid #16a34a}.manual-trip-card .grid>div{min-width:0}.manual-trip-card label{font-size:12px;font-weight:700;display:block;margin-top:4px}.manual-trip-card input,.manual-trip-card select{width:100%;box-sizing:border-box}.manual-trip-card .note{line-height:1.4}
 </style>
 
+
+<style id="v38-circuito-css">.manual-trip-card{border-left:4px solid #16a34a}.manual-trip-card .metric{background:#f7f8fa}.manual-trip-card .note{line-height:1.45}.urban-record{border-left-color:#0ea5e9}</style>
 </head>
 <body>
 <header id="av-fixed-header">
@@ -182,7 +184,8 @@ body.dark .fuel-alert-input{background:#20262d;color:#fff;border-color:#56635f}
 <div class="card"><h3>💾 Backup completo do aplicativo</h3><div class="note" style="margin-bottom:8px">Este backup inclui <b>todos os dados</b> do Assistente de Viagem: carros cadastrados, viagens, abastecimentos, manutenções, histórico, eventos, configurações e chave/configuração do TomTom. Use o backup antes de zerar o aplicativo para poder restaurar tudo depois.</div><div class="backup-actions"><button type="button" class="secondary" id="btnBackupCompleto">💾 Baixar backup completo</button><button type="button" class="secondary" id="btnRestaurarBackupCompleto">📥 Restaurar backup completo</button><button type="button" class="av-action danger" id="btnBackupEZerarCompleto">♻️ Backup + zerar tudo</button></div><input id="inputRestaurarBackupCompleto" type="file" accept="application/json,.json" style="display:none"><div class="saveStatus" id="backupCompletoMsg"></div></div>
 </section>
 <section id="tabHistorico" class="tab-page">
-<div class="card manual-trip-card"><h3>📝 Registrar viagem já realizada</h3><div class="note" style="margin-bottom:8px">Use esta opção para cadastrar uma viagem que aconteceu antes de usar o aplicativo. Ela entra no histórico, não inicia GPS e não interfere na viagem atual.</div><label>Veículo</label><select id="manualTripVehicle" class="trip-vehicle-select"></select><label>Data da viagem</label><input id="manualTripDate" type="date"><div class="grid"><div><label>Origem</label><input id="manualTripOrigin" type="text" placeholder="Ex.: Campinas - SP"></div><div><label>Destino</label><input id="manualTripDestination" type="text" placeholder="Ex.: São Paulo - SP"></div></div><div class="grid"><div><label>Odômetro inicial (km)</label><input id="manualTripOdoStart" type="number" step="0.001" placeholder="Ex.: 125000"></div><div><label>Odômetro final (km)</label><input id="manualTripOdoEnd" type="number" step="0.001" placeholder="Ex.: 125350"></div></div><div class="grid"><div><label>Combustível gasto (L)</label><input id="manualTripLiters" type="number" step="0.01" placeholder="Opcional — calcula pela base se vazio"></div><div><label>Duração (minutos)</label><input id="manualTripDuration" type="number" min="0" step="1" placeholder="Opcional"></div></div><label>Observações</label><input id="manualTripNotes" type="text" placeholder="Opcional"><button type="button" class="primary" style="width:100%;margin-top:8px" id="btnSalvarViagemManual">💾 Registrar viagem realizada</button><div class="saveStatus" id="manualTripMsg"></div></div>
+<div class="card manual-trip-card"><h3>🧾 Registrar viagem feita sem o app</h3><div class="note" style="margin-bottom:8px">Use quando uma viagem aconteceu sem o aplicativo. Ela continua sendo uma <b>VIAGEM</b>: serve para justificar o odômetro e, quando você souber o combustível gasto, também entra no consumo de viagem. Você pode cadastrar só as informações que tiver.</div><label>Veículo</label><select id="manualTripVehicle" class="trip-vehicle-select"></select><label>Data</label><input id="manualTripDate" type="date"><div class="grid"><div><label>Origem (opcional)</label><input id="manualTripOrigin" type="text" placeholder="Ex.: Sumaré"></div><div><label>Destino (opcional)</label><input id="manualTripDestination" type="text" placeholder="Ex.: São Paulo"></div></div><div class="grid"><div><label>Odômetro inicial (km)</label><input id="manualTripOdoStart" type="number" step="0.001" placeholder="Ex.: 125000"></div><div><label>Odômetro final (km)</label><input id="manualTripOdoEnd" type="number" step="0.001" placeholder="Ex.: 125308"></div></div><div class="metric" style="margin:8px 0"><span>Distância da viagem</span><b id="manualTripDistance">0,00 km</b></div><div class="grid"><div><label>Litros gastos (opcional)</label><input id="manualTripLiters" type="number" min="0" step="0.01" placeholder="Se souber"></div><div><label>Combustível final (barras, opcional)</label><input id="manualTripFuelBars" type="number" min="0" step="1" placeholder="Ex.: 5"></div></div><label>Observação</label><input id="manualTripNotes" type="text" placeholder="Ex.: viagem realizada sem o aplicativo"><button type="button" class="primary" style="width:100%;margin-top:8px" id="btnSalvarViagemManual">💾 Registrar viagem</button><div class="saveStatus" id="manualTripMsg"></div></div>
+<div class="card manual-trip-card"><h3>🏙️ Uso urbano</h3><div class="note" style="margin-bottom:8px">Para o uso normal do carro no dia a dia. Você pode lançar uma vez por dia ou por semana. Informe somente o que tiver: a quilometragem é suficiente para justificar o odômetro; litros são necessários para medir o consumo urbano.</div><label>Veículo</label><select id="urbanTripVehicle" class="trip-vehicle-select"></select><label>Data</label><input id="urbanTripDate" type="date"><div class="grid"><div><label>Odômetro inicial (km)</label><input id="urbanTripOdoStart" type="number" step="0.001" placeholder="Ex.: 125308"></div><div><label>Odômetro final (km)</label><input id="urbanTripOdoEnd" type="number" step="0.001" placeholder="Ex.: 125338"></div></div><div class="metric" style="margin:8px 0"><span>Distância urbana</span><b id="urbanTripDistance">0,00 km</b></div><div class="grid"><div><label>Litros gastos (opcional)</label><input id="urbanTripLiters" type="number" min="0" step="0.01" placeholder="Se souber"></div><div><label>Combustível final (barras, opcional)</label><input id="urbanTripFuelBars" type="number" min="0" step="1" placeholder="Ex.: 6"></div></div><div class="grid"><div><label>Nº de deslocamentos (opcional)</label><input id="urbanTripStops" type="number" min="1" step="1" placeholder="Ex.: 5"></div><div><label>Descrição (opcional)</label><input id="urbanTripNotes" type="text" placeholder="Ex.: uso urbano da semana"></div></div><button type="button" class="primary" style="width:100%;margin-top:8px" id="btnSalvarCircuitoUrbano">🏙️ Registrar uso urbano</button><div class="saveStatus" id="urbanTripMsg"></div></div>
 <div class="card"><h3>🚗 Histórico do veículo</h3><label>Selecione o veículo</label><select id="historicoVeiculoSelect" class="trip-vehicle-select"></select><div id="historicoKmResumo" class="history-km-summary"></div></div>
 <div class="card"><h3>📋 Histórico de viagens</h3><div id="historicoViagens"></div></div>
 <div class="card"><h3>⛽ Histórico de abastecimentos</h3><div id="historicoAbastecimentos"></div></div><div class="card"><h3>🔧 Histórico de manutenção</h3>
@@ -457,23 +460,46 @@ function recordSpeedEvent(duration){
   else state.events.push({id:uid('speed'),schemaVersion:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),tipo:'excesso_velocidade',status:'finalizada',tripId:state.trip.id,velocidadeMax:Number(currentSpeed.toFixed(1)),limite:Number(currentLimit),duracaoMs:Math.max(0,duration),location:state.trip.lastPosition||null,extra:{}});
   save();
 }
-function getCumulativeConsumptionKml(vehicle){
+function getCumulativeConsumptionKml(vehicle, tipo){
   const v=vehicle||state.vehicle||{};
-  const km=Number(v.consumptionTotalKm)||0;
-  const liters=Number(v.consumptionTotalLiters)||0;
+  const cat=String(tipo||'viagem').toLowerCase();
+  const km=cat==='urbano'?Number(v.consumptionUrbanKm)||0:Number(v.consumptionTripKm)||0;
+  const liters=cat==='urbano'?Number(v.consumptionUrbanLiters)||0:Number(v.consumptionTripLiters)||0;
   return km>0&&liters>0?km/liters:0;
 }
-function addConsumptionBase(vehicle,km,liters){
-  const v=vehicle||state.vehicle;
-  const d=Number(km)||0,l=Number(liters)||0;
+function addConsumptionBase(vehicle,km,liters,tipo){
+  const v=vehicle||state.vehicle; const d=Number(km)||0,l=Number(liters)||0;
   if(!v||d<=0||l<=0)return;
-  v.consumptionTotalKm=Number(((Number(v.consumptionTotalKm)||0)+d).toFixed(3));
-  v.consumptionTotalLiters=Number(((Number(v.consumptionTotalLiters)||0)+l).toFixed(3));
-  v.consumptionTripCount=(Number(v.consumptionTripCount)||0)+1;
-  const vid=v.id||state.selectedVehicleId;
-  const saved=state.vehicles?.find(x=>String(x.id)===String(vid));
-  if(saved){saved.consumptionTotalKm=v.consumptionTotalKm;saved.consumptionTotalLiters=v.consumptionTotalLiters;saved.consumptionTripCount=v.consumptionTripCount;saved.updatedAt=new Date().toISOString();}
+  const cat=String(tipo||'viagem').toLowerCase()==='urbano'?'urbano':'viagem';
+  const kmKey=cat==='urbano'?'consumptionUrbanKm':'consumptionTripKm';
+  const lKey=cat==='urbano'?'consumptionUrbanLiters':'consumptionTripLiters';
+  const cKey=cat==='urbano'?'consumptionUrbanCount':'consumptionTripCount';
+  v[kmKey]=Number(((Number(v[kmKey])||0)+d).toFixed(3));
+  v[lKey]=Number(((Number(v[lKey])||0)+l).toFixed(3));
+  v[cKey]=(Number(v[cKey])||0)+1;
+  const saved=state.vehicles?.find(x=>String(x.id)===String(v.id||state.selectedVehicleId));
+  if(saved){saved[kmKey]=v[kmKey];saved[lKey]=v[lKey];saved[cKey]=v[cKey];saved.updatedAt=new Date().toISOString();}
 }
+function bestKnownConsumption(vehicle,tipo){
+  const v=vehicle||state.vehicle||{};
+  const cat=String(tipo||'viagem').toLowerCase();
+  const specific=getCumulativeConsumptionKml(v,cat);
+  if(specific>0)return specific;
+  const generic=getCumulativeConsumptionKml(v,'viagem')||getCumulativeConsumptionKml(v,'urbano');
+  if(generic>0)return generic;
+  return realConsumptionKml(v.fuelType)||0;
+}
+function fuelAfterDistance(vehicle,km,tipo,providedLiters){
+  const tank=Number(vehicle?.tankL)||0; const current=Math.max(0,Number(vehicle?.fuelL)||0);
+  const bars=getFuelBarCount(vehicle); const explicit=Number(providedLiters);
+  let liters=Number.isFinite(explicit)&&explicit>0?explicit:0;
+  if(!(liters>0)){const kpl=bestKnownConsumption(vehicle,tipo); if(kpl>0)liters=km/kpl;}
+  const next=Math.max(0,Math.min(tank||Infinity,current-liters));
+  return {liters,nextFuel:next,estimated:!(Number.isFinite(explicit)&&explicit>0),bars: tank>0?Math.max(0,Math.min(bars,Math.floor((next/tank)*bars+1e-9))):null};
+}
+function updateManualTripDistance(){const a=Number($('manualTripOdoStart')?.value)||0,b=Number($('manualTripOdoEnd')?.value)||0;const el=$('manualTripDistance');if(el)el.textContent=fmt(Math.max(0,b-a),2)+' km';}
+function updateUrbanTripDistance(){const a=Number($('urbanTripOdoStart')?.value)||0,b=Number($('urbanTripOdoEnd')?.value)||0;const el=$('urbanTripDistance');if(el)el.textContent=fmt(Math.max(0,b-a),2)+' km';}
+function renderUrbanTripVehicleSelect(){const sel=$('urbanTripVehicle');if(!sel)return;normalizeVehicles();const list=state.vehicles.filter(v=>v&&v.name);sel.innerHTML=list.length?list.map(v=>`<option value="${esc(v.id)}">${esc(v.name)}${v.fuelType?` • ${esc(v.fuelType)}`:''}</option>`).join(''):'<option value="">Cadastre um veículo primeiro</option>';sel.value=String(state.selectedVehicleId||list[0]?.id||'');}
 function saveManualTrip(){
   try{
     normalizeVehicles();
@@ -482,32 +508,56 @@ function saveManualTrip(){
     const date=$('manualTripDate')?.value||'';
     const origin=String($('manualTripOrigin')?.value||'').trim();
     const destination=String($('manualTripDestination')?.value||'').trim();
-    const odoStart=Number($('manualTripOdoStart')?.value);
-    const odoEnd=Number($('manualTripOdoEnd')?.value);
-    const enteredLiters=Number($('manualTripLiters')?.value);
-    const durationMin=Math.max(0,Number($('manualTripDuration')?.value)||0);
+    const odoStart=Number($('manualTripOdoStart')?.value),odoEnd=Number($('manualTripOdoEnd')?.value);
+    const litersInput=Number($('manualTripLiters')?.value);
+    const barsInput=Number($('manualTripFuelBars')?.value);
     const notes=String($('manualTripNotes')?.value||'').trim();
     if(!vehicle){$('manualTripMsg').textContent='⚠️ Cadastre e selecione um veículo.';return;}
-    if(!date||!origin||!destination){$('manualTripMsg').textContent='⚠️ Informe data, origem e destino.';return;}
-    if(!Number.isFinite(odoStart)||!Number.isFinite(odoEnd)||odoEnd<odoStart){$('manualTripMsg').textContent='⚠️ Confira os odômetros inicial e final.';return;}
+    if(!date||!Number.isFinite(odoStart)||!Number.isFinite(odoEnd)||odoEnd<odoStart){$('manualTripMsg').textContent='⚠️ Informe data e confira os odômetros.';return;}
     const distance=Number((odoEnd-odoStart).toFixed(3));
-    if(distance<=0){$('manualTripMsg').textContent='⚠️ A distância da viagem precisa ser maior que zero.';return;}
-    const base=getCumulativeConsumptionKml(vehicle)||realConsumptionKml(vehicle.fuelType)||Number(state.settings.refKml)||10;
-    const liters=enteredLiters>0?enteredLiters:Number((distance/base).toFixed(3));
-    if(!(liters>0)){$('manualTripMsg').textContent='⚠️ Não foi possível calcular o combustível gasto.';return;}
+    if(distance<=0){$('manualTripMsg').textContent='⚠️ O odômetro final precisa ser maior que o inicial.';return;}
+    const oldOdo=Number(vehicle.odometerRef)||0;
+    if(oldOdo>0 && odoStart<oldOdo){$('manualTripMsg').textContent='⚠️ O odômetro inicial está menor que o último valor registrado ('+fmt(oldOdo,3)+' km).';return;}
+    const fuelInfo=fuelAfterDistance(vehicle,distance,'viagem',litersInput);
+    let finalFuel=fuelInfo.nextFuel;
+    let fuelSource=fuelInfo.estimated?'estimado pela melhor base disponível':'informado pelo usuário';
+    const barsCount=getFuelBarCount(vehicle);
+    if(Number.isFinite(barsInput)&&barsInput>=0&&barsInput<=barsCount&&Number(vehicle.tankL)>0){
+      finalFuel=Number((Number(vehicle.tankL)*(barsInput/barsCount)).toFixed(3));
+      fuelSource='nível final informado em barras';
+    }
     const started=new Date(date+'T08:00:00').getTime();
-    const ended=started+durationMin*60000;
-    const avg=durationMin>0?distance/(durationMin/60):0;
-    const price=Number(vehicle.priceL)||lastFuelPrice()||0;
-    const trip={id:uid('trip'),schemaVersion:1,createdAt:new Date(started).toISOString(),updatedAt:new Date(ended||started).toISOString(),vehicle:clone(vehicle),vehicleId:vehicle.id,origin,destination,startedAt:started,endedAt:ended,distanceKm:distance,correctedKm:0,liters:Number(liters.toFixed(3)),cost:Number((liters*price).toFixed(2)),fuelCost:Number((liters*price).toFixed(2)),fuelPriceL:price,totalCost:Number((liters*price).toFixed(2)),avgSpeed:Number(avg.toFixed(2)),drivingMs:durationMin*60000,running:false,paused:false,manual:true,extra:{finalized:true,origemRegistro:'viagem realizada fora do aplicativo',observacoes:notes,odometroInicial:odoStart,odometroFinal:odoEnd}};
+    const trip={id:uid('tripm'),schemaVersion:2,createdAt:new Date(started).toISOString(),updatedAt:new Date(started).toISOString(),vehicle:clone(vehicle),vehicleId:vehicle.id,origin,destination,startedAt:started,endedAt:started,distanceKm:distance,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:0,fuelCost:0,fuelPriceL:Number(vehicle.priceL||lastFuelPrice()||0),totalCost:0,avgSpeed:0,drivingMs:0,running:false,paused:false,manual:true,extra:{finalized:true,tipoRegistro:'viagem_sem_app',odometroInicial:odoStart,odometroFinal:odoEnd,combustivelFonte:fuelSource,observacoes:notes}};
     state.history.unshift(trip);
-    addConsumptionBase(vehicle,distance,liters);
-    // Registro antigo não altera automaticamente o odômetro/combustível atual do veículo.
-    save();
-    renderHistorico();render();
-    $('manualTripMsg').textContent='✅ Viagem realizada registrada e incluída na base de consumo.';
-    ['manualTripOrigin','manualTripDestination','manualTripOdoStart','manualTripOdoEnd','manualTripLiters','manualTripDuration','manualTripNotes'].forEach(id=>{if($(id))$(id).value=''});
+    if(fuelInfo.liters>0)addConsumptionBase(vehicle,distance,fuelInfo.liters,'viagem');
+    vehicle.odometerRef=Math.max(Number(vehicle.odometerRef)||0,odoEnd);
+    vehicle.odometro=vehicle.odometerRef;
+    vehicle.fuelL=finalFuel;
+    vehicle.updatedAt=new Date().toISOString();
+    state.selectedVehicleId=vehicle.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
+    state.events.push({id:uid('ajuste'),schemaVersion:2,type:'REGISTRO_VIAGEM_SEM_APP',createdAt:new Date(started).toISOString(),updatedAt:new Date().toISOString(),vehicleId:vehicle.id,vehicleName:vehicle.name,odometroAnterior:odoStart,odometroNovo:odoEnd,distancia:distance,combustivelConsumido:fuelInfo.liters,combustivelFinal:finalFuel,extra:{origem:'viagem cadastrada posteriormente',observacoes:notes}});
+    save();renderHistorico();render();
+    $('manualTripMsg').textContent='✅ Viagem registrada: '+fmt(distance,2)+' km. Odômetro atualizado para '+fmt(odoEnd,3)+' km. Combustível '+(fuelInfo.estimated?'estimado':'registrado')+'.';
+    ['manualTripOdoStart','manualTripOdoEnd','manualTripOrigin','manualTripDestination','manualTripLiters','manualTripFuelBars','manualTripNotes'].forEach(id=>{if($(id))$(id).value=''});updateManualTripDistance();
   }catch(e){$('manualTripMsg').textContent='❌ Não foi possível registrar: '+(e?.message||'erro');console.error(e)}
+}
+function saveUrbanTrip(){
+  try{
+    normalizeVehicles();
+    const vid=$('urbanTripVehicle')?.value||state.selectedVehicleId||'';const vehicle=state.vehicles.find(v=>String(v.id)===String(vid));
+    const date=$('urbanTripDate')?.value||'';const a=Number($('urbanTripOdoStart')?.value),b=Number($('urbanTripOdoEnd')?.value);const litersInput=Number($('urbanTripLiters')?.value);const barsInput=Number($('urbanTripFuelBars')?.value);const stops=Math.max(0,Number($('urbanTripStops')?.value)||0);const notes=String($('urbanTripNotes')?.value||'').trim();
+    if(!vehicle){$('urbanTripMsg').textContent='⚠️ Cadastre e selecione um veículo.';return;} if(!date||!Number.isFinite(a)||!Number.isFinite(b)||b<a){$('urbanTripMsg').textContent='⚠️ Informe data e odômetros válidos.';return;}
+    const km=Number((b-a).toFixed(3));if(km<=0){$('urbanTripMsg').textContent='⚠️ A distância urbana precisa ser maior que zero.';return;}
+    const oldOdo=Number(vehicle.odometerRef)||0;if(oldOdo>0&&a<oldOdo){$('urbanTripMsg').textContent='⚠️ O odômetro inicial está menor que o último valor registrado ('+fmt(oldOdo,3)+' km).';return;}
+    const fuelInfo=fuelAfterDistance(vehicle,km,'urbano',litersInput);let finalFuel=fuelInfo.nextFuel;let fuelSource=fuelInfo.estimated?'estimado pela melhor base disponível':'informado pelo usuário';const barsCount=getFuelBarCount(vehicle);if(Number.isFinite(barsInput)&&barsInput>=0&&barsInput<=barsCount&&Number(vehicle.tankL)>0){finalFuel=Number((Number(vehicle.tankL)*(barsInput/barsCount)).toFixed(3));fuelSource='nível final informado em barras';}
+    const started=new Date(date+'T08:00:00').getTime();const price=Number(vehicle.priceL)||lastFuelPrice()||0;
+    const trip={id:uid('urb'),schemaVersion:2,createdAt:new Date(started).toISOString(),updatedAt:new Date(started).toISOString(),vehicle:clone(vehicle),vehicleId:vehicle.id,origin:'Uso urbano',destination:'Uso diário',startedAt:started,endedAt:started,distanceKm:km,correctedKm:0,liters:Number(fuelInfo.liters.toFixed(3)),cost:Number((fuelInfo.liters*price).toFixed(2)),fuelCost:Number((fuelInfo.liters*price).toFixed(2)),fuelPriceL:price,totalCost:Number((fuelInfo.liters*price).toFixed(2)),avgSpeed:0,drivingMs:0,running:false,paused:false,manual:true,extra:{finalized:true,tipoRegistro:'circuito_urbano',deslocamentos:stops,observacoes:notes,odometroInicial:a,odometroFinal:b,combustivelFonte:fuelSource}};
+    state.history.unshift(trip);if(fuelInfo.liters>0)addConsumptionBase(vehicle,km,fuelInfo.liters,'urbano');
+    vehicle.odometerRef=Math.max(Number(vehicle.odometerRef)||0,b);vehicle.odometro=vehicle.odometerRef;vehicle.fuelL=finalFuel;vehicle.updatedAt=new Date().toISOString();state.selectedVehicleId=vehicle.id;state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(vehicle));
+    save();renderHistorico();render();
+    $('urbanTripMsg').textContent='✅ Uso urbano registrado: '+fmt(km,2)+' km. Odômetro atualizado. '+(fuelInfo.estimated?'Combustível estimado pela base disponível.':'Combustível informado.');
+    ['urbanTripOdoStart','urbanTripOdoEnd','urbanTripLiters','urbanTripFuelBars','urbanTripStops','urbanTripNotes'].forEach(id=>{if($(id))$(id).value=''});updateUrbanTripDistance();
+  }catch(e){$('urbanTripMsg').textContent='❌ Não foi possível registrar: '+(e?.message||'erro');console.error(e)}
 }
 
 function clearTripForNext(){
@@ -728,7 +778,7 @@ function backupCompleto(){
     const payload={
       schema:'assistente-viagem-backup-completo-v1',
       app:'Assistente de Viagem',
-      appVersion:'V37',
+      appVersion:'V39',
       createdAt:new Date().toISOString(),
       state:clone(state),
       localStorage:localStorageData
@@ -976,11 +1026,12 @@ function renderHistoricoVehicleSelect(){
 function renderManualTripVehicleSelect(){const sel=$('manualTripVehicle');if(!sel)return;normalizeVehicles();const list=state.vehicles.filter(v=>v&&v.name);sel.innerHTML=list.length?list.map(v=>`<option value="${esc(v.id)}">${esc(v.name)}${v.fuelType?` • ${esc(v.fuelType)}`:''}</option>`).join(''):'<option value="">Cadastre um veículo primeiro</option>';sel.value=String(state.selectedVehicleId||list[0]?.id||'');}
 function renderHistorico(){
   renderManualTripVehicleSelect();
+  renderUrbanTripVehicleSelect();
   renderHistoricoVehicleSelect();
   const vid=getHistoricoVehicleId();
   const hv=$('historicoViagens'),ha=$('historicoAbastecimentos'),hm=$('historicoManutencao'),hj=$('historicoAjustes');
   const viagens=(Array.isArray(state.history)?state.history:[]).filter(x=>!vid||String(x.vehicle?.id||x.vehicleId||'')===vid);
-  hv.innerHTML=viagens.length?'<div class="history-stack">'+viagens.slice().sort((a,b)=>Number(b.endedAt||0)-Number(a.endedAt||0)).map(x=>{const dur=timeText(x);return `<details class="history-card"><summary><div class="history-title"><span>🚗 ${esc(x.destination?'Viagem para '+x.destination:'Viagem')}</span><span>${fmt(x.distanceKm||0)} km</span></div><span class="history-sub">${x.endedAt?new Date(x.endedAt).toLocaleString('pt-BR'):'Data não informada'} • ${esc(x.vehicle?.name||'Veículo não informado')}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Origem</span><b>${esc(x.origin||'Não informada')}</b></div><div class="history-item"><span>Destino</span><b>${esc(x.destination||'Não definido')}</b></div><div class="history-item"><span>Veículo</span><b>${esc(x.vehicle?.name||'Não informado')}</b></div><div class="history-item"><span>Combustível</span><b>${esc(x.fuelType||x.vehicle?.fuelType||'Não informado')}</b></div><div class="history-item"><span>Distância</span><b>${fmt(x.distanceKm||0)} km</b></div><div class="history-item"><span>Tempo</span><b>${dur}</b></div><div class="history-item"><span>Velocidade média</span><b>${fmt(x.avgSpeed||0)} km/h</b></div><div class="history-item"><span>Consumo real</span><b>${Number(x.consumptionKml)>0?fmt(x.consumptionKml)+' km/L':'Não disponível'}</b></div><div class="history-item"><span>Combustível gasto</span><b>${fmt(x.liters||0)} L</b></div><div class="history-item"><span>Custo combustível</span><b>${money(x.fuelCost||x.cost||0)}</b></div><div class="history-item"><span>Preço/L</span><b>${Number(x.fuelPriceL)>0?money(x.fuelPriceL):'Não informado'}</b></div><div class="history-item"><span>Custo total</span><b>${money(x.totalCost||x.cost||0)}</b></div></div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhuma viagem registrada para este veículo.</div>';
+  hv.innerHTML=viagens.length?'<div class="history-stack">'+viagens.slice().sort((a,b)=>Number(b.endedAt||0)-Number(a.endedAt||0)).map(x=>{const dur=timeText(x);return `<details class="history-card"><summary><div class="history-title"><span>🚗 ${esc(x.destination?'Viagem para '+x.destination:'Viagem')}</span><span>${fmt(x.distanceKm||0)} km</span></div><span class="history-sub">${x.endedAt?new Date(x.endedAt).toLocaleString('pt-BR'):'Data não informada'} • ${esc(x.vehicle?.name||'Veículo não informado')}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Origem</span><b>${esc(x.origin||'Não informada')}</b></div><div class="history-item"><span>Destino</span><b>${esc(x.destination||'Não definido')}</b></div><div class="history-item"><span>Veículo</span><b>${esc(x.vehicle?.name||'Não informado')}</b></div><div class="history-item"><span>Combustível</span><b>${esc(x.fuelType||x.vehicle?.fuelType||'Não informado')}</b></div><div class="history-item"><span>Distância</span><b>${fmt(x.distanceKm||0)} km</b></div><div class="history-item"><span>Tempo</span><b>${dur}</b></div><div class="history-item"><span>Velocidade média</span><b>${fmt(x.avgSpeed||0)} km/h</b></div><div class="history-item"><span>Tipo de uso</span><b>${esc(x.extra?.tipoRegistro==='circuito_urbano'?'Uso urbano':'Viagem')}</b></div><div class="history-item"><span>Consumo real</span><b>${Number(x.liters)>0&&Number(x.distanceKm)>0?fmt(Number(x.distanceKm)/Number(x.liters),2)+' km/L':'Não disponível'}</b></div><div class="history-item"><span>Combustível gasto</span><b>${fmt(x.liters||0)} L</b></div><div class="history-item"><span>Custo combustível</span><b>${money(x.fuelCost||x.cost||0)}</b></div><div class="history-item"><span>Preço/L</span><b>${Number(x.fuelPriceL)>0?money(x.fuelPriceL):'Não informado'}</b></div><div class="history-item"><span>Custo total</span><b>${money(x.totalCost||x.cost||0)}</b></div></div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhuma viagem registrada para este veículo.</div>';
   const ab=readAb().filter(x=>!vid||String(x.vehicleId||'')===vid);
   ha.innerHTML=ab.length?'<div class="history-stack">'+ab.slice().reverse().map(x=>{const corr=Number(x.correcoes||0);return `<details class="history-card"><summary><div class="history-title"><span>⛽ ${esc(x.tipoCombustivel||x.combustivel||'Não informado')}</span><span>${money(x.valorPago)}</span></div><span class="history-sub">${esc(x.veiculo||'Veículo não informado')} • ${x.createdAt?new Date(x.createdAt).toLocaleString('pt-BR'):'Data não informada'}</span></summary><div class="history-body"><div class="history-grid"><div class="history-item"><span>Tipo de combustível</span><b>${esc(x.tipoCombustivel||x.combustivel||'Não informado')}</b></div><div class="history-item"><span>Valor pago</span><b>${money(x.valorPago)}</b></div><div class="history-item"><span>Preço/L</span><b>${money(x.precoLitro)}</b></div><div class="history-item"><span>Litros</span><b>${fmt(x.litros)} L</b></div><div class="history-item"><span>Odômetro</span><b>${fmt(x.odometro,3)} km</b></div><div class="history-item"><span>Tanque</span><b>${esc(x.situacao||'Não informado')}</b></div><div class="history-item"><span>Distância desde anterior</span><b>${x.distanciaDesdeAnterior==null?'Não calculável':fmt(x.distanciaDesdeAnterior,3)+' km'}</b></div></div><div class="history-corrections">✏️ Correções neste registro: ${corr}</div><div class="history-actions"><button type="button" class="secondary" data-ab-corrigir="${esc(x.id)}">✏️ Corrigir abastecimento</button></div></div></details>`}).join('')+'</div>':'<div class="history-empty">Nenhum abastecimento registrado para este veículo.</div>';
   const manutencoes=(Array.isArray(state.manutencoes)?state.manutencoes:[]).filter(m=>!vid||String(m.vehicleId||'')===vid).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
@@ -1079,7 +1130,7 @@ function render(){
 
   const t=state.trip,running=!!t?.running,paused=!!t?.paused;
   $('av-trip-footer').style.display=document.getElementById('tabViagem').classList.contains('active')?'grid':'none';
-  $('status').textContent=running?(paused?'Viagem pausada':'Viagem em andamento'):'Viagem parada';$('distancia').textContent=fmt(t?.distanceKm||0)+' km';$('litros').textContent=fmt(t?.liters||0)+' L';$('velMedia').textContent=fmt(t?.avgSpeed||0)+' km/h';$('tempo').textContent=timeText(t);$('custo').textContent=money(t?.cost||0);$('custokm').textContent=money((t?.distanceKm||0)>0?(t.cost||0)/t.distanceKm:0);const real=realConsumptionKml();$('consumo').textContent=real>0?fmt(real,2)+' km/L':'Aguardando 2 abastecimentos válidos do mesmo combustível';const cum=getCumulativeConsumptionKml(state.vehicle);$('consumoAcumulado').textContent=cum>0?fmt(cum,2)+' km/L':'-- km/L';$('baseConsumo').textContent=fmt(state.vehicle.consumptionTotalKm||0,1)+' km • '+fmt(state.vehicle.consumptionTotalLiters||0,2)+' L';$('precoInfo').textContent=lastFuelPrice()>0?money(lastFuelPrice())+'/L':'--';$('refInfo').textContent=real>0?fmt(real,2)+' km/L':'--';$('origemDisplay').textContent=t?.origin||state.tripDraft?.origin||'Não definida';$('destinoDisplay').textContent=t?.destination||state.tripDraft?.destination||'Não definido';$('avOdoDemo').textContent=Number(state.vehicle.odometerRef)>0?fmt(state.vehicle.odometerRef,3)+' km':'-- km';renderFuel();checkLowFuelAlert();renderFuelAlertSettings();$('ocorrenciasVelocidade').textContent=state.events.filter(e=>e.tripId===t?.id&&e.tipo==='excesso_velocidade').length;$('consultasLimite').textContent=`${state.settings.limitQueries} / ${state.settings.limitQueryMax}`;$('consultasRestantes').textContent=Math.max(0,state.settings.limitQueryMax-state.settings.limitQueries);$('ultimoLimite').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'--';$('limiteVelocidade').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'-- km/h';$('autonomia').textContent=real>0&&Number(state.vehicle.fuelL)>0?fmt(state.vehicle.fuelL*real,0)+' km':'-- km';if(!running&&!paused)stopTimer()
+  $('status').textContent=running?(paused?'Viagem pausada':'Viagem em andamento'):'Viagem parada';$('distancia').textContent=fmt(t?.distanceKm||0)+' km';$('litros').textContent=fmt(t?.liters||0)+' L';$('velMedia').textContent=fmt(t?.avgSpeed||0)+' km/h';$('tempo').textContent=timeText(t);$('custo').textContent=money(t?.cost||0);$('custokm').textContent=money((t?.distanceKm||0)>0?(t.cost||0)/t.distanceKm:0);const real=realConsumptionKml();const tripCons=getCumulativeConsumptionKml(state.vehicle,'viagem');const urbanCons=getCumulativeConsumptionKml(state.vehicle,'urbano');$('consumo').textContent=tripCons>0?fmt(tripCons,2)+' km/L':'Aguardando dados de viagem';const cum=tripCons||real;$('consumoAcumulado').textContent=cum>0?fmt(cum,2)+' km/L':'-- km/L';$('baseConsumo').textContent='Viagem: '+fmt(state.vehicle.consumptionTripKm||0,1)+' km / '+fmt(state.vehicle.consumptionTripLiters||0,2)+' L • Urbano: '+fmt(state.vehicle.consumptionUrbanKm||0,1)+' km / '+fmt(state.vehicle.consumptionUrbanLiters||0,2)+' L';$('precoInfo').textContent=lastFuelPrice()>0?money(lastFuelPrice())+'/L':'--';$('refInfo').textContent=real>0?fmt(real,2)+' km/L':'--';$('origemDisplay').textContent=t?.origin||state.tripDraft?.origin||'Não definida';$('destinoDisplay').textContent=t?.destination||state.tripDraft?.destination||'Não definido';$('avOdoDemo').textContent=Number(state.vehicle.odometerRef)>0?fmt(state.vehicle.odometerRef,3)+' km':'-- km';renderFuel();checkLowFuelAlert();renderFuelAlertSettings();$('ocorrenciasVelocidade').textContent=state.events.filter(e=>e.tripId===t?.id&&e.tipo==='excesso_velocidade').length;$('consultasLimite').textContent=`${state.settings.limitQueries} / ${state.settings.limitQueryMax}`;$('consultasRestantes').textContent=Math.max(0,state.settings.limitQueryMax-state.settings.limitQueries);$('ultimoLimite').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'--';$('limiteVelocidade').textContent=currentLimit?fmt(currentLimit,0)+' km/h':'-- km/h';$('autonomia').textContent=real>0&&Number(state.vehicle.fuelL)>0?fmt(state.vehicle.fuelL*real,0)+' km':'-- km';if(!running&&!paused)stopTimer()
 }
 function getFuelBarCount(v){return Math.max(1,Math.min(30,Math.round(Number(v?.fuelBars)||8)))}
 function fuelLitersPerBar(v){const tank=Number(v?.tankL)||0;const bars=getFuelBarCount(v);return tank>0?tank/bars:0}
@@ -1483,10 +1534,10 @@ $('saveFuelAlerts').onclick=saveFuelAlertSettings;
 $('abSalvarVeiculo').onclick=saveVehicle;$('abCancelarEdicaoVeiculo').onclick=()=>{resetVehicleForm()};$('abValor').oninput=calcLitersFromValue;$('abPreco').oninput=calcLitersFromValue;$('abSalvar').onclick=saveFueling;if($('btnBackupCompleto'))$('btnBackupCompleto').onclick=backupCompleto;if($('btnBackupViagem'))$('btnBackupViagem').onclick=backupCompleto;
 if($('btnRestaurarViagem'))$('btnRestaurarViagem').onclick=()=>$('inputRestaurarViagem').click();
 if($('inputRestaurarViagem'))$('inputRestaurarViagem').onchange=e=>{restaurarBackupCompleto(e.target.files?.[0]);e.target.value=''};if($('btnRestaurarBackupCompleto'))$('btnRestaurarBackupCompleto').onclick=()=>$('inputRestaurarBackupCompleto').click();if($('inputRestaurarBackupCompleto'))$('inputRestaurarBackupCompleto').onchange=e=>{restaurarBackupCompleto(e.target.files?.[0]);e.target.value=''};if($('btnBackupEZerarCompleto'))$('btnBackupEZerarCompleto').onclick=backupEZerarCompleto;$('avMenuBtn').onclick=openMenu;
-if($('btnSalvarViagemManual'))$('btnSalvarViagemManual').onclick=saveManualTrip;$('btnResetApp').onclick=resetApp;$('avMenuBackdrop').onclick=closeMenu;document.querySelectorAll('#avMenuPanel button[data-tab]').forEach(b=>b.onclick=()=>{showTab(b.dataset.tab);closeMenu()});$('avThemeBtn').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('av_theme',document.body.classList.contains('dark')?'dark':'light');$('avThemeBtn').textContent=document.body.classList.contains('dark')?'☀️':'🌙'};$('cancelarDestino').onclick=()=>{$('destinoModal').style.display='none'};$('origemCard').onclick=openDestino;$('destinoCard').onclick=openDestino;$('destinoCard').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')openDestino()};$('salvarDestino').onclick=saveDestino;$('vozDestino').onclick=voiceDestino;$('btnIniciar').onclick=()=>{if(state.trip?.running||state.trip?.paused){alert(state.trip.paused?'A viagem está pausada. Use o botão Pausar para retomar.':'A viagem já está em andamento.');return}initTrip()};$('btnFim').onclick=finishTrip;$('btnPausar').onclick=pauseTrip;$('btnNova').onclick=newTrip;
+if($('btnSalvarViagemManual'))$('btnSalvarViagemManual').onclick=saveManualTrip; if($('btnSalvarCircuitoUrbano'))$('btnSalvarCircuitoUrbano').onclick=saveUrbanTrip; if($('manualTripOdoStart'))$('manualTripOdoStart').oninput=updateManualTripDistance; if($('manualTripOdoEnd'))$('manualTripOdoEnd').oninput=updateManualTripDistance; if($('urbanTripOdoStart'))$('urbanTripOdoStart').oninput=updateUrbanTripDistance; if($('urbanTripOdoEnd'))$('urbanTripOdoEnd').oninput=updateUrbanTripDistance;$('btnResetApp').onclick=resetApp;$('avMenuBackdrop').onclick=closeMenu;document.querySelectorAll('#avMenuPanel button[data-tab]').forEach(b=>b.onclick=()=>{showTab(b.dataset.tab);closeMenu()});$('avThemeBtn').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('av_theme',document.body.classList.contains('dark')?'dark':'light');$('avThemeBtn').textContent=document.body.classList.contains('dark')?'☀️':'🌙'};$('cancelarDestino').onclick=()=>{$('destinoModal').style.display='none'};$('origemCard').onclick=openDestino;$('destinoCard').onclick=openDestino;$('destinoCard').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')openDestino()};$('salvarDestino').onclick=saveDestino;$('vozDestino').onclick=voiceDestino;$('btnIniciar').onclick=()=>{if(state.trip?.running||state.trip?.paused){alert(state.trip.paused?'A viagem está pausada. Use o botão Pausar para retomar.':'A viagem já está em andamento.');return}initTrip()};$('btnFim').onclick=finishTrip;$('btnPausar').onclick=pauseTrip;$('btnNova').onclick=newTrip;
 if(localStorage.getItem('av_theme')==='dark'){document.body.classList.add('dark');$('avThemeBtn').textContent='☀️'}
 loadFuelings();
-if($('manualTripDate')&&!$('manualTripDate').value)$('manualTripDate').value=new Date().toISOString().slice(0,10);
+if($('manualTripDate')&&!$('manualTripDate').value)$('manualTripDate').value=new Date().toISOString().slice(0,10); if($('urbanTripDate')&&!$('urbanTripDate').value)$('urbanTripDate').value=new Date().toISOString().slice(0,10); updateManualTripDistance(); updateUrbanTripDistance();
 syncExternalReferences();
 normalizeVehicles();
 renderTripVehicleSelect();
@@ -1694,7 +1745,9 @@ if($('viagemLockTag'))$('viagemLockTag').style.display='flex';
     const w=window.open('','_blank');
     if(!w){alert('Permita a abertura de janela para gerar o PDF.');return}
     w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Histórico de manutenção</title>
-      <style>@page{size:A4 landscape;margin:12mm}body{font-family:Arial,sans-serif;color:#111}h1{font-size:22px;margin:0 0 5px}p{margin:4px 0 12px;color:#555}.meta{margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #999;padding:6px;text-align:left;vertical-align:top}th{font-weight:700} .empty{text-align:center;padding:30px;border:1px solid #aaa}footer{margin-top:12px;font-size:10px;color:#666}@media print{button{display:none}}</style></head><body>
+      <style>@page{size:A4 landscape;margin:12mm}body{font-family:Arial,sans-serif;color:#111}h1{font-size:22px;margin:0 0 5px}p{margin:4px 0 12px;color:#555}.meta{margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #999;padding:6px;text-align:left;vertical-align:top}th{font-weight:700} .empty{text-align:center;padding:30px;border:1px solid #aaa}footer{margin-top:12px;font-size:10px;color:#666}@media print{button{display:none}}</style>
+<style id="v38-circuito-css">.manual-trip-card{border-left:4px solid #16a34a}.manual-trip-card .metric{background:#f7f8fa}.manual-trip-card .note{line-height:1.45}.urban-record{border-left-color:#0ea5e9}</style>
+</head><body>
       <h1>Histórico de Manutenção — Assistente de Viagem</h1>
       <p class="meta"><b>Veículo:</b> ${esc2(vehicle)}<br><b>Gerado em:</b> ${esc2(now)}</p>
       ${rows?`<table><thead><tr><th>Veículo</th><th>Manutenção</th><th>Data</th><th>Odômetro</th><th>Custo</th><th>Descrição</th><th>Próxima por km</th><th>Próxima por data</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">Nenhuma manutenção registrada para este veículo.</div>'}
