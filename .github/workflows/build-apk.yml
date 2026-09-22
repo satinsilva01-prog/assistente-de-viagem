@@ -21,51 +21,22 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-
           old="state.trip={id:uid('trip'),schemaVersion:1,createdAt:new Date(now).toISOString(),updatedAt:new Date(now).toISOString(),vehicle:clone(state.vehicle),origin,destination,startedAt:now,endedAt:null,running:true,paused:false,pausedAt:null,pausedMs:0,distanceKm:0,correctedKm:0,liters:0,cost:0,lastPosition:null,avgSpeed:0,drivingMs:0,extra:{}};"
           new="state.trip={id:uid('trip'),schemaVersion:1,createdAt:new Date(now).toISOString(),updatedAt:new Date(now).toISOString(),vehicle:clone(state.vehicle),origin,destination,startedAt:now,endedAt:null,running:true,paused:false,pausedAt:null,pausedMs:0,distanceKm:0,correctedKm:0,liters:0,cost:0,lastPosition:null,avgSpeed:0,drivingMs:0,startFuelL:Number(state.vehicle.fuelL)||0,initialOdometer:Number(state.vehicle.odometerRef)||0,extra:{}};"
           if old not in s: raise SystemExit('initTrip pattern not found')
           s=s.replace(old,new,1)
-
           old="if(lossStarted&&gap>5000){const corrected=hav(lastGps,c);if(corrected>0&&corrected<50){state.trip.correctedKm=Number((state.trip.correctedKm+corrected).toFixed(3));state.trip.distanceKm=Number((state.trip.distanceKm+corrected).toFixed(3));state.trip.extra.lastGpsCorrection={from:lastGps,to:c,gapMs:gap,km:corrected,at:new Date(now).toISOString()};}}"
-          new="""if(lossStarted&&gap>5000){
-      const corrected=hav(lastGps,c);
-      const maxPlausibleKm=Math.max(0.35,180*(gap/3600000)+0.25);
-      if(corrected>0&&corrected<=maxPlausibleKm){
-        state.trip.correctedKm=Number((state.trip.correctedKm+corrected).toFixed(3));
-        state.trip.distanceKm=Number((state.trip.distanceKm+corrected).toFixed(3));
-        state.trip.extra.lastGpsCorrection={from:lastGps,to:c,gapMs:gap,km:corrected,accepted:true,at:new Date(now).toISOString()};
-      }else{
-        state.trip.extra.lastGpsCorrection={from:lastGps,to:c,gapMs:gap,km:corrected,accepted:false,reason:'salto_gps_nao_plausivel',at:new Date(now).toISOString()};
-      }
-    }"""
+          new="if(lossStarted&&gap>5000){\n      const corrected=hav(lastGps,c);\n      const maxPlausibleKm=Math.max(0.35,180*(gap/3600000)+0.25);\n      if(corrected>0&&corrected<=maxPlausibleKm){\n        state.trip.correctedKm=Number((state.trip.correctedKm+corrected).toFixed(3));\n        state.trip.distanceKm=Number((state.trip.distanceKm+corrected).toFixed(3));\n        state.trip.extra.lastGpsCorrection={from:lastGps,to:c,gapMs:gap,km:corrected,accepted:true,at:new Date(now).toISOString()};\n      }else{\n        state.trip.extra.lastGpsCorrection={from:lastGps,to:c,gapMs:gap,km:corrected,accepted:false,reason:'salto_gps_nao_plausivel',at:new Date(now).toISOString()};\n      }\n    }"
           if old not in s: raise SystemExit('GPS tunnel pattern not found')
           s=s.replace(old,new,1)
-
-          old="""if(ref>0 && Number(state.vehicle.fuelL)>0){
-    state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)));
-    if(v){v.fuelL=state.vehicle.fuelL;v.updatedAt=new Date().toISOString();}
-    if(state.trip.vehicle)state.trip.vehicle.fuelL=state.vehicle.fuelL;
-  }"""
-          new="""if(ref>0 && Number(state.trip.startFuelL)>0){
-    const remaining=Math.max(0,Number((Number(state.trip.startFuelL)-Number(state.trip.liters||0)).toFixed(3)));
-    state.vehicle.fuelL=remaining;
-    if(v){v.fuelL=remaining;v.updatedAt=new Date().toISOString();}
-    if(state.trip.vehicle)state.trip.vehicle.fuelL=remaining;
-  }"""
+          old="if(ref>0 && Number(state.vehicle.fuelL)>0){\n    state.vehicle.fuelL=Math.max(0,Number((state.vehicle.fuelL-d/ref).toFixed(3)));\n    if(v){v.fuelL=state.vehicle.fuelL;v.updatedAt=new Date().toISOString();}\n    if(state.trip.vehicle)state.trip.vehicle.fuelL=state.vehicle.fuelL;\n  }"
+          new="if(ref>0 && Number(state.trip.startFuelL)>0){\n    const remaining=Math.max(0,Number((Number(state.trip.startFuelL)-Number(state.trip.liters||0)).toFixed(3)));\n    state.vehicle.fuelL=remaining;\n    if(v){v.fuelL=remaining;v.updatedAt=new Date().toISOString();}\n    if(state.trip.vehicle)state.trip.vehicle.fuelL=remaining;\n  }"
           if old not in s: raise SystemExit('fuel marker pattern not found')
           s=s.replace(old,new,1)
-
-          old="""  if(currentVehicle) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(currentVehicle));
-  state.trip=null;"""
-          new="""  if(currentVehicle) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(currentVehicle));
-  // Ao encerrar a viagem, zera somente o painel da viagem. O cadastro permanente
-  // do veículo continua salvo e será carregado novamente ao iniciar a próxima.
-  state.vehicle=clone(DEFAULT.vehicle);
-  state.trip=null;"""
+          old="  if(currentVehicle) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(currentVehicle));\n  state.trip=null;"
+          new="  if(currentVehicle) state.vehicle=Object.assign(clone(DEFAULT.vehicle),clone(currentVehicle));\n  state.vehicle=clone(DEFAULT.vehicle);\n  state.trip=null;"
           if old not in s: raise SystemExit('clearTrip pattern not found')
           s=s.replace(old,new,1)
-
           p.write_text(s,encoding='utf-8')
           print('INDEX corrigido:',len(s),'bytes')
           PY
