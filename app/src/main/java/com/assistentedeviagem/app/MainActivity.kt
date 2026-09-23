@@ -2,12 +2,14 @@ package com.assistentedeviagem.app
 
 import android.Manifest
 import android.app.Activity
+import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Rational
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
@@ -44,6 +46,18 @@ class MainActivity : Activity() {
                         var panel=document.getElementById('av-trip-panel');
                         if(panel){panel.style.position='static';panel.style.top='auto';panel.style.zIndex='50';}
                         document.querySelectorAll('.viagem-scroll-locked').forEach(function(e){e.classList.remove('viagem-scroll-locked');});
+
+                        /* O limite da via fica dentro de Dados da viagem, sem alterar o HTML-fonte. */
+                        var grid=document.querySelector('#tabViagem .trip-data-card .grid');
+                        var limit=document.getElementById('limiteVelocidade');
+                        if(grid && limit && !document.getElementById('nativeLimiteViaMetric')){
+                          var m=document.createElement('div');
+                          m.className='metric'; m.id='nativeLimiteViaMetric';
+                          m.innerHTML='<span>Limite da via</span><b id="nativeLimiteVia">'+(limit.textContent||'-- km/h')+'</b><div class="future-space"></div>';
+                          grid.insertBefore(m,grid.children[1]||null);
+                          var sync=function(){var x=document.getElementById('nativeLimiteVia'); if(x&&limit)x.textContent=limit.textContent||'-- km/h';};
+                          setInterval(sync,1000);
+                        }
                       }catch(e){}
                     })();
                 """.trimIndent(), null)
@@ -93,22 +107,13 @@ class MainActivity : Activity() {
                 webView.clearFormData()
                 webView.clearCache(true)
                 WebStorage.getInstance().deleteAllData()
-
-                // A limpeza do WebView precisa terminar antes do reload.
-                // O callback garante que localStorage/sessionStorage foram
-                // limpos antes de carregar novamente o index.html.
                 webView.evaluateJavascript("try{localStorage.clear();sessionStorage.clear();}catch(e){}") {
                     handler.postDelayed({
-                        try {
-                            webView.loadUrl("file:///android_asset/index.html")
-                        } catch (e: Exception) {
-                            Toast.makeText(this, "Erro ao recarregar após reset: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
-                        }
+                        try { webView.loadUrl("file:///android_asset/index.html") }
+                        catch (e: Exception) { Toast.makeText(this, "Erro ao recarregar após reset: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show() }
                     }, 700)
                 }
-            } catch (e: Exception) {
-                Toast.makeText(this, "Erro ao resetar dados nativos: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
-            }
+            } catch (e: Exception) { Toast.makeText(this, "Erro ao resetar dados nativos: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show() }
         }
     }
 
@@ -119,11 +124,29 @@ class MainActivity : Activity() {
         val t=JSONObject.quote(d.toString()); runOnUiThread{webView.evaluateJavascript("window.nativeGpsUpdate && window.nativeGpsUpdate($t);",null)}
     }
 
+    private fun entrarPipSeViagemAtiva() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || isInPictureInPictureMode) return
+        val running = getSharedPreferences("trip", MODE_PRIVATE).getBoolean("running", false)
+        if (!running) return
+        try {
+            val params = PictureInPictureParams.Builder()
+                .setAspectRatio(Rational(16, 9))
+                .build()
+            enterPictureInPictureMode(params)
+        } catch (_: Exception) { }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        entrarPipSeViagemAtiva()
+    }
+
     inner class AndroidBridge {
         @JavascriptInterface fun startTrip(){runOnUiThread{iniciarServicoGps()}}
         @JavascriptInterface fun stopTrip(){runOnUiThread{pararServicoGps()}}
         @JavascriptInterface fun resetAll(){resetAplicativoNativo()}
         @JavascriptInterface fun isNative():Boolean=true
+        @JavascriptInterface fun enterPip(){runOnUiThread{entrarPipSeViagemAtiva()}}
     }
 
     override fun onDestroy(){handler.removeCallbacksAndMessages(null);super.onDestroy()}
