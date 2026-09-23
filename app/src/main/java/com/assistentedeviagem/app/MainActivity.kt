@@ -16,6 +16,7 @@ import android.provider.MediaStore
 import android.util.Rational
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebStorage
 import android.webkit.WebView
@@ -26,7 +27,11 @@ import org.json.JSONObject
 class MainActivity : Activity() {
     private lateinit var webView: WebView
     private val handler = Handler(Looper.getMainLooper())
-    companion object { private const val LOCATION_REQUEST = 1001 }
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    companion object {
+        private const val LOCATION_REQUEST = 1001
+        private const val FILE_CHOOSER_REQUEST = 2001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +43,30 @@ class MainActivity : Activity() {
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
-        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                this@MainActivity.filePathCallback?.onReceiveValue(null)
+                this@MainActivity.filePathCallback = filePathCallback
+                return try {
+                    val intent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/json"
+                    }
+                    if (intent.type.isNullOrBlank()) intent.type = "application/json"
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST)
+                    true
+                } catch (e: Exception) {
+                    this@MainActivity.filePathCallback?.onReceiveValue(null)
+                    this@MainActivity.filePathCallback = null
+                    Toast.makeText(this@MainActivity, "Não foi possível abrir o seletor de arquivos.", Toast.LENGTH_LONG).show()
+                    false
+                }
+            }
+        }
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -131,6 +159,30 @@ class MainActivity : Activity() {
                 handler.postDelayed(this, 1000)
             }
         })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != FILE_CHOOSER_REQUEST) return
+        val callback = filePathCallback ?: return
+        filePathCallback = null
+        if (resultCode != RESULT_OK) {
+            callback.onReceiveValue(null)
+            return
+        }
+        val uri = data?.data
+        if (uri != null) {
+            callback.onReceiveValue(arrayOf(uri))
+        } else {
+            callback.onReceiveValue(null)
+        }
+    }
+
+    override fun onDestroy() {
+        filePathCallback?.onReceiveValue(null)
+        filePathCallback = null
+        handler.removeCallbacksAndMessages(null)
+        super.onDestroy()
     }
 
     private fun solicitarPermissoes() {
@@ -247,6 +299,4 @@ class MainActivity : Activity() {
         super.onUserLeaveHint()
         entrarPipSeViagemAtiva()
     }
-
-    override fun onDestroy(){handler.removeCallbacksAndMessages(null);super.onDestroy()}
 }
