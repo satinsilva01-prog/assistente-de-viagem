@@ -3,12 +3,16 @@ package com.assistentedeviagem.app
 import android.Manifest
 import android.app.Activity
 import android.app.PictureInPictureParams
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.util.Rational
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
@@ -58,7 +62,61 @@ class MainActivity : Activity() {
                           var sync=function(){var x=document.getElementById('nativeLimiteVia'); if(x&&limit)x.textContent=limit.textContent||'-- km/h';};
                           setInterval(sync,1000);
                         }
-                      }catch(e){}
+
+                        /* Backup nativo: WebView não trata blob: downloads de forma confiável. */
+                        function nativeBackup(){
+                          try{
+                            var ls={};
+                            for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k)ls[k]=localStorage.getItem(k);}
+                            var payload={schema:'assistente-viagem-backup-completo-v2',app:'Assistente de Viagem',appVersion:'V40',createdAt:new Date().toISOString(),localStorage:ls};
+                            var name='backup-assistente-de-viagem-'+new Date().toISOString().slice(0,10)+'.json';
+                            if(window.AndroidGPS&&typeof window.AndroidGPS.saveBackup==='function'){
+                              var ok=window.AndroidGPS.saveBackup(name,JSON.stringify(payload,null,2));
+                              var msg=document.getElementById('backupCompletoMsg')||document.getElementById('backupViagemMsg');
+                              if(msg)msg.textContent=ok?'✅ Backup salvo na pasta Downloads.':'❌ Não foi possível salvar o backup.';
+                              return ok;
+                            }
+                          }catch(e){console.error(e);}
+                          return false;
+                        }
+                        window.__avNativeBackup=nativeBackup;
+                        ['btnBackupCompleto','btnBackupViagem'].forEach(function(id){
+                          var b=document.getElementById(id);
+                          if(b&&!b.dataset.nativeBackupBound){
+                            b.dataset.nativeBackupBound='1';
+                            b.addEventListener('click',function(e){
+                              if(nativeBackup()){e.preventDefault();e.stopImmediatePropagation();}
+                            },true);
+                          }
+                        });
+
+                        /* Garante o modo escuro também no APK, com acesso pelo menu. */
+                        var menu=document.getElementById('avMenuPanel');
+                        if(menu&&!document.getElementById('nativeThemeMenuBtn')){
+                          var tb=document.createElement('button');
+                          tb.id='nativeThemeMenuBtn'; tb.type='button';
+                          tb.textContent=document.body.classList.contains('dark')?'☀️ Modo claro':'🌙 Modo escuro';
+                          tb.onclick=function(){
+                            document.body.classList.toggle('dark');
+                            var dark=document.body.classList.contains('dark');
+                            localStorage.setItem('av_theme',dark?'dark':'light');
+                            tb.textContent=dark?'☀️ Modo claro':'🌙 Modo escuro';
+                            var header=document.getElementById('avThemeBtn');if(header)header.textContent=dark?'☀️':'🌙';
+                          };
+                          menu.appendChild(tb);
+                        }
+
+                        /* Acesso explícito ao Picture-in-Picture durante uma viagem. */
+                        if(menu&&!document.getElementById('nativePipBtn')){
+                          var pb=document.createElement('button');
+                          pb.id='nativePipBtn'; pb.type='button'; pb.textContent='🖼️ Picture-in-Picture';
+                          pb.onclick=function(){
+                            if(window.AndroidGPS&&typeof window.AndroidGPS.enterPip==='function')window.AndroidGPS.enterPip();
+                            else alert('Picture-in-Picture está disponível somente no APK.');
+                          };
+                          menu.appendChild(pb);
+                        }
+                      }catch(e){console.error(e)}
                     })();
                 """.trimIndent(), null)
             }
@@ -127,18 +185,53 @@ class MainActivity : Activity() {
     private fun entrarPipSeViagemAtiva() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || isInPictureInPictureMode) return
         val running = getSharedPreferences("trip", MODE_PRIVATE).getBoolean("running", false)
-        if (!running) return
+        if (!running) {
+            Toast.makeText(this, "Inicie uma viagem para usar o Picture-in-Picture.", Toast.LENGTH_SHORT).show()
+            return
+        }
         try {
             val params = PictureInPictureParams.Builder()
                 .setAspectRatio(Rational(16, 9))
                 .build()
             enterPictureInPictureMode(params)
-        } catch (_: Exception) { }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Não foi possível ativar o Picture-in-Picture.", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        entrarPipSeViagemAtiva()
+    private fun salvarBackupDownloads(filename: String, content: String): Boolean {
+        return try {
+            val safeName = filename.replace(Regex("[^A-Za-z0-9._-]"), "_")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val resolver = contentResolver
+                val values = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, safeName)
+                    put(MediaStore.Downloads.MIME_TYPE, "application/json")
+                    put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
+                val uri: Uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+                try {
+                    resolver.openOutputStream(uri)?.use { it.write(content.toByteArray(Charsets.UTF_8)) } ?: throw Exception("stream indisponível")
+                    values.clear()
+                    values.put(MediaStore.Downloads.IS_PENDING, 0)
+                    resolver.update(uri, values, null, null)
+                    true
+                } catch (e: Exception) {
+                    resolver.delete(uri, null, null)
+                    throw e
+                }
+            } else {
+                val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: filesDir
+                val file = java.io.File(dir, safeName)
+                file.writeText(content, Charsets.UTF_8)
+                Toast.makeText(this, "Backup salvo em ${file.absolutePath}", Toast.LENGTH_LONG).show()
+                true
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Erro ao salvar backup: ${e.message ?: "erro"}", Toast.LENGTH_LONG).show()
+            false
+        }
     }
 
     inner class AndroidBridge {
@@ -147,6 +240,12 @@ class MainActivity : Activity() {
         @JavascriptInterface fun resetAll(){resetAplicativoNativo()}
         @JavascriptInterface fun isNative():Boolean=true
         @JavascriptInterface fun enterPip(){runOnUiThread{entrarPipSeViagemAtiva()}}
+        @JavascriptInterface fun saveBackup(filename:String, content:String):Boolean = salvarBackupDownloads(filename,content)
+    }
+
+    override fun onUserLeaveHint(){
+        super.onUserLeaveHint()
+        entrarPipSeViagemAtiva()
     }
 
     override fun onDestroy(){handler.removeCallbacksAndMessages(null);super.onDestroy()}
