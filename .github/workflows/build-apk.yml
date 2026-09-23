@@ -46,11 +46,24 @@ jobs:
           set -euxo pipefail
           gradle clean :app:assembleDebug --no-build-cache
 
-      - name: Validar APK
+      - name: Validar conteúdo real do APK
         run: |
           set -euxo pipefail
-          test -s app/build/outputs/apk/debug/app-debug.apk
-          sha256sum app/build/outputs/apk/debug/app-debug.apk
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -l "$APK" | grep -F 'assets/index.html'
+          unzip -l "$APK" | grep -F 'assets/tomtom.js'
+          unzip -p "$APK" assets/index.html > /tmp/apk-index.html
+          unzip -p "$APK" assets/tomtom.js > /tmp/apk-tomtom.js
+          echo 'SHA do INDEX original:'
+          sha256sum index.html
+          echo 'SHA do INDEX realmente dentro do APK:'
+          sha256sum /tmp/apk-index.html
+          cmp -s index.html /tmp/apk-index.html
+          echo 'CONFIRMADO: o INDEX dentro do APK é idêntico ao INDEX da raiz.'
+          grep -F 'Limite da via' /tmp/apk-index.html || true
+          grep -F '2.300' /tmp/apk-index.html || true
+          sha256sum "$APK"
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
